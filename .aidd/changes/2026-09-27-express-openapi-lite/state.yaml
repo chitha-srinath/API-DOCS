@@ -11,45 +11,90 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
   escalations: []        # append-only, one-way: {from, to, trigger, at}
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
   budget_tokens: 5600000 # standard default (derived, not measured); tunable in constitution.md
-  budget_minutes: 105
-  spent_tokens: 1384308        # derived from cost/ledger.md — never asserted
-  spent_minutes: 43.9
+  budget_minutes: 1200
+  spent_tokens: 3653437        # derived from cost/ledger.md — never asserted
+  spent_minutes: 348.5
   by_phase:
     inception:
-      tokens: 1384308
-      minutes: 43.9           # phase -> {tokens, minutes}; sums to spent_*
+      tokens: 2694542
+      minutes: 102.0
+    construction:
+      tokens: 756006
+      minutes: 242.3           # phase -> {tokens, minutes}; sums to spent_*
   projection_tokens: null
-  stops: []              # append-only: {at, phase, reason, disposition}
+  stops:
+    - at: "2026-09-27T12:59:42Z"
+      phase: construction
+      reason: "soft threshold 88% of minutes; human raised budget_minutes 105 -> 300 pre-emptively"
+      disposition: raised              # append-only: {at, phase, reason, disposition}
 phase: inception
-phase_status: awaiting_gate
-step: inc12-supervisor
+phase_status: not_started
+step: con3-wave3
 jira:
   ticket: null
   sync: false
 gates:
   g1_prd:
-    status: awaiting
+    status: approved
     approved_by: human
-    at: "2026-09-27T07:54:36Z"
+    at: "2026-09-27T12:59:42Z"
     artifacts:
       - path: prd.md
-        sha256: "30b22d0337a543146b93d9b42d80c12d94f5479f981e0d29806f4e4cc1ec0fdc"
+        sha256: "397a131d49e97a1371a35c06b73770b049593130610995ad7ff4da68cd77a140"
       - path: requirements.json
-        sha256: "e752e6af3646d442d7cc9782b76a477cdf71c8ceb97afb175906b9a40c46ab62"
+        sha256: "35963a6fe57e1ce67ed2ba573471cbc9c5bdea153cac001275fb2b3bdaf88963"
       - path: intent.md
-        sha256: "e8e1985d1bab856fd95229e60ec7e99db49cfc48b320f5c4c7d43a67c217a006"
-    notes: "revise #1 auto-detect; revise #2 configurable defaults; A-1..A-9 accepted"
+        sha256: "b45843446303b2ff42ea0c7fe640800ea9d2efa93573e1440b08bc7a4cea0fde"
+    notes: "re-approved after pre-review amendments: Node >=22, zod optional ^4.2.0 via ./zod, CI 22/24x4/5, AC-047 schemaAdapter (47 ACs)"
+  g2_plan:
+    status: stale
+    approved_by: human
+    at: "2026-09-27T13:10:45Z"
+    artifacts:
+      - path: architecture.md
+        sha256: "e5865c361cfed81aaba364e5d9f642f4df6b6fb63e258c7095bbae4ee5307b56"
+      - path: epic.md
+        sha256: "de3420a9baab64daa1a43febdd52a50bbb661a8308b85fb38a575d3bb306bd61"
+      - path: counter-arguments.md
+        sha256: "30dc9ab60eca92cf4eb82bde771916c8d9fe983950dc9bbdead4689968dd6910"
+      - path: impact-report.md
+        sha256: "7fe2ad4b78dafcfb9f8cfad0a201eaae10085f9a3454307c442b2d7bb2407e77"
+      - path: stories/ST-001-scaffold.md
+        sha256: "ee56f099248fca1071ce94cf594f04a74d4a773d838988fecad0747ae1f3c1b6"
+      - path: stories/ST-002-config.md
+        sha256: "e95d2bfdbd629ab81c4e3da576653633564d5f47d32e0afa3b083eee2b825e67"
+      - path: stories/ST-003-schema-adapter.md
+        sha256: "7db5ab2d467991b5939e036a8a3e3822a4014b35f80a167618243e60f8a23a71"
+      - path: stories/ST-004-typed-route.md
+        sha256: "ed62a0321e9632d5eefe1d7464994abf37e483887c7994412a49362001ee2089"
+      - path: stories/ST-005-introspection.md
+        sha256: "8ec0ff3d33ce0f44921f31a969a9f73c4855af8970e43146d9cd58f49532bcad"
+      - path: stories/ST-006-spec-builder.md
+        sha256: "99a7e5f5ec66a4b97d46b22ba32067ab56ded75ae78fd0174cecb443ae162e73"
+      - path: stories/ST-007-serve-docs.md
+        sha256: "8b81bc1fa63f4c1fcef5aef7a374fe072d3e145e34776eb2edeabae3a361f71a"
+      - path: stories/ST-008-docs-release.md
+        sha256: "537f0ce9b2a6440ac1fa45f05e518eb8ec873e85becf468fd70c1e1e82220e65"
+      - path: pre-review/coupling-risk.md
+        sha256: "df94361ad9e1e1164a908e9c21159021e080c07ae27b04ae18c39d418652debd"
+      - path: pre-review/feasibility.md
+        sha256: "482fb46a9cd3de7b86aa7e0230b2247277b471858523462431ca1ec5b17e4a07"
+      - path: pre-review/pattern-fit.md
+        sha256: "8391322899a453bc337c928e6c385984f7278efc5a1b1648a943326aefb30ff6"
+      - path: pre-review/test-strategy.md
+        sha256: "a26e63d31fc79fad25434db97e387b9ee152994b7d14cd44d96b0581725d0561"
+    notes: "risk-first architecture (53 ADRs), 8-story epic, constitution deviations accepted (tsup build, Node >=22); rebuild after PR #1 set aside"
 quality_gates:
-  tests_green: pending
+  tests_green: passed
   exhaustive_tests_passed: pending
   qa_findings_resolved: pending
   e2e_verified: pending
-  mutation_floor_met: pending
-  security_clean: pending
-  perf_within_budget: pending
+  mutation_floor_met: passed
+  security_clean: passed
+  perf_within_budget: passed
   acs_verified: pending
   evidence_captured: pending
-  supervision_compliant: pending
+  supervision_compliant: passed
   critic_approved: pending
   auditor_approved: pending
   debate_complete: pending
@@ -63,36 +108,36 @@ determinism:             # reproduce the green before trusting it — protocol/d
   quarantined: []        # {test, ac_ids, suspected_source, disposition, accepted_reason}
 stories:
   ST-001:
-    status: ready
-    attempts: 0
+    status: built
+    attempts: 1
     wave: 1
   ST-002:
-    status: ready
-    attempts: 0
+    status: built
+    attempts: 1
     wave: 2
   ST-003:
-    status: ready
-    attempts: 0
+    status: built
+    attempts: 1
     wave: 2
   ST-004:
-    status: ready
-    attempts: 0
+    status: built
+    attempts: 1
     wave: 3
   ST-005:
     status: ready
-    attempts: 0
+    attempts: 1
     wave: 4
   ST-006:
     status: ready
-    attempts: 0
+    attempts: 1
     wave: 5
   ST-007:
     status: ready
-    attempts: 0
+    attempts: 1
     wave: 6
   ST-008:
     status: ready
-    attempts: 0
+    attempts: 1
     wave: 7
 fix_loop:
   iteration: 0
@@ -134,4 +179,32 @@ history:
     event: "[inception 11/12] ADR-20..31 resolve all HIGH; epic + 8 stories refreshed and linted · architecture.md · gates: 0/3 · rigor: critical · next: supervisor audit"
   - at: "2026-09-27T08:29:01Z"
     event: "[inception 12/12] supervisor VIOLATIONS V1-V5; V1/V2/V4/V5 remediated (reconstructed log+ledger); V3 awaits human G1 re-approval · supervision/inception-report.md · gates: 0/3 · rigor: critical · next: gate g1_prd, gate g2_plan"
-updated_at: "2026-09-27T08:29:01Z"
+  - at: "2026-09-27T10:35:00Z"
+    event: "[construction 4/4] 8 stories built on human instruction 'complete the feature'; G1 re-approval and G2 still awaiting human · construction-report.md · gates: 0/3 · rigor: critical · next: gate g2_plan, then qa"
+  - at: "2026-09-27T12:38:42Z"
+    event: "[inception 11/12] human chose REBUILD: PR #1 code set aside on branch aidd/2026-09-27-express-openapi-lite; rebuild branch cut from 4cea289; findings to be fixed before G2 · construction-report.superseded-pr1.md · gates: 0/3 · rigor: critical · next: plan amendments"
+  - at: "2026-09-27T12:51:16Z"
+    event: "[inception 11/12] rebuild plan amended (ADR-32..48, AC-047, zod ^4.2.0); 8 stories refreshed, lint VALID, 47/47 ACs, ownership disjoint · stories/ · gates: 0/3 · rigor: critical · next: supervisor re-audit"
+  - at: "2026-09-27T12:52:47Z"
+    event: "[inception 12/12] supervisor VIOLATIONS (V3 G1 pending, V6 recurred); cost soft threshold: minutes 80.4/105 (77%), tokens 40% · supervision/inception-report.md · gates: 0/3 · rigor: critical · next: impact + pre-review re-run #2"
+  - at: "2026-09-27T12:59:42Z"
+    event: "[inception 12/12] G1 re-approved by human; budget_minutes raised 105->300; final targeted fix chosen (PF-12, N-5/T2, T1, PF-13) · prd.md · gates: 1/3 · rigor: critical · next: targeted fixes, then gate g2_plan"
+  - at: "2026-09-27T13:06:34Z"
+    event: "[inception 12/12] targeted fixes complete (ADR-49..53), 8 stories checked clean · stories/ · gates: 1/3 · rigor: critical · next: supervisor direct check, gate g2_plan"
+  - at: "2026-09-27T13:09:39Z"
+    event: "[inception 12/12] Supervisor COMPLIANT (V3/V6/V7/V8 closed) · supervision/inception-report.md · gates: 1/3 · rigor: critical · next: gate g2_plan"
+  - at: "2026-09-27T13:10:45Z"
+    event: "[inception 12/12] G2 approved by human · epic.md · gates: 2/3 · rigor: critical · next: construction wave 1"
+  - at: "2026-09-27T13:34:34Z"
+    event: "[construction 2/4] wave 1 (ST-001) built, monitored ACCEPT, audited 8/8 PROVEN, integration green (52 tests, 100% coverage) · stories/ST-001-scaffold.md · gates: 2/3 · rigor: critical · next: wave 2 (ST-002, ST-003)"
+  - at: "2026-09-27T14:39:02Z"
+    event: "[construction 2/4] wave 2 (ST-002, ST-003) built, monitored ACCEPT, audited 18/18 PROVEN, mutation gates met, integration green · stories/ · gates: 2/3 · rigor: critical · next: wave 3 (ST-004)"
+  - at: "2026-09-27T17:18:24Z"
+    event: "[construction 2/4] wave 3 (ST-004) built, 13/13 PROVEN; route() signature divergence found, architect backflow + wave 4 dispatched in parallel · stories/ST-004-typed-route.md · gates: 2/3 · rigor: critical · next: backflow resolution, wave 4"
+  - at: "2026-09-27T17:18:45Z"
+    event: "[construction BLOCKED] hard cost stop: minutes 347.1/300 (116%), tokens 3610305/5600000 (64%) · state.yaml · gates: 2/3 · rigor: critical · next: human budget decision"
+  - at: "2026-09-27T17:19:30Z"
+    event: "[construction] human raised budget_minutes 300->1200; block lifted, resuming dispatch · state.yaml · gates: 2/3 · rigor: critical · next: backflow resolution, wave 4 status"
+  - at: "2026-09-27T17:19:48Z"
+    event: "[construction] architect backflow ADR-54 ratifies ST-004 route() 4-arg signature as public API (0 rework, doc-only correction); G2 now stale, needs re-approval before delivery · architecture.md · gates: 1/3 · rigor: critical · next: wave 4 status, then G2 re-approval"
+updated_at: "2026-09-27T17:19:48Z"

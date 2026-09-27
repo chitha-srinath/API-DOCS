@@ -1,0 +1,121 @@
+{
+  "name": "express-api-docs",
+  "version": "0.1.0",
+  "description": "TypeScript-first OpenAPI 3.1 docs and request validation for Express 4 and 5, with near-zero config.",
+  "license": "MIT",
+  "author": "chitha_srinath",
+  "type": "module",
+  "keywords": [
+    "express",
+    "openapi",
+    "openapi-3.1",
+    "swagger",
+    "scalar",
+    "zod",
+    "standard-schema",
+    "validation",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chitha-srinath/API-DOCS.git"
+  },
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./manual": {
+      "import": {
+        "types": "./dist/manual.d.ts",
+        "default": "./dist/manual.js"
+      },
+      "require": {
+        "types": "./dist/manual.d.cts",
+        "default": "./dist/manual.cjs"
+      }
+    },
+    "./zod": {
+      "import": {
+        "types": "./dist/zod.d.ts",
+        "default": "./dist/zod.js"
+      },
+      "require": {
+        "types": "./dist/zod.d.cts",
+        "default": "./dist/zod.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "./dist/auto-record.js",
+    "./dist/auto-record.cjs"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run --coverage --typecheck",
+    "test:watch": "vitest",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "check:pack": "npm run build && publint && attw --pack . --profile node16",
+    "mutation": "stryker run",
+    "perf": "vitest run --config vitest.perf.config.ts",
+    "audit": "npm audit --audit-level=critical",
+    "example": "node examples/basic/server.mjs"
+  },
+  "peerDependencies": {
+    "@types/express": "^4.17.21 || ^5.0.0",
+    "express": "^4.21.0 || ^5.0.0",
+    "zod": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/express": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "13.1.0",
+    "@arethetypeswrong/cli": "0.18.5",
+    "@eslint/js": "^10.0.0",
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/vitest-runner": "^10.0.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "~22.20.4",
+    "@types/supertest": "^7.2.1",
+    "@vitest/coverage-v8": "5.0.2",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.11.0",
+    "express": "^5.2.1",
+    "express4": "npm:express@^4.22.3",
+    "prettier": "^3.9.9",
+    "publint": "0.3.24",
+    "supertest": "^7.3.0",
+    "tsup": "8.5.1",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.1",
+    "vitest": "5.0.2",
+    "zod": "^4.6.5"
+  }
+}

@@ -99,7 +99,6 @@
     "@arethetypeswrong/cli": "0.18.5",
     "@eslint/js": "^10.0.0",
     "@stryker-mutator/core": "^10.0.0",
-    "@stryker-mutator/vitest-runner": "^10.0.0",
     "@types/express": "^5.0.6",
     "@types/node": "~22.20.4",
     "@types/supertest": "^7.2.1",

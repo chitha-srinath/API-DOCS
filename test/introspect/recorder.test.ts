@@ -42,7 +42,8 @@ describe.each(majors)('installRecorder on Express $major', ({ name }) => {
     const middleware = (_req: any, _res: any, next: any) => next();
     const result = app.use('/api', middleware, router);
     expect(result).toBe(app);
-    const stack = (name === 'express4' && app._router ? app._router : app.router).stack;
+    // Express 4 keeps its root router at `_router` (reading `app.router` throws there).
+    const stack = (app._router ?? app.router).stack;
     const [mw, mounted] = stack.slice(-2);
     expect(mw[MOUNT]).toEqual({ path: '/api' });
     expect(mounted[MOUNT]).toEqual({ path: '/api', target: router });

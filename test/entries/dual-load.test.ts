@@ -36,7 +36,10 @@ describe('dual ESM/CJS load (AC-003, ADR-20)', () => {
     const esm = await import(new URL('index.js', distUrl).href);
     const cjs = require(new URL('index.cjs', distUrl).pathname);
     const express = require('express');
-    const owner = Object.getPrototypeOf(Object.getPrototypeOf(express.Router()));
+    // `use` is owned one prototype up on Express 4 and two up on Express 5.
+    let owner = Object.getPrototypeOf(express.Router());
+    while (!Object.prototype.hasOwnProperty.call(owner, 'use'))
+      owner = Object.getPrototypeOf(owner);
     expect(owner[Symbol.for('express-api-docs.recorder')]).toBe(true);
     expect(owner.use.name).toBe('recordedUse');
 

@@ -1,0 +1,7 @@
+# AIDD global state — seeded by install; orchestrator-owned. Schema: state.schema.json
+schema: 1
+aidd_version: "0.1.0"
+default_mode: let-me-look
+active_change: null
+constitution: missing
+changes: {}

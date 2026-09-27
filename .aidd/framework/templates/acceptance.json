@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "suite_receipts": ["evidence/receipts/suite/receipt.json"],
+  "requirements": [
+    {
+      "id": "AC-001",
+      "description": "REPLACE with the exact approved acceptance criterion",
+      "receipts": ["evidence/receipts/ac-001/receipt.json"]
+    }
+  ]
+}

@@ -1,0 +1,329 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIDD Delta per-change state (.aidd/changes/<id>/state.yaml)",
+  "type": "object",
+  "required": ["schema", "change_id", "intent", "mode", "phase", "phase_status"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "type": "integer", "enum": [1] },
+    "change_id": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+$" },
+    "intent": { "type": "string" },
+    "evidence_contract": { "enum": ["receipts-v1"] },
+    "mode": { "enum": ["take-care", "let-me-look"] },
+    "rigor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "selected_by"],
+      "properties": {
+        "mode": { "enum": ["fast", "standard", "critical"] },
+        "selected_by": { "enum": ["classifier", "user", "escalation"] },
+        "reason": { "type": ["string", "null"] },
+        "escalations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to", "trigger", "at"],
+            "additionalProperties": false,
+            "properties": {
+              "from": { "enum": ["fast", "standard", "critical"] },
+              "to": { "enum": ["fast", "standard", "critical"] },
+              "trigger": { "type": "string" },
+              "at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" }
+            }
+          }
+        }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "budget_tokens": { "type": "integer", "minimum": 0 },
+        "budget_minutes": { "type": "number", "minimum": 0 },
+        "spent_tokens": { "type": "integer", "minimum": 0 },
+        "spent_minutes": { "type": "number", "minimum": 0 },
+        "by_phase": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["tokens", "minutes"],
+            "additionalProperties": false,
+            "properties": {
+              "tokens": { "type": "integer", "minimum": 0 },
+              "minutes": { "type": "number", "minimum": 0 }
+            }
+          }
+        },
+        "projection_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "stops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["at", "phase", "reason", "disposition"],
+            "additionalProperties": false,
+            "properties": {
+              "at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+              "phase": { "enum": ["document", "master", "inception", "construction", "qa", "delivery", "retro"] },
+              "reason": { "type": "string" },
+              "disposition": { "enum": ["raised", "reduced-breadth", "narrowed-scope", "aborted", "aborted-dispatch", "pending"] }
+            }
+          }
+        }
+      }
+    },
+    "phase": { "enum": ["document", "master", "inception", "construction", "qa", "delivery", "retro", "done"] },
+    "phase_status": { "enum": ["not_started", "in_progress", "awaiting_gate", "blocked", "complete"] },
+    "step": { "type": ["string", "null"] },
+    "jira": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ticket": { "type": ["string", "null"] },
+        "sync": { "type": "boolean" }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "additionalProperties": false,
+        "properties": {
+          "status": { "enum": ["pending", "awaiting", "approved", "revised", "stale", "aborted"] },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "object", "required": ["path", "sha256"],
+              "additionalProperties": false,
+              "properties": {
+                "path": { "type": "string", "pattern": "^[^\\\\]+$" },
+                "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+              }
+            }
+          },
+          "artifact": { "type": ["string", "null"] },
+          "artifact_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{8,64}$" },
+          "approved_by": { "enum": ["human", "auto", null] },
+          "at": { "type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "quality_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "$comment": "Every gate takes one of two encodings, per core/protocol/gates.md 'Quality gates': the bare status, or the object form {status, reason} — which is what a gate skipped by rigor mode MUST use to carry `reason: rigor:<mode>`. The scalar form stays valid for gates with no reason to record.",
+      "properties": {
+        "tests_green": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "exhaustive_tests_passed": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "qa_findings_resolved": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "e2e_verified": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "mutation_floor_met": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "security_clean": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "perf_within_budget": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "acs_verified": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "evidence_captured": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "supervision_compliant": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "critic_approved": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "auditor_approved": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "debate_complete": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "tally_reconciled": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "within_cost_budget": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] },
+        "evidence_reproduced": { "oneOf": [
+          { "enum": ["pending", "passed", "failed", "na"] },
+          { "type": "object", "required": ["status"], "additionalProperties": false,
+            "properties": { "status": { "enum": ["pending", "passed", "failed", "na"] }, "reason": { "type": "string" } } }
+        ] }
+      }
+    },
+    "determinism": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repeats_required": { "type": "integer", "minimum": 0 },
+        "repeats_done": { "type": "integer", "minimum": 0 },
+        "report": { "type": ["string", "null"] },
+        "quarantined": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["test", "suspected_source", "disposition"],
+            "additionalProperties": false,
+            "properties": {
+              "test": { "type": "string" },
+              "ac_ids": { "type": "array", "items": { "type": "string" } },
+              "suspected_source": { "enum": ["seed", "clock", "network", "shared-fixture", "test-order", "concurrency", "unknown"] },
+              "disposition": { "enum": ["pending", "fixed", "accepted"] },
+              "accepted_reason": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "stories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "additionalProperties": false,
+        "properties": {
+          "status": { "enum": ["queued", "ready", "in_progress", "built", "blocked", "failed", "done"] },
+          "attempts": { "type": "integer", "minimum": 0 },
+          "wave": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "fix_loop": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "iteration": { "type": "integer", "minimum": 0 },
+        "max": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "backflow_used": { "type": "boolean" },
+    "supervision": {
+      "type": "object",
+      "additionalProperties": { "enum": ["pending", "compliant", "violations"] }
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "verdict": { "enum": ["PASS", "CONCERNS", "FAIL"] },
+          "score": { "type": "integer", "minimum": 0, "maximum": 100 }
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "interrogation": { "type": "object", "additionalProperties": false,
+          "properties": { "rounds_used": {"type":"integer","minimum":0}, "max": {"type":"integer","minimum":1} },
+          "required": ["rounds_used","max"] },
+        "negotiation":   { "type": "object", "additionalProperties": false,
+          "properties": {
+            "exchanges_used": {"type":"integer","minimum":0},
+            "max": {"type":"integer","minimum":1},
+            "rulings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["ac_id", "ruling", "ruled_by"],
+                "additionalProperties": false,
+                "properties": {
+                  "ac_id": { "type": "string" },
+                  "ruling": { "enum": ["PROVEN", "DEFECT", "UNRESOLVABLE"] },
+                  "ruled_by": { "enum": ["negotiation", "Supervisor adjudication", "short-circuit", "short-circuit (no monitoring note)"] }
+                }
+              }
+            }
+          },
+          "required": ["exchanges_used","max"] },
+        "debate":        { "type": "object", "additionalProperties": false,
+          "properties": { "exchanges_used": {"type":"integer","minimum":0}, "max": {"type":"integer","minimum":1} },
+          "required": ["exchanges_used","max"] }
+      },
+      "required": ["interrogation","negotiation","debate"]
+    },
+    "escapes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "at", "defect_class", "verdict"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^E-[0-9]{3}$" },
+          "at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+          "defect_class": { "enum": ["auth-bypass", "tenant-leak", "off-by-one", "race", "silent-catch", "mocked-proof", "missing-ac-coverage", "perf-regression", "contract-break", "migration-data-loss", "secret-leak", "logic-inversion", "orphan-diff", "process-skip"] },
+          "verdict": { "enum": ["layer-blind", "no-layer-at-reasonable-cost", "out-of-scope"] },
+          "blind_layers": {
+            "type": "array",
+            "items": { "enum": ["L1-review", "L1-tests", "L2-auditor", "L2-tally", "L2-debate", "L3-supervisor", "critic", "e2e-mutation", "evidence-capture"] }
+          },
+          "regression_test": { "type": ["string", "null"] },
+          "amendment": { "type": ["string", "null"] },
+          "report": { "type": ["string", "null"] },
+          "repeat_of": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "blocked_reason": { "type": ["string", "null"] },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["at", "event"],
+        "additionalProperties": false,
+        "properties": {
+          "at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+          "event": { "type": "string" }
+        }
+      }
+    },
+    "updated_at": { "type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" }
+  }
+}

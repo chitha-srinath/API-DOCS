@@ -1,0 +1,8 @@
+# AIDD global state — seeded by install; orchestrator-owned. Schema: state.schema.json
+schema: 1
+aidd_version: "0.4.0"
+default_mode: let-me-look
+active_change: 2026-09-27-express-openapi-lite
+constitution: present
+changes:
+  2026-09-27-express-openapi-lite: in_progress

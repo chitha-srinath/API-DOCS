@@ -1,0 +1,30 @@
+{
+  "$comment": [
+    "AIDD machine-tunable configuration. Copy to .aidd/config.json and edit.",
+    "Boundary rule: this file holds routing a script reads on every dispatch;",
+    "constitution.md holds policy a human must approve (budgets, gates, rigor).",
+    "Provider credentials are read from the environment ONLY and must never",
+    "appear here - `aidd-route.sh audit` fails the run if they do.",
+    "Rates are USD per million tokens, published list price at the version below.",
+    "A model with no rate entry records `na` in the cost ledger, never 0."
+  ],
+  "version": 1,
+  "models": {
+    "default": "claude-opus-5",
+    "routes": {
+      "mechanical": { "model": "claude-haiku-4-5", "effort": "low" },
+      "index": { "model": "claude-haiku-4-5", "effort": "low" },
+      "docs": { "model": "claude-sonnet-5", "effort": "medium" },
+      "build-fix": { "model": "claude-sonnet-5", "effort": "medium" },
+      "test": { "model": "claude-sonnet-5", "effort": "high" },
+      "review": { "model": "claude-opus-5", "effort": "high" },
+      "adversarial": { "model": "claude-opus-5", "effort": "xhigh" },
+      "architecture": { "model": "claude-opus-5", "effort": "xhigh" }
+    },
+    "rates": {
+      "claude-opus-5": { "in_per_mtok": 5.0, "out_per_mtok": 25.0 },
+      "claude-sonnet-5": { "in_per_mtok": 3.0, "out_per_mtok": 15.0 },
+      "claude-haiku-4-5": { "in_per_mtok": 1.0, "out_per_mtok": 5.0 }
+    }
+  }
+}

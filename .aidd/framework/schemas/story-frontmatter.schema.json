@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIDD Delta story frontmatter (.aidd/changes/<id>/stories/ST-NNN-*.md)",
+  "type": "object",
+  "required": ["id", "title", "wave", "status", "file_scope"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^ST-[0-9]{3}$" },
+    "title": { "type": "string" },
+    "wave": { "type": "integer", "minimum": 1 },
+    "status": { "enum": ["queued", "ready", "in_progress", "built", "blocked", "failed", "done"] },
+    "attempts": { "type": "integer", "minimum": 0 },
+    "ac_ids": { "type": "array", "items": { "type": "string" } },
+    "depends_on": { "type": "array", "items": { "type": "string", "pattern": "^ST-[0-9]{3}$" } },
+    "file_scope": {
+      "type": "object",
+      "required": ["owns"],
+      "additionalProperties": false,
+      "properties": {
+        "owns": { "type": "array", "items": { "type": "string" } },
+        "creates": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

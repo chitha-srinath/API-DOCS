@@ -1,0 +1,70 @@
+# AIDD per-change state — seeded at change creation. Schema: change-state.schema.json
+schema: 1
+evidence_contract: receipts-v1 # source-bound suite and AC receipts required before delivery
+change_id: 2026-01-01-example-change
+intent: "REPLACE: verbatim user intent"
+mode: let-me-look
+rigor:                   # how much verification runs — see protocol/rigor-modes.md
+  mode: standard         # fast | standard | critical (classifier resolves at creation)
+  selected_by: classifier
+  reason: "REPLACE: the classifier row that matched"
+  escalations: []        # append-only, one-way: {from, to, trigger, at}
+cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
+  budget_tokens: 3400000 # standard default (derived, not measured); tunable in constitution.md
+  budget_minutes: 65
+  spent_tokens: 0        # derived from cost/ledger.md — never asserted
+  spent_minutes: 0
+  by_phase: {}           # phase -> {tokens, minutes}; sums to spent_*
+  projection_tokens: null
+  stops: []              # append-only: {at, phase, reason, disposition}
+phase: inception
+phase_status: not_started
+step: null
+jira:
+  ticket: null
+  sync: false
+gates: {}
+quality_gates:
+  tests_green: pending
+  exhaustive_tests_passed: pending
+  qa_findings_resolved: pending
+  e2e_verified: pending
+  mutation_floor_met: pending
+  security_clean: pending
+  perf_within_budget: pending
+  acs_verified: pending
+  evidence_captured: pending
+  supervision_compliant: pending
+  critic_approved: pending
+  auditor_approved: pending
+  debate_complete: pending
+  tally_reconciled: pending
+  within_cost_budget: pending
+  evidence_reproduced: pending
+determinism:             # reproduce the green before trusting it — protocol/determinism.md
+  repeats_required: 2    # standard: the gating suite twice (fast: 0, gate records na)
+  repeats_done: 0
+  report: null
+  quarantined: []        # {test, ac_ids, suspected_source, disposition, accepted_reason}
+stories: {}
+fix_loop:
+  iteration: 0
+  max: 3
+backflow_used: false
+supervision: {}
+scores: {}
+audit:                   # seeded from rigor.mode — see protocol/rigor-modes.md §Seeded audit budgets
+  interrogation:
+    rounds_used: 0
+    max: 1               # standard: 1 round per subject (critical: 2)
+  negotiation:
+    exchanges_used: 0
+    max: 1               # standard: 1 exchange per disputed AC (critical: 2)
+    rulings: []          # one row per disputed AC closed: {ac_id, ruling, ruled_by}
+  debate:
+    exchanges_used: 0
+    max: 2               # standard: design surface only (critical: pool of 6)
+escapes: []              # post-merge defects analyzed per layer — protocol/escape-analysis.md
+blocked_reason: null
+history: []
+updated_at: null

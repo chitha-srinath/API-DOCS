@@ -1,0 +1,32 @@
+# AIDD Delta — CI template emitted into target repos by the Delivery phase.
+# The Delivery Agent replaces the verification commands with the canonical ones
+# from architecture.md before committing.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # setup: REPLACE with stack setup (actions/setup-node, setup-python, …)
+      - name: Build
+        run: |
+          echo "AIDD: configure the canonical build command before using this workflow" >&2
+          exit 1
+      - name: Test
+        run: |
+          echo "AIDD: configure the canonical test command before using this workflow" >&2
+          exit 1
+      - name: Lint
+        run: |
+          echo "AIDD: configure the canonical lint command before using this workflow" >&2
+          exit 1
+      - name: Validate AIDD state
+        run: |
+          if [ -f .aidd/state.yaml ]; then
+            python3 .aidd/framework/scripts/aidd-validate.py \
+              .aidd/framework/schemas/state.schema.json .aidd/state.yaml
+          fi

@@ -1,0 +1,45 @@
+# Pre-Implementation Review Findings — feasibility
+
+<!-- Reviewer mode=pre. Reviews architecture + stories against the LIVE codebase, before any code. -->
+<!-- Greenfield repo: no src file exists to cite, so evidence is the plan artifacts (section/line) plus live read-only npm registry probes run 2026-09-27. -->
+
+Probe run for this review (Git Bash, from `$TEMP`, all exit 0):
+
+```
+$ npm view @stryker-mutator/vitest-runner@10.0.0 peerDependencies engines
+peerDependencies = { vitest: '>=2.0.0', '@stryker-mutator/core': '10.0.0' }
+engines = { node: '>=22.0.0' }
+$ npm view vitest@5.0.2 peerDependencies engines
+peerDependencies = { vite: '^6.4.0 || ^7.0.0 || ^8.0.0', ..., '@types/node': '^22.0.0 || >=24.0.0', '@vitest/coverage-v8': '5.0.2', ... }
+engines = { node: '^22.12.0 || ^24.0.0 || >=26.0.0' }
+$ npm view eslint@10.11.0 engines          → { node: '^20.19.0 || ^22.13.0 || >=24' }
+$ npm view tsup@8.5.1 engines              → { node: '>=18' }   peer typescript '>=4.5.0'
+$ npm view @arethetypeswrong/cli@0.18.5 engines → { node: '>=20' }
+```
+
+| # | Severity | Artifact | Claim | Concrete risk scenario | Cited repo evidence |
+|---|---|---|---|---|---|
+| F-1 | HIGH | architecture.md ADR-15 / ADR-05 / C10; ST-001 CI matrix; prd.md AC-027 | The pinned test runner cannot run on Node 20, but AC-027 needs tests to run on Node 20. | The CI cell `node 20 × express {4,5}` runs `npm ci`, which only warns about the engine mismatch, and then runs `vitest run`. vitest 5.0.2 declares `node ^22.12.0 \|\| ^24 \|\| >=26`, and Stryker's vitest-runner 10.0.0 declares `>=22`. Two of the six matrix cells fail or are unsupported, so the CI-green goal (AC-027) cannot be met with the tools as pinned. The architecture probed only the peers of typescript-eslint and tsup, never the engines. Resolution options: (a) on Node 20, run a smoke test of the built `dist` (for example `node --test` or a plain `node` script against both Express majors) and keep vitest/Stryker on 22 and 24; (b) pin vitest 3.x (`node >=18`), which is compatible with the vitest-runner peer `>=2`, and run Stryker only on 22 and 24; (c) change AC-027/`engines` at G2. Record the choice in ADR-15. | Probe above; architecture.md:170-176 (probe evidence lists versions only, no engines); prd.md:45 AC-027; ST-001-scaffold.md:55 (matrix `node {20,22,24} × express {4,5}`) |
+| F-2 | MEDIUM | architecture.md ADR-15; ST-001 devDependency set | vitest 5.0.2 needs `vite` and `@types/node` as peers, and neither is in the pre-declared devDependency list. Later stories are not allowed to edit `package.json`. | ST-001 must "pre-declare the full devDependency set" (line 70), and later stories may not edit `package.json`. If `vite` resolves only transitively, or `@types/node` is missing, `tsc --noEmit`/`vitest --typecheck` fails on `process`/`Buffer` in the S-04/S-05 tests, and ST-004 is then blocked by a file it does not own. `@types/node` has to be `^22 \|\| >=24` to satisfy the vitest peer, which also conflicts with a Node 20 floor (F-1). | Probe above (`'@types/node': '^22.0.0 \|\| >=24.0.0'`); ST-001-scaffold.md:67-70; grep for `types/node` in architecture.md/stories returns no hits |
+| F-3 | HIGH | architecture.md ADR-18, ADR-07/17 (`[META]`, `[MOUNT]`, `[CHILD]` symbols, "idempotent (guarded by a symbol)"); ADR-11 dual ESM/CJS build | The recorder guard and the metadata tags are declared as symbols, but the plan does not require `Symbol.for(...)`. A dual ESM+CJS package can be loaded twice in one process. | A consumer's app does `import { createApiDocs } from 'express-api-docs'` (ESM `dist/index.js`), and a CJS plugin or test helper does `require('express-api-docs')` (`dist/index.cjs`). Both copies wrap `Router.prototype.use`. With a module-local `Symbol()`, (a) the idempotence guard does not see the other copy, so `use` is wrapped twice, and (b) the `[MOUNT]` tags written by copy A cannot be read by copy B's walker. The mounts then fall back to local paths plus warns, so on Express 5 `/api/users/{id}` is emitted as `/users/{id}` (AC-023 is broken without any error). tsup gives each format its own copy of every module-level symbol. Fix: require `Symbol.for('express-api-docs.mount')` (and the same for `.child`, `.meta` and `.recorder`) in ST-005/ST-004, and add a contract test that loads both the `.js` and `.cjs` builds in one process. | architecture.md:83 (ADR-18 "guarded by a symbol"), :76 (ADR-11 dual build), :41 (C5 reads `[META]`); ST-001-scaffold.md:78 (dual `exports`) |
+| F-4 | MEDIUM | ST-001 `package.json` shape: "`sideEffects` must allow the S-05 import-time recorder (do not set it to `false`)" | The plan relies on `sideEffects` being absent, but nothing enforces it and no bundler scenario is tested. The recorder's import chain is also not pinned to the public entry point. | (1) A later maintainer adds `"sideEffects": false` to improve tree-shaking. A consumer who bundles the server with webpack/esbuild imports only `route` and `createApiDocs`; the bundler drops `introspect/recorder.ts` if it is reached only through a bare `import './recorder'`, so no mounts are recorded and Express 5 paths lose their prefixes (AC-023) with only warns. (2) Even with `sideEffects` left unset, if S-07 reaches the recorder only lazily (inside the spec handler), installation happens after the user's `app.use('/api', r)` calls, which gives the same failure. Fix: ST-001 adds a pack test asserting that `sideEffects` is absent or `true` (or lists `["./dist/index.js","./dist/index.cjs"]`); ST-007 must import the recorder at the top level of `src/index.ts` for side effects; ST-005/007 add a test that bundles `dist/index.js` with esbuild (`--bundle --platform=node`) and asserts the Express 5 mount prefix. | ST-001-scaffold.md:78; architecture.md:83 (ADR-18 "when express-api-docs is imported"); epic.md:52,60 (index.ts handover to S-07) |
+| F-5 | MEDIUM | architecture.md ADR-18 "installed per resolved Express module instance"; R-8 | The recorder patches the Express copy that resolves from the package's own location, which can differ from the app's copy. This is also the case when a bundler inlines Express. | In a pnpm/monorepo layout where `express-api-docs` resolves `express@5.2.1` and the app resolves `express@5.1.0` (two copies), or when the app bundle inlines Express while `express-api-docs` is external, the prototype that gets wrapped is not the prototype of the app's router, so every mount goes unrecorded. R-8 covers "second copy" at the documentation level, but no story has a detection test. Fix: at the first walk, if the app's router prototype lacks the recorder guard (`Symbol.for`, F-3), emit one specific `warn` ("recorder not installed on this Express instance"), and test it by using the `express4`/`express` aliases as two instances. | architecture.md:83, :237-240 (R-8); ST-005 contract fixtures cover the nested Router, sub-app and wrapped handler only (ST-005-introspection.md:93-108) |
+| F-6 | LOW | architecture.md ADR-18: wrap both the owner-prototype `use` and `express.application.use` | On both majors `app.use` delegates to `router.use`, so one mount call passes through both wrappers. The "newly pushed layers" diff must not double-annotate or mis-attribute. | For `app.use('/v1', subApp)`, `application.use` calls `router.use('/v1', mounted_app)`. The inner wrapper tags `[MOUNT]='/v1'` without `[CHILD]`, and the outer wrapper then tags `[CHILD]`. If the outer wrapper computes "new layers" by the stack length taken before the call, that works. If it compares against a snapshot taken after the inner wrapper, it sees zero new layers and `[CHILD]` is never set, so the sub-app routes are dropped with the ADR-19 warn. Spike S-4b passed, so this is advisory: ST-005 should state the before-length rule explicitly. | architecture.md:83, :128 (S-4b PASS) |
+| F-7 | LOW | epic.md waves / story `depends_on` | Every story can be built in its wave. The dependencies it declares, plus the transitive ones, are all satisfied earlier. | This was checked and nothing blocks. S-05 (W4) needs `register()` from S-04 (W3). S-06 (W5) uses the registry through S-05, a transitive dependency. S-07 (W6) imports `route`/`describe`/the recorder from S-04/S-05, which are transitive through S-06. The one latent coupling is `package.json`, which is frozen after W1 (F-2): any missing devDependency blocks a later wave, because only S-01 owns that file. | epic.md:8-18, :50-60; ST-001-scaffold.md:70 |
+
+<!-- Severity: CRITICAL blocks G2 until resolved; HIGH needs resolution or explicit waiver;
+     MEDIUM/LOW advisory. -->
+
+Checks with no finding: typescript-eslint 8.70.1 peers `typescript <6.1.0`, which is satisfied by `~5.9.3` (ADR-12). tsup 8.5.1 peers `typescript >=4.5`. eslint 10.11.0 needs node `^20.19` (CI must use Node 20.19 or later, not an older 20.x). `@vitest/coverage-v8` is pinned to exactly 5.0.2, which matches vitest.
+
+## Resolution log
+
+| # | Resolution (revised artifact / waived by / rationale) |
+|---|---|
+| F-1 | open |
+| F-2 | open |
+| F-3 | open |
+| F-4 | open |
+| F-5 | open |
+| F-6 | open |
+| F-7 | n/a (informational) |

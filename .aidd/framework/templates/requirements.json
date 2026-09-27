@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "requirements": [
+    {
+      "id": "AC-001",
+      "description": "REPLACE with the exact approved acceptance criterion"
+    }
+  ]
+}

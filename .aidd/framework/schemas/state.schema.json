@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIDD Delta global state (.aidd/state.yaml)",
+  "type": "object",
+  "required": ["schema", "aidd_version", "default_mode", "constitution", "changes"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "type": "integer", "enum": [1] },
+    "aidd_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "default_mode": { "enum": ["take-care", "let-me-look"] },
+    "active_change": { "type": ["string", "null"] },
+    "constitution": { "enum": ["present", "missing"] },
+    "changes": {
+      "type": "object",
+      "additionalProperties": { "enum": ["in_progress", "done", "abandoned"] }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+# AIDD Delta canonical command manifest — the single source of truth for
+# "what is a valid AIDD command". One row per file in commands/; nothing else is a command.
+# Format: <command>|<playbook-or-protocol path>|<one-line purpose>
+# Derived mechanically from commands/*.md (row path = the first framework path the command
+# file names; purpose = its description frontmatter). Keep 1:1 with commands/ — tests/commands.test.sh
+# fails on a phantom row or a missing one. Skills are NOT commands: see protocol/command-contract.md.
+/aidd:approve|.aidd/framework/protocol/gates.md|Approve the currently pending AIDD gate
+/aidd:construct|.aidd/framework/playbooks/30-construction.md|Run the AIDD Construction phase
+/aidd:cost|.aidd/framework/protocol/cost-governance.md|Report AIDD cost — ledger summary, projection, and threshold status
+/aidd:dashboard|.aidd/framework/scripts/render-dashboard.sh|Regenerate and show the AIDD dashboard
+/aidd:deliver|.aidd/framework/playbooks/50-delivery.md|Run the AIDD Delivery phase
+/aidd:document|.aidd/framework/playbooks/05-document.md|Run the AIDD Document phase (brownfield spec mining)
+/aidd:escape|.aidd/framework/protocol/escape-analysis.md|Analyze a defect that escaped to production — which layer went blind, and what changes
+/aidd:go|.aidd/framework/playbooks/00-pipeline.md|Run the full AIDD pipeline for an intent (or Jira key)
+/aidd:impact|.aidd/framework/roles/impact-analyst.md|Run AIDD impact analysis — blast radius through multiple lenses
+/aidd:inception|.aidd/framework/playbooks/20-inception.md|Run the AIDD Inception phase for an intent
+/aidd:init|install.sh|Install/refresh AIDD in this repo, then run the Master interview if needed
+/aidd:master|.aidd/framework/playbooks/10-master.md|Run/refresh the AIDD Master phase (constitution + memory)
+/aidd:mode|.aidd/framework/protocol/autonomy-modes.md|Set AIDD autonomy mode (take-care or let-me-look)
+/aidd:qa|.aidd/framework/playbooks/40-qa.md|Run the AIDD QA phase
+/aidd:resume|.aidd/framework/prompts/resume.md|Resume the active AIDD change from recorded state
+/aidd:review-pr|.aidd/framework/protocol/pr-review.md|Review an external pull request — two-phase, adversarially verified, nothing posted without approval
+/aidd:revise|.aidd/framework/protocol/gates.md|Send the pending AIDD gate back with feedback
+/aidd:rigor|.aidd/framework/protocol/rigor-modes.md|Set or report AIDD rigor mode (fast, standard, or critical)
+/aidd:status|.aidd/framework/prompts/status.md|Show AIDD pipeline status
+/aidd:test|.aidd/framework/roles/test-engineer.md|Run the AIDD test-engineer team — exhaustive test design + execution
+/aidd:upgrade|install.sh|Re-vendor the AIDD framework in this repo from the installed plugin

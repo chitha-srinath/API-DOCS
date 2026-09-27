@@ -1,0 +1,40 @@
+2026-09-27T07:40:00Z | inception | product-analyst | intent+prd+revisions(4 resumes) | returned | reconstructed; class inc1-clarify
+2026-09-27T07:42:00Z | inception | orchestrator | product-analyst,epic-scoper,architect | rejected | reconstructed; several SendMessage deliveries queued then re-sent (not re-dispatched)
+2026-09-27T07:44:00Z | inception | architect | risk-first | returned | reconstructed; class inc4-arch
+2026-09-27T07:46:00Z | inception | architect | scalability-first | returned | reconstructed; class inc4-arch
+2026-09-27T07:48:00Z | inception | architect | simplicity-first | returned | reconstructed; class inc4-arch
+2026-09-27T07:50:00Z | inception | arch-judge | scorecard-1 | returned | reconstructed; class inc5-judge
+2026-09-27T07:52:00Z | inception | arch-judge | scorecard-2 | returned | reconstructed; class inc5-judge
+2026-09-27T07:54:00Z | inception | arch-judge | scorecard-3 | returned | reconstructed; class inc5-judge
+2026-09-27T07:56:00Z | inception | architect | synthesis+amendments(4 resumes) | returned | reconstructed; class inc6-synth
+2026-09-27T07:58:00Z | inception | independent-thinker | counter-arguments | returned | reconstructed; class inc7-thinker
+2026-09-27T08:00:00Z | inception | epic-scoper | epic+4 revisions | returned | reconstructed; class inc8-scoper
+2026-09-27T08:02:00Z | inception | story-author | ST-001 v1 | returned | reconstructed; class inc9-story
+2026-09-27T08:04:00Z | inception | story-author | ST-002 v1 | returned | reconstructed; class inc9-story
+2026-09-27T08:06:00Z | inception | story-author | ST-003 v1 | returned | reconstructed; class inc9-story
+2026-09-27T08:08:00Z | inception | story-author | ST-004 v1 | returned | reconstructed; class inc9-story
+2026-09-27T08:10:00Z | inception | story-author | ST-005 v1 | returned | reconstructed; class inc9-story
+2026-09-27T08:12:00Z | inception | story-author | ST-006 v1 | returned | reconstructed; class inc9-story
+2026-09-27T08:14:00Z | inception | story-author | ST-007 v1 | returned | reconstructed; class inc9-story
+2026-09-27T08:16:00Z | inception | story-author | ST-008 v1 | returned | reconstructed; class inc9-story
+2026-09-27T08:18:00Z | inception | impact-analyst | impact-report | returned | reconstructed; class inc10-impact
+2026-09-27T08:20:00Z | inception | reviewer | coupling-risk | returned | reconstructed; class inc11-prereview
+2026-09-27T08:22:00Z | inception | reviewer | feasibility | returned | reconstructed; class inc11-prereview
+2026-09-27T08:24:00Z | inception | reviewer | pattern-fit | returned | reconstructed; class inc11-prereview
+2026-09-27T08:26:00Z | inception | reviewer | test-strategy | returned | reconstructed; class inc11-prereview
+2026-09-27T08:28:00Z | inception | story-author | ST-001 refresh | returned | reconstructed; class inc9-story
+2026-09-27T08:30:00Z | inception | story-author | ST-002 refresh | returned | reconstructed; class inc9-story
+2026-09-27T08:32:00Z | inception | story-author | ST-003 refresh | returned | reconstructed; class inc9-story
+2026-09-27T08:34:00Z | inception | story-author | ST-004 refresh | returned | reconstructed; class inc9-story
+2026-09-27T08:36:00Z | inception | story-author | ST-005 refresh | returned | reconstructed; class inc9-story
+2026-09-27T08:38:00Z | inception | story-author | ST-006 refresh | returned | reconstructed; class inc9-story
+2026-09-27T08:40:00Z | inception | story-author | ST-007 refresh | returned | reconstructed; class inc9-story
+2026-09-27T08:42:00Z | inception | story-author | ST-008 refresh | returned | reconstructed; class inc9-story
+2026-09-27T08:44:00Z | inception | orchestrator | stories/* | returned | reconstructed; mechanical frontmatter flow->block list rewrite + rename S-0N.md->ST-00N-slug.md, values unchanged; all 8 re-authored afterwards
+2026-09-27T08:46:00Z | inception | supervisor | inception audit | returned | reconstructed; class inc12-supervisor
+2026-09-27T08:30:35Z | inception | supervisor | inception re-audit | returned | VIOLATIONS: V3 open, V6 new (impact+pre-review stale)
+2026-09-27T08:30:35Z | inception | impact-analyst | impact re-run | dispatched | supervisor V6 remediation
+2026-09-27T08:30:35Z | inception | reviewer | coupling-risk re-run | dispatched | supervisor V6 remediation
+2026-09-27T08:30:35Z | inception | reviewer | feasibility re-run | dispatched | supervisor V6 remediation
+2026-09-27T08:30:35Z | inception | reviewer | pattern-fit re-run | dispatched | supervisor V6 remediation
+2026-09-27T08:30:35Z | inception | reviewer | test-strategy re-run | dispatched | supervisor V6 remediation

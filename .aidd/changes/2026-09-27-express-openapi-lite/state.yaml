@@ -1,0 +1,137 @@
+# AIDD per-change state — seeded at change creation. Schema: change-state.schema.json
+schema: 1
+evidence_contract: receipts-v1 # source-bound suite and AC receipts required before delivery
+change_id: 2026-09-27-express-openapi-lite
+intent: "Build express-openapi-lite (working name): a TypeScript-first npm package that generates OpenAPI 3.1 docs for Express from route definitions with near-zero config. Zod schemas go through a pluggable SchemaAdapter interface (Zod adapter ships first; other schema libraries additive later without breaking changes). Required: typed route helper that validates requests and infers handler types; automatic path/query/body/response/params docs; security schemes (bearer, apiKey, oauth2) declared once; a docs UI endpoint (Scalar or Swagger UI via CDN, no bundled assets); a JSON spec endpoint; incremental adoption on existing routers; ESM+CJS dual build with .d.ts; tests with >=90% coverage; README, examples, CHANGELOG, CI, and npm publish config."
+mode: let-me-look
+rigor:                   # how much verification runs — see protocol/rigor-modes.md
+  mode: critical         # fast | standard | critical (classifier resolves at creation)
+  selected_by: classifier
+  reason: "critical trigger: public API contract (published SDK surface, exported .d.ts, OpenAPI output) + infra/deploy config (.github/workflows CI) named in intent"
+  escalations: []        # append-only, one-way: {from, to, trigger, at}
+cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
+  budget_tokens: 5600000 # standard default (derived, not measured); tunable in constitution.md
+  budget_minutes: 105
+  spent_tokens: 1384308        # derived from cost/ledger.md — never asserted
+  spent_minutes: 43.9
+  by_phase:
+    inception:
+      tokens: 1384308
+      minutes: 43.9           # phase -> {tokens, minutes}; sums to spent_*
+  projection_tokens: null
+  stops: []              # append-only: {at, phase, reason, disposition}
+phase: inception
+phase_status: awaiting_gate
+step: inc12-supervisor
+jira:
+  ticket: null
+  sync: false
+gates:
+  g1_prd:
+    status: awaiting
+    approved_by: human
+    at: "2026-09-27T07:54:36Z"
+    artifacts:
+      - path: prd.md
+        sha256: "30b22d0337a543146b93d9b42d80c12d94f5479f981e0d29806f4e4cc1ec0fdc"
+      - path: requirements.json
+        sha256: "e752e6af3646d442d7cc9782b76a477cdf71c8ceb97afb175906b9a40c46ab62"
+      - path: intent.md
+        sha256: "e8e1985d1bab856fd95229e60ec7e99db49cfc48b320f5c4c7d43a67c217a006"
+    notes: "revise #1 auto-detect; revise #2 configurable defaults; A-1..A-9 accepted"
+quality_gates:
+  tests_green: pending
+  exhaustive_tests_passed: pending
+  qa_findings_resolved: pending
+  e2e_verified: pending
+  mutation_floor_met: pending
+  security_clean: pending
+  perf_within_budget: pending
+  acs_verified: pending
+  evidence_captured: pending
+  supervision_compliant: pending
+  critic_approved: pending
+  auditor_approved: pending
+  debate_complete: pending
+  tally_reconciled: pending
+  within_cost_budget: pending
+  evidence_reproduced: pending
+determinism:             # reproduce the green before trusting it — protocol/determinism.md
+  repeats_required: 2    # standard: the gating suite twice (fast: 0, gate records na)
+  repeats_done: 0
+  report: null
+  quarantined: []        # {test, ac_ids, suspected_source, disposition, accepted_reason}
+stories:
+  ST-001:
+    status: ready
+    attempts: 0
+    wave: 1
+  ST-002:
+    status: ready
+    attempts: 0
+    wave: 2
+  ST-003:
+    status: ready
+    attempts: 0
+    wave: 2
+  ST-004:
+    status: ready
+    attempts: 0
+    wave: 3
+  ST-005:
+    status: ready
+    attempts: 0
+    wave: 4
+  ST-006:
+    status: ready
+    attempts: 0
+    wave: 5
+  ST-007:
+    status: ready
+    attempts: 0
+    wave: 6
+  ST-008:
+    status: ready
+    attempts: 0
+    wave: 7
+fix_loop:
+  iteration: 0
+  max: 3
+backflow_used: false
+supervision: {}
+scores: {}
+audit:                   # seeded from rigor.mode — see protocol/rigor-modes.md Â§Seeded audit budgets
+  interrogation:
+    rounds_used: 0
+    max: 2               # critical: 2 round per subject (critical: 2)
+  negotiation:
+    exchanges_used: 0
+    max: 2               # critical: 2 exchange per disputed AC (critical: 2)
+    rulings: []          # one row per disputed AC closed: {ac_id, ruling, ruled_by}
+  debate:
+    exchanges_used: 0
+    max: 6               # critical: pool surface only (critical: pool of 6)
+escapes: []              # post-merge defects analyzed per layer — protocol/escape-analysis.md
+blocked_reason: null
+history:
+  - at: "2026-09-27T07:39:38Z"
+    event: "change created · rigor critical · branch aidd/2026-09-27-express-openapi-lite"
+  - at: "2026-09-27T07:45:00Z"
+    event: "[inception 2/12] PRD written, 29 ACs · prd.md · gates: 0/3 · rigor: critical · next: gate g1_prd"
+  - at: "2026-09-27T07:50:00Z"
+    event: "[inception 3/12] G1 revised twice by human (auto-detect; configurable defaults), 46 ACs · prd.md · gates: 0/3 · rigor: critical · next: gate g1_prd"
+  - at: "2026-09-27T07:54:36Z"
+    event: "[inception 3/12] G1 approved by human · prd.md · gates: 1/3 · rigor: critical · next: architecture candidates"
+  - at: "2026-09-27T08:05:00Z"
+    event: "[inception 5/12] 3 candidates judged, risk-first unanimous · arch-candidates/ · gates: 1/3 · rigor: critical · next: synthesis"
+  - at: "2026-09-27T08:15:00Z"
+    event: "[inception 7/12] architecture synthesized, counter-arguments not decisive, spike passed after ADR-18 · architecture.md · gates: 1/3 · rigor: critical · next: epic"
+  - at: "2026-09-27T08:25:00Z"
+    event: "[inception 10/12] epic 8 stories/7 waves, stories linted, impact MEDIUM · epic.md · gates: 1/3 · rigor: critical · next: pre-review"
+  - at: "2026-09-27T08:35:00Z"
+    event: "[inception 11/12] pre-review 0 CRITICAL 9 HIGH; human dropped Node 20; AC-004/027 amended; G1 stale · pre-review/ · gates: 0/3 · rigor: critical · next: resolutions"
+  - at: "2026-09-27T08:55:00Z"
+    event: "[inception 11/12] ADR-20..31 resolve all HIGH; epic + 8 stories refreshed and linted · architecture.md · gates: 0/3 · rigor: critical · next: supervisor audit"
+  - at: "2026-09-27T08:29:01Z"
+    event: "[inception 12/12] supervisor VIOLATIONS V1-V5; V1/V2/V4/V5 remediated (reconstructed log+ledger); V3 awaits human G1 re-approval · supervision/inception-report.md · gates: 0/3 · rigor: critical · next: gate g1_prd, gate g2_plan"
+updated_at: "2026-09-27T08:29:01Z"

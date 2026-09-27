@@ -1,0 +1,8 @@
+dist
+coverage
+node_modules
+reports
+.stryker-tmp
+.aidd
+AGENTS.md
+package-lock.json

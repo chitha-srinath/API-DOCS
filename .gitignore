@@ -1,1 +1,7 @@
 .aidd/context/
+node_modules/
+/dist/
+/coverage/
+/reports/
+/.stryker-tmp/
+*.tgz

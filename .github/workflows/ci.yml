@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: node ${{ matrix.node }} / express ${{ matrix.express }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+        express: [4, 5]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - name: Use Express ${{ matrix.express }} as the root copy
+        if: matrix.express == 4
+        run: npm i --no-save express@${{ matrix.express }}
+      - run: npm run build
+      - run: npm run lint
+      - name: Typecheck
+        if: matrix.express == 5
+        run: npx tsc --noEmit
+      - run: npm test
+      - name: Package checks
+        if: matrix.node == 24 && matrix.express == 5
+        run: npm run check:pack
+
+  peer-floor:
+    name: peer floor (express 4.21.0 / 5.0.0)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm i --no-save express@4.21.0 express4@npm:express@4.21.0
+      - run: npx vitest run test/introspect test/route
+      - run: npm i --no-save express@5.0.0 router@2.0.0 express4@npm:express@4.21.0
+      - run: npx vitest run test/introspect test/route
+
+  perf:
+    name: perf budget (p95 < 200 ms)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run perf

@@ -12,8 +12,8 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
   budget_tokens: 5600000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 1200
-  spent_tokens: 3653437        # derived from cost/ledger.md — never asserted
-  spent_minutes: 348.5
+  spent_tokens: 4321271        # derived from cost/ledger.md — never asserted
+  spent_minutes: 464.0
   by_phase:
     inception:
       tokens: 2694542
@@ -48,6 +48,7 @@ gates:
     notes: "re-approved after pre-review amendments: Node >=22, zod optional ^4.2.0 via ./zod, CI 22/24x4/5, AC-047 schemaAdapter (47 ACs)"
   g2_plan:
     status: stale
+    notes: "risk-first architecture (53 ADRs), 8-story epic, constitution deviations accepted (tsup build, Node >=22); rebuild after PR #1 set aside. STALE: ADR-54 (route() 4-arg ratified), ADR-55 (dist sideEffects defect diagnosed, S-07 ownership exception granted), ADR-56 (describe() 3-arg ratified) -- all documentation corrections / narrow scoped exceptions, zero rework of built stories."
     approved_by: human
     at: "2026-09-27T13:10:45Z"
     artifacts:
@@ -83,7 +84,6 @@ gates:
         sha256: "8391322899a453bc337c928e6c385984f7278efc5a1b1648a943326aefb30ff6"
       - path: pre-review/test-strategy.md
         sha256: "a26e63d31fc79fad25434db97e387b9ee152994b7d14cd44d96b0581725d0561"
-    notes: "risk-first architecture (53 ADRs), 8-story epic, constitution deviations accepted (tsup build, Node >=22); rebuild after PR #1 set aside"
 quality_gates:
   tests_green: passed
   exhaustive_tests_passed: pending
@@ -124,7 +124,7 @@ stories:
     attempts: 1
     wave: 3
   ST-005:
-    status: ready
+    status: built
     attempts: 1
     wave: 4
   ST-006:
@@ -207,4 +207,10 @@ history:
     event: "[construction] human raised budget_minutes 300->1200; block lifted, resuming dispatch · state.yaml · gates: 2/3 · rigor: critical · next: backflow resolution, wave 4 status"
   - at: "2026-09-27T17:19:48Z"
     event: "[construction] architect backflow ADR-54 ratifies ST-004 route() 4-arg signature as public API (0 rework, doc-only correction); G2 now stale, needs re-approval before delivery · architecture.md · gates: 1/3 · rigor: critical · next: wave 4 status, then G2 re-approval"
-updated_at: "2026-09-27T17:19:48Z"
+  - at: "2026-09-27T19:30:35Z"
+    event: "[construction 2/4] wave 4 (ST-005) built, 7/7 PROVEN, mutation 100%; dist-bundling defect confirmed + describe() divergence found, both routed to architect · stories/ST-005-introspection.md · gates: 1/3 · rigor: critical · next: architect backflow resolution, wave 5 status"
+  - at: "2026-09-27T19:32:17Z"
+    event: "[construction] both wave-4 backflows resolved: ADR-55 (dist sideEffects defect diagnosed, S-07 exception granted) and ADR-56 (describe() ratified, zero rework) · architecture.md · gates: 1/3 · rigor: critical · next: wave 5 status"
+  - at: "2026-09-27T19:33:34Z"
+    event: "[construction] both wave-4 backflows resolved: ADR-55 (dist sideEffects defect diagnosed, S-07 exception granted) and ADR-56 (describe() ratified, zero rework) · architecture.md · gates: 1/3 · rigor: critical · next: wave 5 status"
+updated_at: "2026-09-27T19:33:34Z"

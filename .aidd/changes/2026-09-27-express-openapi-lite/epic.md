@@ -135,6 +135,8 @@ Each shared file has exactly one owner:
 
 Other stories that need changes to these files send requests through their story report. They do not edit the files.
 
+**Scoped ownership exception (ADR-55, BACKFLOW).** S-07 (ST-007) is granted a narrow, single-purpose exception to S-01's exclusive ownership of `package.json`: S-07 may add exactly one entry to the `"sideEffects"` array (currently lines 59-62, the two-element array `["./dist/auto-record.js", "./dist/auto-record.cjs"]`) — appending the source path `"src/introspect/auto-record.ts"` — as part of its Wave-6 work on `test/entries/recorder-install.test.ts`. No other key, line, or file in `package.json` is included in this exception; `tsup.config.ts` is unaffected and stays S-01-owned with no changes required. See ADR-55 for the defect, root cause and prescribed fix.
+
 Paths are split by exact file where two stories share a directory:
 
 - `src/route/`: `describe.ts` belongs to S-05 and the other five files belong to S-04.

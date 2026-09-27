@@ -108,3 +108,11 @@
 2026-09-27T17:18:45Z | construction | orchestrator | cost | returned | HARD STOP: minutes 347.1/300 (116%); blocking further dispatch pending human decision; 2 in-flight dispatches allowed to complete
 2026-09-27T17:19:30Z | construction | human | cost | returned | budget_minutes raised 300->1200; block lifted
 2026-09-27T17:19:48Z | construction | architect | ADR-54 backflow | returned | ratified 4-arg route() signature, 0 rework needed, G2 flagged stale
+2026-09-27T19:30:35Z | construction | builder | ST-005 (rate-limit resume) | returned | wave 4 evidence
+2026-09-27T19:30:35Z | construction | master-agent | wave-4 | returned | wave 4 evidence
+2026-09-27T19:30:35Z | construction | auditor | ST-005 | returned | wave 4 evidence
+2026-09-27T19:30:35Z | construction | orchestrator | dist bundling defect | returned | CONFIRMED via build+runtime test: recorder never installs from built package (tsup/esbuild elides src/auto-record.ts side-effect import); architect backflow dispatched to diagnose + pre-authorize S-07 ownership exception
+2026-09-27T19:30:35Z | construction | master-agent | wave-4 | returned | ACCEPT quality; SECOND route()-style divergence found: describe() 3-arg factory vs architecture.md C4's documented describe(meta); recommends backflow ADR same as ADR-54
+2026-09-27T19:31:03Z | construction | architect | ADR-55 backflow | returned | root cause diagnosed (package.json sideEffects array is esbuild's source-level allowlist); fix prescribed (1-line addition); S-07 ownership exception granted, S-01/tsup.config.ts untouched
+2026-09-27T19:31:03Z | construction | orchestrator | backflow followup | dispatched | describe() signature divergence (ADR-56 candidate), same agent sequentially resumed
+2026-09-27T19:32:17Z | construction | architect | ADR-56 backflow | returned | describe() 3-arg factory ratified as public API, C4 amended, zero rework (ST-005 already matches)

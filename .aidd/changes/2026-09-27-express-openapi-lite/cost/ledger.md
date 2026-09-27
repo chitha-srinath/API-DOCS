@@ -89,3 +89,7 @@
 | 2026-09-27T17:18:24Z | construction | con2c-monitor | master-agent | wave-3 | not measured | 45056 | 1.9 | 3558239 | 344.5 | measured |
 | 2026-09-27T17:18:24Z | construction | con2d-interrogation | auditor | ST-004 | not measured | 52066 | 2.6 | 3610305 | 347.1 | measured |
 | 2026-09-27T17:19:48Z | construction | inc6-synth | architect | backflow ADR-54 | not measured | 43132 | 1.35 | 3653437 | 348.5 | measured |
+| 2026-09-27T19:30:35Z | construction | con2a-builder | builder | ST-005 (rate-limit resume) | not measured | 519048 | 108.6 | 4172485 | 457.1 | measured |
+| 2026-09-27T19:30:35Z | construction | con2c-monitor | master-agent | wave-4 | not measured | 45033 | 1.7 | 4217518 | 458.8 | measured |
+| 2026-09-27T19:30:35Z | construction | con2d-interrogation | auditor | ST-005 | not measured | 48375 | 2.4 | 4265893 | 461.2 | measured |
+| 2026-09-27T19:31:03Z | construction | inc6-synth | architect | backflow ADR-55 (sideEffects) | not measured | 55378 | 2.8 | 4321271 | 464.0 | measured |

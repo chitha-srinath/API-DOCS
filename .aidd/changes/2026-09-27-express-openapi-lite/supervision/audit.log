@@ -38,3 +38,4 @@
 2026-09-27T08:30:35Z | inception | reviewer | feasibility re-run | dispatched | supervisor V6 remediation
 2026-09-27T08:30:35Z | inception | reviewer | pattern-fit re-run | dispatched | supervisor V6 remediation
 2026-09-27T08:30:35Z | inception | reviewer | test-strategy re-run | dispatched | supervisor V6 remediation
+2026-09-27T10:35:00Z | construction | orchestrator | ST-001..ST-008 | returned | built inline (no subagents); human instruction "complete the feature"; gates G1/G2 not approved

@@ -117,3 +117,11 @@
 | 2026-09-28T20:28:23Z | qa | qa3-adversarial | adversarial-verifier | F-03 | not measured | 36078 | 2.1 | 5992572 | 664.2 | measured |
 | 2026-09-28T20:28:23Z | qa | qa3-adversarial | adversarial-verifier | F-04 | not measured | 20772 | 0.6 | 6013344 | 664.8 | measured |
 | 2026-09-28T20:28:23Z | qa | con2c-monitor | master-agent | qa-review-batch | not measured | 52682 | 1.4 | 6066026 | 666.2 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | functional-happy-path | not measured | 102714 | 11.5 | 6168740 | 677.7 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | negative-error-handling | not measured | 78131 | 3.5 | 6246871 | 681.2 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | boundary-edge | not measured | 80152 | 3.7 | 6327023 | 684.9 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | impossible-abuse | not measured | 76943 | 3.5 | 6403966 | 688.4 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | api-contract | not measured | 91940 | 4.8 | 6495906 | 693.2 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | performance-smoke | not measured | 51370 | 4.6 | 6547276 | 697.8 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | regression-compat | not measured | 73373 | 7.0 | 6620649 | 704.8 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | state-concurrency-idempotency | not measured | 66559 | 3.5 | 6687208 | 708.3 | measured |

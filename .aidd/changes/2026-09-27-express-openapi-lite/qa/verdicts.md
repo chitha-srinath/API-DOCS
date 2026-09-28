@@ -24,6 +24,8 @@ No upstream guard (config validation, route registration, adapter duck-typing) i
 
 **Disposition: BLOCKING. Enters the step 6 fix loop (owned by ST-006/S-06's `src/spec/glob.ts`).**
 
+**Post-verdict update (QA step 5, boundary-edge exhaustive testing, `qa/tests/boundary-edge.md`):** independent blind testing (designed without knowledge of this finding) reproduced the mismatch (TC-EDGE-005, TC-EDGE-020) AND found a THIRD aspect the original finding did not identify: **TC-EDGE-010** shows a pattern containing one of every metacharacter in balanced arrangement makes `toRegExp` construct a syntactically invalid regex, throwing `SyntaxError: Invalid regular expression ... Unterminated character class` uncaught. This is a crash/DoS-adjacent path, not merely a silent mismatch — any code path passing user-influenced `include`/`exclude` glob patterns can crash spec generation entirely. **The step 6 fix loop dispatch for F-02 must verify both the escape-alternation mismatch AND the crash case before F-02 is closed** — the suggested fix (drop the `g` flag from `REGEXP_METACHARS`) should address both, but this must be confirmed, not assumed.
+
 ## F-03 (HIGH as framed) — O(n²) introspection walk breaching ADR-26
 
 **Verdict: REFUTED at HIGH / "breaches ADR-26" framing. Underlying mechanism confirmed real, demoted to LOW/advisory.**

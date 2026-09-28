@@ -12,8 +12,8 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
   budget_tokens: 20000000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 1200
-  spent_tokens: 6066026        # derived from cost/ledger.md — never asserted
-  spent_minutes: 666.2
+  spent_tokens: 6687208        # derived from cost/ledger.md — never asserted
+  spent_minutes: 708.3
   by_phase:
     inception:
       tokens: 2694542
@@ -231,4 +231,6 @@ history:
     event: "[qa 2/17] step 1-2 done: 6 dimensions + security auditor, 20 findings collated (1C/3H/8M/8L) · qa/findings.md · gates: 2/3 · rigor: critical · next: step 3 adversarial verification"
   - at: "2026-09-28T20:28:23Z"
     event: "[qa 3/17] adversarial verification: 3 CONFIRMED blocking (F-01/02/04), 1 REFUTED/demoted (F-03) · qa/verdicts.md · gates: 2/3 · rigor: critical · next: step 4-5 test debate + exhaustive testing"
-updated_at: "2026-09-28T20:28:23Z"
+  - at: "2026-09-28T21:04:05Z"
+    event: "[qa 5/17] all 8 exhaustive test categories done: 237 cases, 230 PASS, 5 legit FAIL (F-01x2/F-02x3), F-02 widened, new F-21 · qa/test-report.md · gates: 2/3 · rigor: critical · next: test-batch monitoring, then step 6 fix loop"
+updated_at: "2026-09-28T21:04:05Z"

@@ -369,3 +369,29 @@ independently reproduced the ADR-50 scoped mutation claim from the raw
 `reports/stryker-incremental.json` (376 Killed + 7 Timeout + 0 Survived = 383, only the 5
 `src/spec/**` files present), corroborating the console summary despite the builder's
 self-disclosed tail-buffering/kill/rerun incident. No negotiation entries filed.
+
+## QA Fix Loop — Iteration 1 (QA step 6)
+
+Two CONFIRMED findings from QA (`qa/verdicts.md`), both owned by this story (`src/spec/**`). Fix both, TDD (reproducing test first for each), then re-run this story's full test suite, lint, typecheck, and the ADR-50(a) scoped mutation command before reporting done.
+
+### Defect 1 — F-01 (CRITICAL): dangling `$ref` for named/reused schemas
+
+`src/spec/build.ts:107-131` (`pathParameters`, `queryParameters`): when a schema's `toJSONSchema()` output includes a `$defs` bag (produced whenever a Zod schema carries `.meta({id})` — an ordinary, spec-sanctioned pattern for naming/reusing schemas), only `schema.properties[name]` is extracted and the sibling `$defs` bag is dropped, leaving a dangling, unresolvable `$ref`. Confirmed reachable through BOTH the opt-in `zodAdapter` and the DEFAULT `standardSchemaAdapter` (ADR-21's zero-config default) — this is not an opt-in-only defect. Reproduced end-to-end: `SwaggerParser.validate()` throws `Missing $ref pointer` on the generated `/openapi.json`, falsifying AC-015/AC-016.
+
+**Fix requirement:** whenever `adapter.toJSONSchema(...)` returns a `$defs` bag alongside the extracted property schema, that `$defs` bag must be hoisted into `components.schemas` (with appropriate naming/collision handling, consistent with the existing `dedupe`/canonicalization logic) so the `$ref` resolves. This applies to `pathParameters` and `queryParameters` specifically — `requestBodyOf`/`responsesOf` already pass the whole adapter output through untouched and are NOT affected.
+
+**Required regression test:** a route with a `.meta({id})`-tagged Zod schema (or an equivalent Standard-Schema-compatible schema) used in `params`/`query`, spec generated, and the result validated with `@apidevtools/swagger-parser`'s `validate()` — must pass. Test both the default adapter path and the `./zod` subpath explicitly, since both were confirmed broken.
+
+### Defect 2 — F-02 (HIGH, widened scope): glob escaping shared-state bug, including a crash path
+
+`src/spec/glob.ts:5-9`: `REGEXP_METACHARS` is a module-level `/g`-flagged regex; `escapeChar`'s `.test()` calls share its `lastIndex` across every invocation, causing:
+(a) every other consecutive metacharacter in a pattern to be silently left unescaped (can cause `autoDetect.include`/`exclude` globs to over- or under-match routes), AND
+(b) — a NEW aspect found during exhaustive testing (`qa/tests/boundary-edge.md`, TC-EDGE-010) — certain metacharacter combinations cause `toRegExp` to construct a syntactically invalid regex, throwing an uncaught `SyntaxError: Invalid regular expression ... Unterminated character class`. This is a crash path, not just a silent mismatch.
+
+**Fix requirement:** remove the `g` flag from `REGEXP_METACHARS` (a stateless per-character `.test()` needs no global flag) — this should resolve both the escaping-alternation bug and the crash, but BOTH must be verified, not assumed.
+
+**Required regression tests** (both must pass):
+1. A pattern with 2+ consecutive metacharacters (e.g. `/a..b`) — every metacharacter escapes correctly, no alternation.
+2. A pattern containing one of every metacharacter class member in a balanced arrangement — `toRegExp` does not throw; the resulting regex is syntactically valid and behaves as intended.
+
+Existing tests to re-confirm green after the fix: `test/spec/glob.test.ts`, `test/aidd-exhaustive/boundary-edge/aidd_exhaustive_boundary.test.ts` (TC-EDGE-005, TC-EDGE-010, TC-EDGE-020 must all pass).

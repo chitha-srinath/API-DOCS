@@ -160,3 +160,5 @@
 2026-09-28T21:04:05Z | qa | test-engineer | state-concurrency-idempotency | returned | exhaustive testing
 2026-09-28T21:04:05Z | qa | orchestrator | cross-category fixes | returned | fixed 3 rounds of tsc errors in new exhaustive test files (mechanical, non-product), 1 false-positive manifest-name match, 1 flaky memory-threshold test (missing --expose-gc guard); full suite now exactly 3 expected F-02 failures
 2026-09-28T21:04:05Z | qa | orchestrator | step 5 consolidate | returned | qa/test-report.md: 237 cases, 230 PASS, 5 legitimate FAIL (F-01x2, F-02x3), F-02 scope widened (crash path), new F-21 LOW/advisory
+2026-09-28T21:07:54Z | qa | master-agent | qa-test-batch | returned | accepted, F-02 widening confirmed accurate, F-21 severity defensible; no shell in this dispatch, orchestrator's own earlier full-suite run stands as independent execution
+2026-09-28T21:07:54Z | qa | orchestrator | step 6 fix loop, iteration 1 | dispatched | 3 findings grouped by ownership: F-01+F-02 -> ST-006, F-04 -> ST-004 and ST-007 (split call sites)

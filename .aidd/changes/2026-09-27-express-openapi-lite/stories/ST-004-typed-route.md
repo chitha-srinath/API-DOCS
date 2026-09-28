@@ -385,3 +385,15 @@ Independent verification performed (not taken on the builder's word):
   mutant).
 
 No negotiation entries required; no DISPUTED ACs.
+
+## QA Fix Loop — Iteration 1 (QA step 6)
+
+One CONFIRMED finding from QA (`qa/verdicts.md`), your portion owned by this story.
+
+### Defect — F-04 (HIGH): `memoizeAdapter` never wired into `resolveAdapter`
+
+`src/route/typed.ts:61-68` (`resolveAdapter`): returns `meta.adapter`, `globalOptions.schemaAdapter`, or `standardSchemaAdapter` directly — the raw, unwrapped adapter. `memoizeAdapter` (`src/adapter/memo.ts`, ADR-03) is defined and unit-tested in isolation but never imported here (confirmed via `grep -rn "memoizeAdapter" src/`: the only match is the export declaration itself). No compensating cache exists elsewhere for per-schema JSON Schema conversion — `src/spec/cache.ts` only caches the whole built document by router fingerprint, not per-schema conversions. Every spec rebuild re-derives every operation's schema conversions from scratch.
+
+**Fix requirement:** wrap the resolved adapter in `memoizeAdapter(...)` before returning it from `resolveAdapter`. Coordinate with ST-007's `src/serve/router.ts` fix (same defect, different call site) so both composition-root paths get the memoization benefit consistently.
+
+**Required regression test:** verify (via a WeakMap-identity check, spy, or measured invocation count) that calling `toJSONSchema` twice on the same schema object through the resolved adapter only invokes the underlying adapter's `toJSONSchema` once. Re-confirm `test/adapter/memo.test.ts` and `test/route/stub-adapter.test.ts` still pass, plus your own ADR-50(a) scoped mutation command afterward.

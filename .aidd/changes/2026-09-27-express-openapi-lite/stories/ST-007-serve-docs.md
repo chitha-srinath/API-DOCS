@@ -451,3 +451,15 @@ the story's exact Verification command — **PROVEN**. The Build Fixer's correct
 to be legitimate, narrowly-scoped fixes tied to the authorized ADR-55 `sideEffects` change, not
 weakened assertions — full suite genuinely green, no regressions. 0 DISPUTED. No negotiation
 entries filed. Full evidence: `audit/interrogation/ST-007-verdict.md`.
+
+## QA Fix Loop — Iteration 1 (QA step 6)
+
+One CONFIRMED finding from QA (`qa/verdicts.md`), your portion owned by this story.
+
+### Defect — F-04 (HIGH): `memoizeAdapter` never wired into the composition root's adapter resolution
+
+`src/serve/router.ts:50-52`: `adapter` is assigned directly from `options.schemaAdapter ?? standardSchemaAdapter` and used unwrapped at lines 69/77. `memoizeAdapter` (`src/adapter/memo.ts`, ADR-03) is defined and unit-tested in isolation but never wired in here. The document-level spec cache (`src/spec/cache.ts`) only caches the whole built document by router fingerprint, and the `getSpec()` path with no `ctx.app` has no caching at all — so every rebuild re-derives every schema's JSON Schema from scratch.
+
+**Fix requirement:** wrap the resolved adapter in `memoizeAdapter(...)` before it's used to build the spec. Coordinate with ST-004's `src/route/typed.ts` fix (same defect, different call site) so both composition-root paths get consistent memoization.
+
+**Required regression test:** verify (WeakMap-identity check, spy, or measured invocation count) that the same schema object's `toJSONSchema` is only computed once across multiple spec rebuilds via `createApiDocs()`. Re-confirm your existing tests pass, plus your ADR-50(a) scoped mutation command afterward.

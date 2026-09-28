@@ -112,3 +112,8 @@
 | 2026-09-28T20:24:12Z | qa | qa1-dim | reviewer | spec-compliance | not measured | 75404 | 5.5 | 5812456 | 652.6 | measured |
 | 2026-09-28T20:24:12Z | qa | qa1-dim | reviewer | delta | not measured | 49464 | 2.2 | 5861920 | 654.8 | measured |
 | 2026-09-28T20:24:12Z | qa | qa1-sec | security-auditor | security-report | not measured | 39042 | 4.1 | 5900962 | 658.9 | measured |
+| 2026-09-28T20:28:23Z | qa | qa3-adversarial | adversarial-verifier | F-01 | not measured | 33368 | 1.6 | 5934330 | 660.5 | measured |
+| 2026-09-28T20:28:23Z | qa | qa3-adversarial | adversarial-verifier | F-02 | not measured | 22164 | 1.6 | 5956494 | 662.1 | measured |
+| 2026-09-28T20:28:23Z | qa | qa3-adversarial | adversarial-verifier | F-03 | not measured | 36078 | 2.1 | 5992572 | 664.2 | measured |
+| 2026-09-28T20:28:23Z | qa | qa3-adversarial | adversarial-verifier | F-04 | not measured | 20772 | 0.6 | 6013344 | 664.8 | measured |
+| 2026-09-28T20:28:23Z | qa | con2c-monitor | master-agent | qa-review-batch | not measured | 52682 | 1.4 | 6066026 | 666.2 | measured |

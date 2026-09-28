@@ -9,6 +9,14 @@ a file recurs (e.g. `src/config/merge.ts`), each dimension's finding is a distin
 Total: 20 findings — 1 CRITICAL, 3 HIGH, 8 MEDIUM, 8 LOW. Plus the security auditor's
 separate threat matrix (0 CRITICAL/HIGH, 2 LOW dependency findings) in `qa/security-report.md`.
 
+**Post-adversarial-verification update (step 3, see `qa/verdicts.md`):** F-01 CONFIRMED
+(scope widened — reachable via the default adapter, not only the opt-in zod subpath).
+F-02 CONFIRMED. F-04 CONFIRMED. **F-03 REFUTED at HIGH and demoted to LOW** — the
+underlying O(n) lookup is real but the "breaches ADR-26" framing does not hold (wrong
+budget applied) and the claimed magnitude/growth shape did not reproduce (measured
+linear growth, well under budget). Effective counts after verification: 1 CRITICAL,
+2 HIGH, 8 MEDIUM, 9 LOW. Three findings (F-01, F-02, F-04) enter the step 6 fix loop.
+
 ## CRITICAL (1) — requires adversarial verification (step 3)
 
 | # | Source dim | file:line | Claim |

@@ -142,3 +142,10 @@
 2026-09-28T20:24:12Z | qa | security-auditor | security-report | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
 2026-09-28T20:24:12Z | qa | orchestrator | write-tool guard | returned | 5 of 6 reviewer dispatches blocked from writing qa/findings-*.md by harness guard (subagents must return findings as text); orchestrator persisted all content verbatim itself
 2026-09-28T20:24:12Z | qa | orchestrator | step 2 collate | returned | qa/findings.md: 20 findings (1C/3H/8M/8L), no duplicates across dimensions, 4 CRITICAL/HIGH queued for step 3 adversarial verification
+2026-09-28T20:28:23Z | qa | orchestrator | step 3 dispatch plan | dispatched | 4 adversarial verifiers (F-01..F-04, one each, within cap 6) + master-agent review-batch monitor, parallel
+2026-09-28T20:28:23Z | qa | adversarial-verifier | F-01 | returned | adversarial verification
+2026-09-28T20:28:23Z | qa | adversarial-verifier | F-02 | returned | adversarial verification
+2026-09-28T20:28:23Z | qa | adversarial-verifier | F-03 | returned | adversarial verification
+2026-09-28T20:28:23Z | qa | adversarial-verifier | F-04 | returned | adversarial verification
+2026-09-28T20:28:23Z | qa | master-agent | qa-review-batch | returned | adversarial verification
+2026-09-28T20:28:23Z | qa | orchestrator | step 3 verdicts | returned | F-01 CONFIRMED (widened: default-adapter reachable too), F-02 CONFIRMED, F-04 CONFIRMED (3 blocking), F-03 REFUTED at HIGH/demoted to LOW advisory; qa/verdicts.md persisted (write-guard applied to all 4 dispatches too)

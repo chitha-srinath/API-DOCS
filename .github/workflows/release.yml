@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check last mutation-full run
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'mutation-full.yml',
+              per_page: 1,
+            });
+            const last = runs.data.workflow_runs[0];
+            if (last && last.conclusion !== 'success') {
+              core.setFailed('Last mutation-full run did not succeed; blocking release.');
+            }
+      - run: npm ci
+      - run: npm run build
+      - run: npm run check:pack
+      # Publishing is intentionally not wired up yet; this workflow only
+      # validates the package. `npm publish` is added by a later story.

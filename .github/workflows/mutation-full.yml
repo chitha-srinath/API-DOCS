@@ -1,0 +1,31 @@
+name: Mutation Full
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  mutation-full:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: reports/stryker-incremental.json
+          key: ${{ github.ref_name }}-${{ hashFiles('src/**','test/**') }}
+          restore-keys: |
+            main-
+      - run: npx stryker run --incremental
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: reports/stryker-incremental.json
+          key: ${{ github.ref_name }}-${{ hashFiles('src/**','test/**') }}

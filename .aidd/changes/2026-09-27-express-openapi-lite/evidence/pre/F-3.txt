@@ -1,0 +1,11 @@
+Flow F-3: GET /openapi.json returns valid 3.1 spec
+No example app / server exists yet on this branch (no src/, no package.json).
+$ curl -sv http://localhost:3000/openapi.json
+*   Trying 127.0.0.1:3000...
+*   Trying ::1:3000...
+* connect to 127.0.0.1 port 3000 failed: Connection refused
+* connect to ::1 port 3000 failed: Connection refused
+* Failed to connect to localhost port 3000 after 2246 ms: Connection refused
+* Closing connection 0
+EXIT:7
+Result: connection refused / no server process — flow is ABSENT (expected pre-construction baseline).

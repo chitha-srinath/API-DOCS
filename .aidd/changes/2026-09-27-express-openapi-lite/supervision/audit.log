@@ -38,3 +38,114 @@
 2026-09-27T08:30:35Z | inception | reviewer | feasibility re-run | dispatched | supervisor V6 remediation
 2026-09-27T08:30:35Z | inception | reviewer | pattern-fit re-run | dispatched | supervisor V6 remediation
 2026-09-27T08:30:35Z | inception | reviewer | test-strategy re-run | dispatched | supervisor V6 remediation
+2026-09-27T10:35:00Z | construction | orchestrator | ST-001..ST-008 | returned | built inline (no subagents); human instruction "complete the feature"; gates G1/G2 not approved
+2026-09-27T12:34:31Z | inception | impact-analyst,reviewer x4 | V6 re-runs | rejected | first attempt terminated by session rate limit (HTTP 429), no artifacts written; re-dispatched
+2026-09-27T12:34:31Z | inception | impact-analyst | impact re-run | returned | V6 remediation
+2026-09-27T12:34:31Z | inception | reviewer | pattern-fit re-run | returned | V6 remediation
+2026-09-27T12:34:31Z | inception | reviewer | feasibility re-run | returned | V6 remediation
+2026-09-27T12:34:31Z | inception | reviewer | coupling-risk re-run | returned | V6 remediation
+2026-09-27T12:34:31Z | inception | reviewer | test-strategy re-run | returned | V6 remediation
+2026-09-27T12:34:31Z | inception | orchestrator | branch | returned | DISCOVERED: PR #1 (claude/admiring-wright) merged by human account 17:19; ST-001..ST-008 built by another session before G1 re-approval and G2; escalated to human
+2026-09-27T12:51:16Z | inception | orchestrator | branch | returned | human chose REBUILD; new branch aidd/2026-09-27-express-openapi-lite-rebuild from 4cea289; PR #1 code untouched on old branch; stash + scratchpad backup
+2026-09-27T12:51:16Z | inception | architect | ADR-32..48 + markers | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | product-analyst | AC-004 zod floor, AC-047 | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | epic-scoper | epic ADR-32..48 + AC-047 fixes | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | story-author | ST-001 rebuild refresh | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | story-author | ST-002 rebuild refresh | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | story-author | ST-003 rebuild refresh | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | story-author | ST-004 rebuild refresh | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | story-author | ST-005 rebuild refresh | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | story-author | ST-006 rebuild refresh | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | story-author | ST-007 rebuild refresh | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | story-author | ST-008 rebuild refresh | returned | rebuild plan amendment
+2026-09-27T12:51:16Z | inception | orchestrator | stories/* | returned | lint VALID x8; AC coverage 47/47; ownership pairwise disjoint; AC-044 split (a,b)->ST-002 (c,d)->ST-004 by design
+2026-09-27T12:52:47Z | inception | orchestrator | audit.log row 41 | returned | CLARIFICATION: row 41 was written by a separate Claude session (claude.ai/code/session_01XPHvfvToR7Thf86VEoNwHE) whose orchestrator built ST-001..ST-008 inline; it arrived via PR #1 merged into aidd/2026-09-27-express-openapi-lite (origin has no main branch). Not work of this session.
+2026-09-27T12:52:47Z | inception | orchestrator | cost | returned | SOFT THRESHOLD: minutes 80.4/105 (77%); tokens 2256850/5600000 (40%)
+2026-09-27T12:52:47Z | inception | impact-analyst | impact re-run #2 | dispatched | supervisor V6 recurrence
+2026-09-27T12:52:47Z | inception | reviewer | coupling-risk re-run #2 | dispatched | supervisor V6 recurrence
+2026-09-27T12:52:47Z | inception | reviewer | feasibility re-run #2 | dispatched | supervisor V6 recurrence
+2026-09-27T12:52:47Z | inception | reviewer | pattern-fit re-run #2 | dispatched | supervisor V6 recurrence
+2026-09-27T12:52:47Z | inception | reviewer | test-strategy re-run #2 | dispatched | supervisor V6 recurrence
+2026-09-27T12:52:47Z | inception | architect | S-07 dependency marker | dispatched | supervisor V6 recurrence
+2026-09-27T12:55:21Z | inception | supervisor | re-audit #2 | returned | V6 recurrence remediation
+2026-09-27T12:55:21Z | inception | architect | ADR-23 + S-07 markers | returned | V6 recurrence remediation
+2026-09-27T12:55:21Z | inception | impact-analyst | impact re-run #2 | returned | V6 recurrence remediation
+2026-09-27T12:55:21Z | inception | reviewer | pattern-fit #2 | returned | V6 recurrence remediation
+2026-09-27T12:55:21Z | inception | reviewer | coupling-risk #2 | returned | V6 recurrence remediation
+2026-09-27T12:55:21Z | inception | reviewer | feasibility #2 | returned | V6 recurrence remediation
+2026-09-27T12:55:21Z | inception | reviewer | test-strategy #2 | returned | V6 recurrence remediation
+2026-09-27T12:59:42Z | inception | human | g1_prd | returned | G1 re-approved (V3 closed); budget_minutes raised to 300; targeted fix round chosen
+2026-09-27T13:06:34Z | inception | architect | ADR-49..53 | returned | targeted fix round (PF-12/CR-16, N-5/T2, T1/N-6, PF-13)
+2026-09-27T13:06:34Z | inception | story-author | ST-001 targeted fix | returned | targeted fix round (PF-12/CR-16, N-5/T2, T1/N-6, PF-13)
+2026-09-27T13:06:34Z | inception | story-author | ST-002 targeted fix (rate-limited, content complete) | returned | targeted fix round (PF-12/CR-16, N-5/T2, T1/N-6, PF-13)
+2026-09-27T13:06:34Z | inception | story-author | ST-003 targeted fix | returned | targeted fix round (PF-12/CR-16, N-5/T2, T1/N-6, PF-13)
+2026-09-27T13:06:34Z | inception | story-author | ST-004/005/006 mutation scope | returned | targeted fix round (PF-12/CR-16, N-5/T2, T1/N-6, PF-13)
+2026-09-27T13:06:34Z | inception | story-author | ST-007 targeted fix | returned | targeted fix round (PF-12/CR-16, N-5/T2, T1/N-6, PF-13)
+2026-09-27T13:06:34Z | inception | story-author | ST-008 targeted fix (rate-limited, content complete) | returned | targeted fix round (PF-12/CR-16, N-5/T2, T1/N-6, PF-13)
+2026-09-27T13:06:34Z | inception | orchestrator | epic.md, ST-001 | returned | ownership gap closed: vitest.typecheck.v4.config.ts added to S-01 row and file_scope (mechanical fix, no dispatch)
+2026-09-27T13:06:34Z | inception | orchestrator | ST-004 | returned | reconciled stale npm run mutation reference to ADR-50 scoped command (mechanical fix, no dispatch)
+2026-09-27T13:06:34Z | inception | orchestrator | stories/* | returned | full check: lint VALID x8, AC coverage 47/47, ownership pairwise disjoint, AC quotes verbatim (AC-044 split by design)
+2026-09-27T13:09:39Z | inception | supervisor | inception re-audit #3 | returned | COMPLIANT: V3, V6, V7, V8 all closed
+2026-09-27T13:10:45Z | inception | human | g2_plan | returned | G2 approved; phase -> construction
+2026-09-27T13:34:34Z | construction | builder | ST-001 | returned | built, TDD evidence verified
+2026-09-27T13:34:34Z | construction | master-agent | wave-1 | returned | ACCEPT (1 non-blocking watch-item)
+2026-09-27T13:34:34Z | construction | auditor | ST-001 | returned | 8/8 PROVEN, 0 DISPUTED, 0 negotiation
+2026-09-27T13:34:34Z | construction | orchestrator | wave-1 integration | returned | build+test+lint+typecheck green, independently reproduced (10 files/52 tests/100% coverage)
+2026-09-27T14:39:02Z | construction | builder | ST-001 | returned | wave 2 evidence
+2026-09-27T14:39:02Z | construction | builder | ST-002 | returned | wave 2 evidence
+2026-09-27T14:39:02Z | construction | builder | ST-003 | returned | wave 2 evidence
+2026-09-27T14:39:02Z | construction | master-agent | wave-1 | returned | wave 2 evidence
+2026-09-27T14:39:02Z | construction | auditor | ST-001 | returned | wave 2 evidence
+2026-09-27T14:39:02Z | construction | master-agent | wave-2 | returned | wave 2 evidence
+2026-09-27T14:39:02Z | construction | auditor | ST-002+ST-003 | returned | wave 2 evidence
+2026-09-27T14:39:02Z | construction | orchestrator | ST-003 mutation gate | returned | ADR-50(a) executed post-Auditor: 86.49 >= 70, MET (stale sandbox cleared first)
+2026-09-27T14:39:02Z | construction | orchestrator | wave-2 integration | returned | build+test+lint+typecheck green, independently reproduced (24 files/138 tests/97%+ coverage)
+2026-09-27T17:18:24Z | construction | builder | ST-004 | returned | wave 3 evidence
+2026-09-27T17:18:24Z | construction | master-agent | wave-3 | returned | wave 3 evidence
+2026-09-27T17:18:24Z | construction | auditor | ST-004 | returned | wave 3 evidence
+2026-09-27T17:18:24Z | construction | master-agent | wave-3 | returned | ACCEPT quality, but flagged route() signature divergence vs architecture.md; recommend architect backflow ADR before S-07
+2026-09-27T17:18:24Z | construction | orchestrator | backflow dispatch | dispatched | architect backflow ADR (route() signature) || ST-005 builder, parallel (file-disjoint, Master Agent confirmed ST-005 unaffected via registry identity correlation)
+2026-09-27T17:18:45Z | construction | orchestrator | cost | returned | HARD STOP: minutes 347.1/300 (116%); blocking further dispatch pending human decision; 2 in-flight dispatches allowed to complete
+2026-09-27T17:19:30Z | construction | human | cost | returned | budget_minutes raised 300->1200; block lifted
+2026-09-27T17:19:48Z | construction | architect | ADR-54 backflow | returned | ratified 4-arg route() signature, 0 rework needed, G2 flagged stale
+2026-09-27T19:30:35Z | construction | builder | ST-005 (rate-limit resume) | returned | wave 4 evidence
+2026-09-27T19:30:35Z | construction | master-agent | wave-4 | returned | wave 4 evidence
+2026-09-27T19:30:35Z | construction | auditor | ST-005 | returned | wave 4 evidence
+2026-09-27T19:30:35Z | construction | orchestrator | dist bundling defect | returned | CONFIRMED via build+runtime test: recorder never installs from built package (tsup/esbuild elides src/auto-record.ts side-effect import); architect backflow dispatched to diagnose + pre-authorize S-07 ownership exception
+2026-09-27T19:30:35Z | construction | master-agent | wave-4 | returned | ACCEPT quality; SECOND route()-style divergence found: describe() 3-arg factory vs architecture.md C4's documented describe(meta); recommends backflow ADR same as ADR-54
+2026-09-27T19:31:03Z | construction | architect | ADR-55 backflow | returned | root cause diagnosed (package.json sideEffects array is esbuild's source-level allowlist); fix prescribed (1-line addition); S-07 ownership exception granted, S-01/tsup.config.ts untouched
+2026-09-27T19:31:03Z | construction | orchestrator | backflow followup | dispatched | describe() signature divergence (ADR-56 candidate), same agent sequentially resumed
+2026-09-27T19:32:17Z | construction | architect | ADR-56 backflow | returned | describe() 3-arg factory ratified as public API, C4 amended, zero rework (ST-005 already matches)
+2026-09-28T05:33:02Z | construction | builder | ST-006 (rate-limit resume) | returned | wave 5 evidence
+2026-09-28T05:33:02Z | construction | master-agent | wave-5 | returned | wave 5 evidence
+2026-09-28T05:33:02Z | construction | auditor | ST-006 | returned | wave 5 evidence
+2026-09-28T05:33:02Z | construction | orchestrator | wave-5 monitoring note | returned | corrected misplaced file (repo-root audit/ instead of change-scoped audit/); moved, stray dir removed
+2026-09-28T07:07:35Z | construction | builder | ST-007 | returned | wave 6 evidence
+2026-09-28T07:07:35Z | construction | build-fixer | test/dist stale assertions | returned | wave 6 evidence
+2026-09-28T07:07:35Z | construction | master-agent | wave-6 | returned | wave 6 evidence
+2026-09-28T07:07:35Z | construction | auditor | ST-007 | returned | wave 6 evidence
+2026-09-28T07:07:35Z | construction | orchestrator | integration check | returned | 2 known ADR-55-caused test/dist failures -> Build Fixer, fixed first attempt, 67/67 files green, independently re-verified
+2026-09-28T07:27:41Z | construction | builder | ST-008 | returned | wave 7 evidence
+2026-09-28T07:27:41Z | construction | builder | ST-008 wave-7 followup (auto-detect example, README brand keys) | returned | wave 7 evidence
+2026-09-28T07:27:41Z | construction | master-agent | wave-7 | returned | wave 7 evidence
+2026-09-28T07:27:41Z | construction | auditor | ST-008 | returned | wave 7 evidence
+2026-09-28T07:27:41Z | construction | orchestrator | stash incident | returned | ST-008 followup dispatch accidentally popped a stale stash (own artifact from early Inception, pre-rebuild); caused whitespace-only diff on audit.log (harmless), verified all 8 other affected files byte-identical to committed HEAD, state.yaml re-validated VALID; reverted the diff and dropped the superseded stash
+2026-09-28T07:31:52Z | construction | supervisor | construction phase-boundary audit | returned | COMPLIANT (cost violation remediated, re-verified)
+2026-09-28T20:13:53Z | qa | human | cost | returned | budget_tokens raised 5.6M->20M pre-emptively before QA step 1
+2026-09-28T20:24:12Z | qa | orchestrator | step 1 dispatch plan | dispatched | 6 reviewer dimensions (correctness/security/performance/test-coverage/spec-compliance/delta) + 1 security auditor, parallel artifact-disjoint, cap 6+1
+2026-09-28T20:24:12Z | qa | reviewer | correctness | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | reviewer | security | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | reviewer | performance | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | reviewer | test-coverage | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | reviewer | spec-compliance | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | reviewer | delta | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | security-auditor | security-report | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | orchestrator | write-tool guard | returned | 5 of 6 reviewer dispatches blocked from writing qa/findings-*.md by harness guard (subagents must return findings as text); orchestrator persisted all content verbatim itself
+2026-09-28T20:24:12Z | qa | orchestrator | step 2 collate | returned | qa/findings.md: 20 findings (1C/3H/8M/8L), no duplicates across dimensions, 4 CRITICAL/HIGH queued for step 3 adversarial verification
+2026-09-28T20:28:23Z | qa | orchestrator | step 3 dispatch plan | dispatched | 4 adversarial verifiers (F-01..F-04, one each, within cap 6) + master-agent review-batch monitor, parallel
+2026-09-28T20:28:23Z | qa | adversarial-verifier | F-01 | returned | adversarial verification
+2026-09-28T20:28:23Z | qa | adversarial-verifier | F-02 | returned | adversarial verification
+2026-09-28T20:28:23Z | qa | adversarial-verifier | F-03 | returned | adversarial verification
+2026-09-28T20:28:23Z | qa | adversarial-verifier | F-04 | returned | adversarial verification
+2026-09-28T20:28:23Z | qa | master-agent | qa-review-batch | returned | adversarial verification
+2026-09-28T20:28:23Z | qa | orchestrator | step 3 verdicts | returned | F-01 CONFIRMED (widened: default-adapter reachable too), F-02 CONFIRMED, F-04 CONFIRMED (3 blocking), F-03 REFUTED at HIGH/demoted to LOW advisory; qa/verdicts.md persisted (write-guard applied to all 4 dispatches too)

@@ -46,6 +46,8 @@ Open BLOCKING: 0. Open non-blocking: 0.
   - AC-027: CI runs on Node 22 and 24, against Express 4 and 5.
 - **Pre-review amendment #2 (pre-review finding PF-2, Source: coordinator):** users of other schema libraries must be able to import the package without zod installed.
   - AC-004: `zod` is an optional peer (`peerDependenciesMeta.zod.optional: true`), and the Zod adapter is exported only from the subpath `express-api-docs/zod`, not from the main entry.
+- **Rebuild amendment (from pre-review re-run) #1 (Source: coordinator, architecture.md ADR-47):** AC-004's zod peer range changes from `^4.0.0` to `^4.2.0`. A probe showed that `~standard.jsonSchema` is absent in zod 4.0.0 to 4.1.13 and present from 4.2.0.
+- **Rebuild amendment (from pre-review re-run) #2 (Source: coordinator, architecture.md ADR-38):** new AC-047 covers a global `schemaAdapter` option (documented default: the Standard Schema adapter) and a per-route `meta.adapter` override. No existing config AC (AC-035 to AC-046) covered it.
 - Neither G1 revision raises a BLOCKING question: all details are reversible and non-destructive, and none needs credentials. The defaults are recorded below as assumptions for the human to confirm at G1.
 
 ## Assumptions (G1 revisions — flagged for confirmation at G1)

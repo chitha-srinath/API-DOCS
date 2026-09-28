@@ -105,3 +105,10 @@
 | 2026-09-28T07:27:41Z | construction | con2c-monitor | master-agent | wave-7 | not measured | 48482 | 1.7 | 5241800 | 623.7 | measured |
 | 2026-09-28T07:27:41Z | construction | con2d-interrogation | auditor | ST-008 | not measured | 43770 | 2.4 | 5285570 | 626.1 | measured |
 | 2026-09-28T07:31:52Z | construction | con4-supervisor | supervisor | construction phase-boundary audit | not measured | 127665 | 1.8 | 5413235 | 627.9 | measured |
+| 2026-09-28T20:24:12Z | qa | qa1-dim | reviewer | correctness | not measured | 101881 | 4.9 | 5515116 | 632.8 | measured |
+| 2026-09-28T20:24:12Z | qa | qa1-dim | reviewer | security | not measured | 73955 | 4.1 | 5589071 | 636.9 | measured |
+| 2026-09-28T20:24:12Z | qa | qa1-dim | reviewer | performance | not measured | 72506 | 4.7 | 5661577 | 641.6 | measured |
+| 2026-09-28T20:24:12Z | qa | qa1-dim | reviewer | test-coverage | not measured | 75475 | 5.5 | 5737052 | 647.1 | measured |
+| 2026-09-28T20:24:12Z | qa | qa1-dim | reviewer | spec-compliance | not measured | 75404 | 5.5 | 5812456 | 652.6 | measured |
+| 2026-09-28T20:24:12Z | qa | qa1-dim | reviewer | delta | not measured | 49464 | 2.2 | 5861920 | 654.8 | measured |
+| 2026-09-28T20:24:12Z | qa | qa1-sec | security-auditor | security-report | not measured | 39042 | 4.1 | 5900962 | 658.9 | measured |

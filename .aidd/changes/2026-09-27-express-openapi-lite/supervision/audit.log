@@ -132,3 +132,13 @@
 2026-09-28T07:27:41Z | construction | orchestrator | stash incident | returned | ST-008 followup dispatch accidentally popped a stale stash (own artifact from early Inception, pre-rebuild); caused whitespace-only diff on audit.log (harmless), verified all 8 other affected files byte-identical to committed HEAD, state.yaml re-validated VALID; reverted the diff and dropped the superseded stash
 2026-09-28T07:31:52Z | construction | supervisor | construction phase-boundary audit | returned | COMPLIANT (cost violation remediated, re-verified)
 2026-09-28T20:13:53Z | qa | human | cost | returned | budget_tokens raised 5.6M->20M pre-emptively before QA step 1
+2026-09-28T20:24:12Z | qa | orchestrator | step 1 dispatch plan | dispatched | 6 reviewer dimensions (correctness/security/performance/test-coverage/spec-compliance/delta) + 1 security auditor, parallel artifact-disjoint, cap 6+1
+2026-09-28T20:24:12Z | qa | reviewer | correctness | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | reviewer | security | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | reviewer | performance | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | reviewer | test-coverage | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | reviewer | spec-compliance | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | reviewer | delta | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | security-auditor | security-report | returned | step 1: 1 CRITICAL(spec-compliance), 3 HIGH(correctness×1, performance×2), rest medium/low
+2026-09-28T20:24:12Z | qa | orchestrator | write-tool guard | returned | 5 of 6 reviewer dispatches blocked from writing qa/findings-*.md by harness guard (subagents must return findings as text); orchestrator persisted all content verbatim itself
+2026-09-28T20:24:12Z | qa | orchestrator | step 2 collate | returned | qa/findings.md: 20 findings (1C/3H/8M/8L), no duplicates across dimensions, 4 CRITICAL/HIGH queued for step 3 adversarial verification

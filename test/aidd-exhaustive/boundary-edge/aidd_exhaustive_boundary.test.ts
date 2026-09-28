@@ -287,7 +287,7 @@ describe('TC-EDGE: config merge deep-merge boundary sweep (AC-044, AC-036)', () 
     expect(Object.isFrozen(DEFAULT_OPTIONS)).toBe(true);
     expect(Object.isFrozen(DEFAULT_OPTIONS.openapi)).toBe(true);
     expect(Object.isFrozen(DEFAULT_OPTIONS.openapi!.info)).toBe(true);
-    'use strict';
+    ('use strict');
     expect(() => {
       (DEFAULT_OPTIONS as unknown as Record<string, unknown>).specPath = '/hacked.json';
     }).toThrow();

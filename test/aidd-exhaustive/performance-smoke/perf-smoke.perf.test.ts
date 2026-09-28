@@ -66,7 +66,7 @@ describe('performance-smoke: TC-PERF-003 memory smoke across repeated spec rebui
     if (global.gc) global.gc();
     const after = process.memoryUsage().heapUsed;
     const deltaMb = (after - before) / (1024 * 1024);
-    // eslint-disable-next-line no-console
+
     console.log(
       `[perf-smoke] TC-PERF-003 heapUsed before=${(before / 1024 / 1024).toFixed(2)}MB ` +
         `after=${(after / 1024 / 1024).toFixed(2)}MB delta=${deltaMb.toFixed(2)}MB over ${REBUILDS} rebuilds ` +
@@ -103,7 +103,7 @@ describe('performance-smoke: TC-PERF-004 introspection soak at 500 routes (repea
     const lastFive = timings.slice(-5);
     const avgFirst = firstFive.reduce((a, b) => a + b, 0) / firstFive.length;
     const avgLast = lastFive.reduce((a, b) => a + b, 0) / lastFive.length;
-    // eslint-disable-next-line no-console
+
     console.log(
       `[perf-smoke] TC-PERF-004 soak 500 routes x ${ROUNDS} rebuilds: ` +
         `all=${timings.map((t) => t.toFixed(1)).join(',')} avgFirst5=${avgFirst.toFixed(2)}ms avgLast5=${avgLast.toFixed(2)}ms`,
@@ -130,7 +130,7 @@ describe('performance-smoke: TC-PERF-005 introspection soak at 1000 routes (repe
     const lastFive = timings.slice(-5);
     const avgFirst = firstFive.reduce((a, b) => a + b, 0) / firstFive.length;
     const avgLast = lastFive.reduce((a, b) => a + b, 0) / lastFive.length;
-    // eslint-disable-next-line no-console
+
     console.log(
       `[perf-smoke] TC-PERF-005 soak 1000 routes x ${ROUNDS} rebuilds: ` +
         `all=${timings.map((t) => t.toFixed(1)).join(',')} avgFirst5=${avgFirst.toFixed(2)}ms avgLast5=${avgLast.toFixed(2)}ms`,

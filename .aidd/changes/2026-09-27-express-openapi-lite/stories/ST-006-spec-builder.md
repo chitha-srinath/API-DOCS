@@ -395,3 +395,171 @@ Two CONFIRMED findings from QA (`qa/verdicts.md`), both owned by this story (`sr
 2. A pattern containing one of every metacharacter class member in a balanced arrangement — `toRegExp` does not throw; the resulting regex is syntactically valid and behaves as intended.
 
 Existing tests to re-confirm green after the fix: `test/spec/glob.test.ts`, `test/aidd-exhaustive/boundary-edge/aidd_exhaustive_boundary.test.ts` (TC-EDGE-005, TC-EDGE-010, TC-EDGE-020 must all pass).
+
+## Fix Loop Iteration 1 Report
+
+Both CONFIRMED findings owned by this story (`src/spec/**`) fixed via TDD, reproducing test
+first for each.
+
+### F-01 (CRITICAL): dangling `$ref` for named/reused schemas — fixed
+
+**Root cause:** `pathParameters`/`queryParameters` in `src/spec/build.ts` extracted only
+`schema.properties[name]` from `adapter.toJSONSchema(...)` output and silently dropped any
+sibling `$defs` bag (produced whenever a schema carries `.meta({id})`), leaving a dangling
+`#/$defs/...` `$ref` that `SwaggerParser.validate()` cannot resolve. Confirmed via both the
+default `standardSchemaAdapter` and the opt-in `zodAdapter` subpath.
+
+**Fix:** added `hoistSchemaDefs()` + `rewriteDefsRefs()` in `src/spec/build.ts`. Both
+`pathParameters` and `queryParameters` now hoist any `$defs` bag into a shared `defs`
+collector threaded through `buildOperation` → `buildSpec`, rewriting `$ref: '#/$defs/X'` to
+`$ref: '#/components/schemas/X'`. `buildSpec` merges the collected defs into
+`components.schemas` alongside `ProblemDetails`. `requestBodyOf`/`responsesOf` were left
+untouched per the finding's scoping (they already pass the whole adapter output through,
+`$defs`-sibling-and-all, which is valid at that nesting level).
+
+**Red** (regression test run against the pre-fix `src/spec/build.ts` from `HEAD`, restored
+immediately after):
+```
+$ npx vitest run test/spec/defs-hoist.test.ts test/spec/glob.test.ts
+ ❯ test/spec/defs-hoist.test.ts (3 tests | 3 failed)
+   × default standardSchemaAdapter: params with a .meta({id})-tagged schema resolves and validates
+     AssertionError: expected undefined to be defined   (components.schemas.UserId)
+   × default standardSchemaAdapter: query with a .meta({id})-tagged schema resolves and validates
+     AssertionError: expected undefined to be defined   (components.schemas.Status)
+   × opt-in zodAdapter subpath: params with a .meta({id})-tagged schema resolves and validates
+     AssertionError: expected undefined to be defined   (components.schemas.UserIdZod)
+ Test Files  1 failed | (defs-hoist.test.ts)
+```
+Matches the finding: no hoisted def, dangling `$ref`, `SwaggerParser.validate()` would throw
+"Missing $ref pointer" (the test fails before even reaching the `validates()` assertion,
+which is the stronger/prior failure).
+
+**Green** (after restoring the fix):
+```
+$ npx vitest run test/spec/defs-hoist.test.ts
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+```
+All three tests — default adapter + params, default adapter + query, opt-in `zodAdapter` +
+params — assert the def lands in `components.schemas`, no `#/$defs/` ref remains anywhere in
+the parameter schema, and `SwaggerParser.validate()` resolves.
+
+### F-02 (HIGH, widened): glob `escapeChar` shared-`lastIndex` bug — fixed
+
+**Root cause:** `src/spec/glob.ts`'s module-level `REGEXP_METACHARS` carried the `/g` flag;
+`escapeChar`'s `.test()` calls shared its `lastIndex` across invocations, so every other
+consecutive metacharacter went unescaped (silent glob mismatch), and certain balanced
+metacharacter runs made `toRegExp` build a syntactically invalid regex, throwing an
+uncaught `SyntaxError` (TC-EDGE-010, a crash path).
+
+**Fix:** removed the `g` flag — `REGEXP_METACHARS = /[.+?^${}()|[\]\\]/` — so each
+`escapeChar` call is a fresh, stateless per-character test.
+
+**Red** (regression tests run against the pre-fix `src/spec/glob.ts` from `HEAD`, restored
+immediately after):
+```
+$ npx vitest run test/spec/glob.test.ts
+ ❯ test/spec/glob.test.ts (7 tests | 1 failed)
+   × a balanced run of every metacharacter class member does not throw and matches literally (F-02b, TC-EDGE-010)
+     AssertionError: expected [Function] to not throw an error but 'SyntaxError: Invalid regular expressi…' was thrown
+     "SyntaxError: Invalid regular expression: /^/a\\.+\\?^\\${\\}(\\)|\\[]\\\\b$/: Unterminated group"
+```
+Reproduces the exact crash class TC-EDGE-010 identified. (The "2+ consecutive
+metacharacters" test happened to pass against this particular `/a..b` input pre-fix too —
+the alternation bug is input-dependent on which positions land on odd/even `lastIndex`
+parity across the whole matching session — but the crash test above is an unambiguous,
+deterministic red for the same root cause.)
+
+**Green** (after restoring the fix):
+```
+$ npx vitest run test/spec/glob.test.ts
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+```
+Both new tests pass: consecutive-metacharacter escaping (`/a..b`, `/a...b`) and the
+TC-EDGE-010 balanced-metacharacter-run case (no throw, matches literally, non-matching
+input correctly rejected).
+
+### Full verification
+
+```
+$ npx vitest run test/spec
+ Test Files  7 passed (7)
+      Tests  40 passed (40)
+Type Errors  no errors
+```
+
+```
+$ npm run lint
+> eslint . && prettier --check .
+✖ 3 problems (0 errors, 3 warnings)   — all 3 warnings in test/aidd-exhaustive/performance-smoke/perf-smoke.perf.test.ts (unrelated file, not owned by this story)
+Checking formatting...
+[warn] 5 files                        — all outside src/spec/** and test/spec/**, not owned by this story
+```
+0 lint errors; no formatting/lint issues in any owned file.
+
+```
+$ npx tsc --noEmit
+(no output — success)
+```
+
+```
+$ npx vitest run --coverage --coverage.reportsDirectory=coverage-st006-fix1d --exclude "**/performance-smoke/**"
+ Test Files  78 passed (78)  [excluding one known pre-existing flaky perf file, see below]
+Coverage summary
+Statements   : 98.54% ( 810/822 )
+Branches     : 93.04% ( 495/532 )
+Functions    : 99.45% ( 182/183 )
+Lines        : 99.33% ( 743/748 )
+```
+All four thresholds (90/90/90/90) met.
+
+**Note on `test/aidd-exhaustive/performance-smoke/perf-smoke.perf.test.ts`:** two of its
+percentile-budget tests (TC-PERF-001, TC-PERF-007) intermittently time out
+(`Test timed out in 20000ms`/`5000ms`) in this environment, reproducing identically
+whether run against my fixed `src/spec/{build,glob}.ts` or against the pre-fix versions
+restored verbatim from `HEAD` — confirmed by temporarily swapping the files back, rerunning,
+and restoring the fix (`git diff --stat -- src/spec` unchanged afterward, confirming no
+stray edits). This is a pre-existing, environment-sensitive flake in a file outside this
+story's ownership (`test/aidd-exhaustive/**`, not `test/spec/**`), unrelated to the F-01/F-02
+fixes. Concurrent `node.exe` processes were observed running throughout this session
+(shared machine), consistent with CPU-contention-driven timeouts against a hard 200ms/5s
+budget.
+
+### Mutation (ADR-50 scoped run) — BLOCKED, pre-existing unrelated failure
+
+```
+$ npx stryker run --mutate "src/spec/**" --incremental
+...
+FAIL test/aidd-exhaustive/performance-smoke/perf-smoke.perf.test.ts (same TC-PERF-001/007 timeouts as above, under vitest.stryker.config.ts's default 5000ms test timeout)
+ConfigError: There were failed tests in the initial test run.
+```
+Stryker's dry run executes the full suite selected by `vitest.stryker.config.ts` (owned by
+S-01), which does not exclude `test/aidd-exhaustive/performance-smoke/**` the way it excludes
+`test/perf/**`. That perf-smoke file's hard timing budgets fail the dry run before any
+mutant is generated — this reproduces identically against the pre-fix `src/spec/**` restored
+from `HEAD` (see above), so it is **not** a regression introduced by this fix loop, and it is
+outside this story's file ownership (`src/spec/**`, `test/spec/**`) to resolve — fixing it
+would require editing `vitest.stryker.config.ts` (S-01-owned) or the perf test itself
+(neither owned by S-06). I could not obtain a fresh ADR-50(a) mutation score in this
+environment as a result. Flagging for Master/QA: either re-run mutation once the shared
+environment is quiet, or route a follow-up to add `test/aidd-exhaustive/performance-smoke/**`
+to `vitest.stryker.config.ts`'s exclude list (same treatment as `test/perf/**`) under S-01's
+ownership.
+
+### Ownership-scoped diff
+
+```
+$ git diff --stat -- src/spec test/spec
+ src/spec/build.ts       | 78 +++++++++++++++++++++++++++++++++++++++++++++-----
+ src/spec/glob.ts        |  2 +-
+ test/spec/glob.test.ts  | 28 ++++++++++++++++++
+ 3 files changed, 100 insertions(+), 8 deletions(-)
+```
+Plus new file `test/spec/defs-hoist.test.ts` (untracked, within `test/spec/**`). Confirmed
+confined to `src/spec/**` and `test/spec/**`; no other tracked files touched by this fix
+loop (other unrelated in-progress changes visible in `git status` — `src/route/typed.ts`,
+`src/serve/router.ts`, `test/route/stub-adapter.test.ts`, `test/serve/adapter-memo.test.ts`
+— belong to a concurrent fix-loop dispatch for F-04, not this story, and were not touched).
+
+### Status: built (both F-01 and F-02 fixed and verified; ADR-50(a) mutation re-run blocked by a pre-existing, out-of-scope environmental test failure — see above)

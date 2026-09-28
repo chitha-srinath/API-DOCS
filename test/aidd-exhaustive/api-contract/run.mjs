@@ -47,7 +47,7 @@ async function main() {
 
   // TC-CONTRACT-001: ESM export set of '.' matches ADR-41
   try {
-    const mod = await importFile(path.join(pkgRoot,'dist/index.js'));
+    const mod = await importFile(path.join(pkgRoot, 'dist/index.js'));
     const keys = Object.keys(mod).filter((k) => k !== 'default');
     const ok = setEq(keys, EXPECTED_DOT_VALUES);
     record(
@@ -77,7 +77,7 @@ async function main() {
 
   // TC-CONTRACT-003: ESM export set of './manual' matches ADR-41 (identical to '.')
   try {
-    const mod = await importFile(path.join(pkgRoot,'dist/manual.js'));
+    const mod = await importFile(path.join(pkgRoot, 'dist/manual.js'));
     const keys = Object.keys(mod).filter((k) => k !== 'default');
     const ok = setEq(keys, EXPECTED_DOT_VALUES);
     record(
@@ -107,7 +107,7 @@ async function main() {
 
   // TC-CONTRACT-005: ESM export set of './zod'
   try {
-    const mod = await importFile(path.join(pkgRoot,'dist/zod.js'));
+    const mod = await importFile(path.join(pkgRoot, 'dist/zod.js'));
     const keys = Object.keys(mod).filter((k) => k !== 'default');
     const ok = setEq(keys, EXPECTED_ZOD_VALUES);
     record(
@@ -187,9 +187,10 @@ async function main() {
     );
 
     const describeSrc = fs.readFileSync(path.join(pkgRoot, 'src/route/describe.ts'), 'utf8');
-    const describeFnMatch = /export type DescribeFn = \(method: HttpMethod, localPath: string, meta: OperationMeta\) => RequestHandler;/.test(
-      describeSrc,
-    );
+    const describeFnMatch =
+      /export type DescribeFn = \(method: HttpMethod, localPath: string, meta: OperationMeta\) => RequestHandler;/.test(
+        describeSrc,
+      );
     const factoryMatch = /export function createDescribe\(deps: DescribeFactoryDeps\): DescribeFn/.test(describeSrc);
     const ok010 = describeFnMatch && factoryMatch;
     record(
@@ -212,16 +213,18 @@ async function main() {
     record(
       'TC-CONTRACT-011',
       ok ? 'PASS' : 'FAIL',
-      ok ? 'dist/index.d.ts re-exports RouteFn and DescribeFn types' : `missing type export(s): RouteFn=${hasRouteFn}, DescribeFn=${hasDescribeFn}`,
+      ok
+        ? 'dist/index.d.ts re-exports RouteFn and DescribeFn types'
+        : `missing type export(s): RouteFn=${hasRouteFn}, DescribeFn=${hasDescribeFn}`,
       'grep RouteFn|DescribeFn in dist/index.d.ts',
     );
   }
 
   // Build a live app for the runtime contract cases (012-021, 026-028)
-  const { createApiDocs } = await importFile(path.join(pkgRoot,'dist/index.js'));
+  const { createApiDocs } = await importFile(path.join(pkgRoot, 'dist/index.js'));
   const express = (await import('express')).default;
   const { z } = await import('zod');
-  const { zodAdapter } = await importFile(path.join(pkgRoot,'dist/zod.js'));
+  const { zodAdapter } = await importFile(path.join(pkgRoot, 'dist/zod.js'));
 
   function listen(app) {
     return new Promise((resolve) => {
@@ -279,9 +282,14 @@ async function main() {
   );
   app.post(
     '/users',
-    ...apiDocs.route('post', '/users', { body: BodySchema, response: ResponseSchema, adapter: zodAdapter }, (req, res) => {
-      res.json({ ok: true });
-    }),
+    ...apiDocs.route(
+      'post',
+      '/users',
+      { body: BodySchema, response: ResponseSchema, adapter: zodAdapter },
+      (req, res) => {
+        res.json({ ok: true });
+      },
+    ),
   );
   app.use(apiDocs.router);
   const server = await listen(app);
@@ -384,7 +392,9 @@ async function main() {
     record(
       'TC-CONTRACT-017',
       inOk ? 'PASS' : ok ? 'FAIL' : 'BLOCKED',
-      inOk ? "all errors[].in === 'body' for a body-schema violation" : 'in field(s) not all body, or TC-016 failed first',
+      inOk
+        ? "all errors[].in === 'body' for a body-schema violation"
+        : 'in field(s) not all body, or TC-016 failed first',
       `errors=${JSON.stringify(doc?.errors)}`,
     );
   }
@@ -403,7 +413,12 @@ async function main() {
         'SwaggerParser.validate(doc) resolved without throwing',
       );
     } catch (e) {
-      record('TC-CONTRACT-018', 'FAIL', `unexpected validation failure on the plain spec: ${e.message}`, String(e.stack || e));
+      record(
+        'TC-CONTRACT-018',
+        'FAIL',
+        `unexpected validation failure on the plain spec: ${e.message}`,
+        String(e.stack || e),
+      );
     }
   }
 
@@ -415,13 +430,12 @@ async function main() {
     const apiDocs3 = createApiDocs();
     const app3 = express();
     app3.use(express.json());
-    app3.get(
-      '/a',
-      ...apiDocs3.route('get', '/a', { query: Named, adapter: zodAdapter }, (req, res) => res.json({})),
-    );
+    app3.get('/a', ...apiDocs3.route('get', '/a', { query: Named, adapter: zodAdapter }, (req, res) => res.json({})));
     app3.post(
       '/b',
-      ...apiDocs3.route('post', '/b', { body: Named, response: Named, adapter: zodAdapter }, (req, res) => res.json({})),
+      ...apiDocs3.route('post', '/b', { body: Named, response: Named, adapter: zodAdapter }, (req, res) =>
+        res.json({}),
+      ),
     );
     app3.use(apiDocs3.router);
     const server3 = await listen(app3);
@@ -506,21 +520,23 @@ async function main() {
 
   // TC-CONTRACT-022: backward-compat — no unintended (undocumented) exports beyond ADR-41 on '.'
   {
-    const mod = await importFile(path.join(pkgRoot,'dist/index.js'));
+    const mod = await importFile(path.join(pkgRoot, 'dist/index.js'));
     const keys = Object.keys(mod).filter((k) => k !== 'default');
     const extra = keys.filter((k) => !EXPECTED_DOT_VALUES.includes(k));
     const ok = extra.length === 0;
     record(
       'TC-CONTRACT-022',
       ok ? 'PASS' : 'FAIL',
-      ok ? 'no undocumented value exports beyond ADR-41 list on the main entry' : `unexpected extra export(s): ${extra}`,
+      ok
+        ? 'no undocumented value exports beyond ADR-41 list on the main entry'
+        : `unexpected extra export(s): ${extra}`,
       `extra = [${extra.join(', ')}]`,
     );
   }
 
   // TC-CONTRACT-023: backward-compat — nothing documented by ADR-41 is missing on '.'
   {
-    const mod = await importFile(path.join(pkgRoot,'dist/index.js'));
+    const mod = await importFile(path.join(pkgRoot, 'dist/index.js'));
     const keys = Object.keys(mod);
     const missing = EXPECTED_DOT_VALUES.filter((k) => !keys.includes(k));
     const ok = missing.length === 0;
@@ -540,7 +556,13 @@ async function main() {
     const problems = [];
     for (const sp of subpaths) {
       const entry = pkg.exports?.[sp];
-      if (!entry || !entry.import?.types || !entry.import?.default || !entry.require?.types || !entry.require?.default) {
+      if (
+        !entry ||
+        !entry.import?.types ||
+        !entry.import?.default ||
+        !entry.require?.types ||
+        !entry.require?.default
+      ) {
         problems.push(sp);
       }
     }
@@ -647,7 +669,7 @@ async function main() {
     } catch (e) {
       threw = e;
     }
-    const { ApiDocsConfigError } = await importFile(path.join(pkgRoot,'dist/index.js'));
+    const { ApiDocsConfigError } = await importFile(path.join(pkgRoot, 'dist/index.js'));
     const ok = threw instanceof ApiDocsConfigError && /ui/.test(threw.message);
     record(
       'TC-CONTRACT-028',
@@ -661,13 +683,10 @@ async function main() {
 
   server.close();
 
-  const tally = results.reduce(
-    (acc, r) => {
-      acc[r.status] = (acc[r.status] || 0) + 1;
-      return acc;
-    },
-    {},
-  );
+  const tally = results.reduce((acc, r) => {
+    acc[r.status] = (acc[r.status] || 0) + 1;
+    return acc;
+  }, {});
   console.log('\n--- TALLY ---');
   console.log(JSON.stringify(tally));
 }

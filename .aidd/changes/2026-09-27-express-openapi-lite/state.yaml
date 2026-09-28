@@ -12,8 +12,8 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
   budget_tokens: 20000000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 1200
-  spent_tokens: 6726445        # derived from cost/ledger.md — never asserted
-  spent_minutes: 710.2
+  spent_tokens: 6976198        # derived from cost/ledger.md — never asserted
+  spent_minutes: 762.9
   by_phase:
     inception:
       tokens: 2694542
@@ -235,4 +235,6 @@ history:
     event: "[qa 5/17] all 8 exhaustive test categories done: 237 cases, 230 PASS, 5 legit FAIL (F-01x2/F-02x3), F-02 widened, new F-21 · qa/test-report.md · gates: 2/3 · rigor: critical · next: test-batch monitoring, then step 6 fix loop"
   - at: "2026-09-28T21:07:54Z"
     event: "[qa 6/17] test-batch monitoring accepted; fix loop iteration 1 dispatched (F-01/F-02 -> ST-006, F-04 -> ST-004+ST-007) · stories/ · gates: 2/3 · rigor: critical · next: fix loop returns, re-integration"
-updated_at: "2026-09-28T21:07:54Z"
+  - at: "2026-09-28T21:35:27Z"
+    event: "[qa 6/17] fix loop iteration 1: F-01+F-02 fixed (ST-006), F-04 fixed at both call sites (ST-004+ST-007); infra gap fixed; full suite 79/79 green, coverage up · stories/ · gates: 2/3 · rigor: critical · next: mutation re-verification, then re-integration + auditor"
+updated_at: "2026-09-28T21:35:27Z"

@@ -104,10 +104,68 @@ interface JsonObjectSchema {
   required?: string[];
 }
 
-function pathParameters(op: SpecOperation, adapter: SchemaAdapter<unknown>): Record<string, unknown>[] {
+interface JsonSchemaWithDefs extends JsonObjectSchema {
+  $defs?: Record<string, JSONSchema>;
+}
+
+/** A shared bag `pathParameters`/`queryParameters` hoist `$defs` into, keyed by def name (F-01 fix). */
+type DefsCollector = Record<string, JSONSchema>;
+
+/**
+ * Recursively rewrites `$ref: '#/$defs/Name'` to `$ref: '#/components/schemas/Name'`
+ * so a hoisted def bag stays internally consistent once moved to `components.schemas`.
+ */
+function rewriteDefsRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => rewriteDefsRefs(item)) as unknown as T;
+  }
+  if (value !== null && typeof value === 'object') {
+    const input = value as Record<string, unknown>;
+    const output: Record<string, unknown> = {};
+    for (const [key, item] of Object.entries(input)) {
+      if (key === '$ref' && typeof item === 'string' && item.startsWith('#/$defs/')) {
+        output[key] = `#/components/schemas/${item.slice('#/$defs/'.length)}`;
+      } else {
+        output[key] = rewriteDefsRefs(item);
+      }
+    }
+    return output as unknown as T;
+  }
+  return value;
+}
+
+/**
+ * F-01 fix: `adapter.toJSONSchema()` output for a `.meta({id})`-tagged (or otherwise
+ * named/reused) Zod/Standard-Schema schema carries the named subschema in a sibling
+ * `$defs` bag with a `$ref` in its place. `pathParameters`/`queryParameters` only ever
+ * extracted `schema.properties[name]`, silently dropping `$defs` and leaving a dangling,
+ * unresolvable `$ref` (confirmed via the default `standardSchemaAdapter` too, not just
+ * the opt-in `zodAdapter`). This hoists any `$defs` into the shared `defs` collector
+ * (merged into `components.schemas` by `buildSpec`) and rewrites refs to point there,
+ * returning the schema with `$defs` stripped.
+ */
+function hoistSchemaDefs(schema: JsonSchemaWithDefs, defs: DefsCollector): JsonObjectSchema {
+  const { $defs, ...rest } = schema;
+  if ($defs) {
+    for (const [name, defSchema] of Object.entries($defs)) {
+      if (!(name in defs)) {
+        defs[name] = rewriteDefsRefs(defSchema);
+      }
+    }
+  }
+  return rewriteDefsRefs(rest) as JsonObjectSchema;
+}
+
+function pathParameters(
+  op: SpecOperation,
+  adapter: SchemaAdapter<unknown>,
+  defs: DefsCollector,
+): Record<string, unknown>[] {
   const meta = metaOf(op);
   const schema =
-    meta.params !== undefined ? (adapter.toJSONSchema(meta.params, 'input') as JsonObjectSchema) : undefined;
+    meta.params !== undefined
+      ? hoistSchemaDefs(adapter.toJSONSchema(meta.params, 'input') as JsonSchemaWithDefs, defs)
+      : undefined;
   return op.pathParams.map((name) => ({
     name,
     in: 'path',
@@ -116,10 +174,14 @@ function pathParameters(op: SpecOperation, adapter: SchemaAdapter<unknown>): Rec
   }));
 }
 
-function queryParameters(op: SpecOperation, adapter: SchemaAdapter<unknown>): Record<string, unknown>[] {
+function queryParameters(
+  op: SpecOperation,
+  adapter: SchemaAdapter<unknown>,
+  defs: DefsCollector,
+): Record<string, unknown>[] {
   const meta = metaOf(op);
   if (meta.query === undefined) return [];
-  const schema = adapter.toJSONSchema(meta.query, 'input') as JsonObjectSchema;
+  const schema = hoistSchemaDefs(adapter.toJSONSchema(meta.query, 'input') as JsonSchemaWithDefs, defs);
   const properties = schema.properties ?? {};
   const required = new Set(schema.required ?? []);
   return Object.keys(properties).map((name) => ({
@@ -195,9 +257,10 @@ function buildOperation(
   operationId: string,
   adapter: SchemaAdapter<unknown>,
   config: ApiDocsOptions,
+  defs: DefsCollector,
 ): Record<string, unknown> {
   const meta = metaOf(op);
-  const parameters = [...pathParameters(op, adapter), ...queryParameters(op, adapter)];
+  const parameters = [...pathParameters(op, adapter, defs), ...queryParameters(op, adapter, defs)];
   const requestBody = requestBodyOf(op, adapter);
   const security = securityOf(op, config);
 
@@ -254,17 +317,18 @@ export function buildSpec(
   }));
   const resolvedIds = assignOperationIds(idInputs);
 
+  const defs: DefsCollector = {};
   const paths: Record<string, Record<string, unknown>> = {};
   for (const [index, op] of filtered.entries()) {
     const id = op.id ?? index;
     const operationId = resolvedIds.get(id) as string;
     const opAdapter = resolveAdapter(op, adapter);
     const pathEntry = (paths[op.path] ??= {});
-    pathEntry[op.method as HttpMethod] = buildOperation(op, operationId, opAdapter, merged);
+    pathEntry[op.method as HttpMethod] = buildOperation(op, operationId, opAdapter, merged, defs);
   }
 
   const components: Record<string, unknown> = {
-    schemas: { [PROBLEM_SCHEMA_NAME]: PROBLEM_DETAILS_SCHEMA },
+    schemas: { [PROBLEM_SCHEMA_NAME]: PROBLEM_DETAILS_SCHEMA, ...defs },
   };
   if (merged.securitySchemes) components.securitySchemes = merged.securitySchemes;
 

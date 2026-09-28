@@ -126,3 +126,6 @@
 | 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | regression-compat | not measured | 73373 | 7.0 | 6620649 | 704.8 | measured |
 | 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | state-concurrency-idempotency | not measured | 66559 | 3.5 | 6687208 | 708.3 | measured |
 | 2026-09-28T21:07:54Z | qa | con2c-monitor | master-agent | qa-test-batch | not measured | 39237 | 1.9 | 6726445 | 710.2 | measured |
+| 2026-09-28T21:35:27Z | qa | con2a-builder | builder | ST-006 fix loop 1 | not measured | 98818 | 17.4 | 6825263 | 727.6 | measured |
+| 2026-09-28T21:35:27Z | qa | con2a-builder | builder | ST-004 fix loop 1 | not measured | 82857 | 20.6 | 6908120 | 748.2 | measured |
+| 2026-09-28T21:35:27Z | qa | con2a-builder | builder | ST-007 fix loop 1 | not measured | 68078 | 14.7 | 6976198 | 762.9 | measured |

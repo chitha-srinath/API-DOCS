@@ -117,7 +117,9 @@ describe('impossible-abuse: injection strings', () => {
     app.get('/users/:id', validator, wrapped);
 
     const payload = '<script>alert(1)</script>';
-    const res = await request(app).get(`/users/${encodeURIComponent(payload)}`).expect(200);
+    const res = await request(app)
+      .get(`/users/${encodeURIComponent(payload)}`)
+      .expect(200);
     expect(res.body.id).toBe(payload);
     expect(res.headers['content-type']).toContain('application/json');
   });
@@ -127,11 +129,8 @@ describe('impossible-abuse: injection strings', () => {
   // but must not break coercion/validation).
   it('TC-ABUSE-006: SQL-injection-shaped query string -> validated as plain string, no crash', async () => {
     const { route } = makeRouteFactory();
-    const [validator, wrapped] = route(
-      'get',
-      '/search',
-      { query: z.object({ q: z.string() }) },
-      (req, res) => res.json({ q: req.query.q }),
+    const [validator, wrapped] = route('get', '/search', { query: z.object({ q: z.string() }) }, (req, res) =>
+      res.json({ q: req.query.q }),
     );
     const app = freshApp();
     app.get('/search', validator, wrapped);
@@ -144,11 +143,8 @@ describe('impossible-abuse: injection strings', () => {
   // TC-ABUSE-007: path-traversal-shaped string in a path param.
   it('TC-ABUSE-007: path-traversal string in path param -> treated as opaque data', async () => {
     const { route } = makeRouteFactory();
-    const [validator, wrapped] = route(
-      'get',
-      '/files/:name',
-      { params: z.object({ name: z.string() }) },
-      (req, res) => res.json({ name: req.params.name }),
+    const [validator, wrapped] = route('get', '/files/:name', { params: z.object({ name: z.string() }) }, (req, res) =>
+      res.json({ name: req.params.name }),
     );
     const app = freshApp();
     app.get('/files/:name', validator, wrapped);
@@ -164,11 +160,8 @@ describe('impossible-abuse: injection strings', () => {
   // global Object.prototype.
   it('TC-ABUSE-008: __proto__ as literal path-param VALUE -> no global prototype pollution', async () => {
     const { route } = makeRouteFactory();
-    const [validator, wrapped] = route(
-      'get',
-      '/users/:id',
-      { params: z.object({ id: z.string() }) },
-      (req, res) => res.json({ id: req.params.id }),
+    const [validator, wrapped] = route('get', '/users/:id', { params: z.object({ id: z.string() }) }, (req, res) =>
+      res.json({ id: req.params.id }),
     );
     const app = freshApp();
     app.get('/users/:id', validator, wrapped);
@@ -445,7 +438,9 @@ describe('impossible-abuse: out-of-range / type-confused inputs', () => {
     const app = freshApp();
     app.get('/items', validator, wrapped);
 
-    const huge = await request(app).get('/items').query({ page: '9'.repeat(400) });
+    const huge = await request(app)
+      .get('/items')
+      .query({ page: '9'.repeat(400) });
     expect(huge.status).toBe(400);
 
     const negative = await request(app).get('/items').query({ page: '-1' });
@@ -458,11 +453,8 @@ describe('impossible-abuse: out-of-range / type-confused inputs', () => {
   // TC-ABUSE-027: array sent where schema expects a scalar string param.
   it('TC-ABUSE-027: array value sent for scalar query param -> validation rejects, no crash', async () => {
     const { route } = makeRouteFactory();
-    const [validator, wrapped] = route(
-      'get',
-      '/items',
-      { query: z.object({ q: z.string() }) },
-      (_req, res) => res.json({ ok: true }),
+    const [validator, wrapped] = route('get', '/items', { query: z.object({ q: z.string() }) }, (_req, res) =>
+      res.json({ ok: true }),
     );
     const app = freshApp();
     app.get('/items', validator, wrapped);
@@ -474,11 +466,8 @@ describe('impossible-abuse: out-of-range / type-confused inputs', () => {
   // TC-ABUSE-028: null byte in a path param.
   it('TC-ABUSE-028: null byte in path param -> handled without crash', async () => {
     const { route } = makeRouteFactory();
-    const [validator, wrapped] = route(
-      'get',
-      '/users/:id',
-      { params: z.object({ id: z.string() }) },
-      (req, res) => res.json({ id: req.params.id }),
+    const [validator, wrapped] = route('get', '/users/:id', { params: z.object({ id: z.string() }) }, (req, res) =>
+      res.json({ id: req.params.id }),
     );
     const app = freshApp();
     app.get('/users/:id', validator, wrapped);

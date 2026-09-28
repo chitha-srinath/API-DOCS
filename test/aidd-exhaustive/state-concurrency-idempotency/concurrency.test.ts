@@ -30,9 +30,7 @@ describe('TC-CONC: repeated/concurrent GET /openapi.json determinism (AC-034)', 
     app.use(api.router);
 
     const N = 50;
-    const responses = await Promise.all(
-      Array.from({ length: N }, () => request(app).get('/openapi.json')),
-    );
+    const responses = await Promise.all(Array.from({ length: N }, () => request(app).get('/openapi.json')));
     const bodies = responses.map((r) => JSON.stringify(r.body));
     expect(responses.every((r) => r.status === 200)).toBe(true);
     const first = bodies[0];
@@ -332,9 +330,7 @@ describe('TC-CONC: rebuild-cycle persistence/consistency under interleaved concu
     }
     app.use(api.router);
 
-    const responses = await Promise.all(
-      Array.from({ length: 200 }, () => request(app).get('/openapi.json')),
-    );
+    const responses = await Promise.all(Array.from({ length: 200 }, () => request(app).get('/openapi.json')));
     expect(responses.every((r) => r.status === 200)).toBe(true);
     const distinctBodies = new Set(responses.map((r) => JSON.stringify(r.body)));
     expect(distinctBodies.size).toBe(1);

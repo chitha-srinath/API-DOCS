@@ -74,9 +74,7 @@ describe('TC-NEG: config validation errors (ApiDocsConfigError)', () => {
   });
 
   it('TC-NEG-010 (AC-045): malformed nested key inside a group (openapi.info.title wrong type)', () => {
-    expect(() => createApiDocs({ openapi: { info: { title: 123 as unknown as string } } })).toThrow(
-      ApiDocsConfigError,
-    );
+    expect(() => createApiDocs({ openapi: { info: { title: 123 as unknown as string } } })).toThrow(ApiDocsConfigError);
   });
 
   it('TC-NEG-011 (AC-045): unknown nested key inside a group throws naming the dotted path', () => {
@@ -106,15 +104,13 @@ describe('TC-NEG: config validation errors (ApiDocsConfigError)', () => {
   });
 
   it('TC-NEG-015 (AC-045): autoDetect.include with non-string array entries throws', () => {
-    expect(() => createApiDocs({ autoDetect: { include: [1, 2] as unknown as string[] } })).toThrow(
-      ApiDocsConfigError,
-    );
+    expect(() => createApiDocs({ autoDetect: { include: [1, 2] as unknown as string[] } })).toThrow(ApiDocsConfigError);
   });
 
   it('TC-NEG-016 (AC-045): detectedDefaultResponse missing description throws', () => {
-    expect(() => createApiDocs({ detectedDefaultResponse: { status: 204 } as unknown as { status: number; description: string } })).toThrow(
-      ApiDocsConfigError,
-    );
+    expect(() =>
+      createApiDocs({ detectedDefaultResponse: { status: 204 } as unknown as { status: number; description: string } }),
+    ).toThrow(ApiDocsConfigError);
   });
 
   it('TC-NEG-017 (AC-045): detectedDefaultResponse status wrong type throws', () => {
@@ -279,7 +275,9 @@ describe('TC-NEG: request validation error path (RFC 9457 / AC-007..010, AC-040)
     const { route } = makeRouteFactory({ onValidationError });
     const app = freshApp();
     app.use(express.json());
-    const [v, h] = route('post', '/hooked', { body: z.object({ a: z.string() }) }, (_req, res) => res.json({ ok: true }));
+    const [v, h] = route('post', '/hooked', { body: z.object({ a: z.string() }) }, (_req, res) =>
+      res.json({ ok: true }),
+    );
     app.post('/hooked', v, h);
 
     const res = await request(app).post('/hooked').send({ a: 1 }).expect(422);
@@ -316,11 +314,8 @@ describe('TC-NEG: response validation error path (AC-012..014)', () => {
     const { route } = makeRouteFactory({ validateResponses: 'error' });
     const app = freshApp();
     app.use(express.json());
-    const [v, h] = route(
-      'get',
-      '/bad-response',
-      { response: z.object({ a: z.string() }) },
-      (_req, res) => res.json({ a: 123 } as unknown as { a: string }),
+    const [v, h] = route('get', '/bad-response', { response: z.object({ a: z.string() }) }, (_req, res) =>
+      res.json({ a: 123 } as unknown as { a: string }),
     );
     app.get('/bad-response', v, h);
 
@@ -338,11 +333,8 @@ describe('TC-NEG: response validation error path (AC-012..014)', () => {
     const registryDeps = makeRouteFactory({ validateResponses: 'warn' }, logger);
     const app = freshApp();
     app.use(express.json());
-    const [v, h] = registryDeps.route(
-      'get',
-      '/warn-response',
-      { response: z.object({ a: z.string() }) },
-      (_req, res) => res.json({ a: 123 } as unknown as { a: string }),
+    const [v, h] = registryDeps.route('get', '/warn-response', { response: z.object({ a: z.string() }) }, (_req, res) =>
+      res.json({ a: 123 } as unknown as { a: string }),
     );
     app.get('/warn-response', v, h);
 

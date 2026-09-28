@@ -6,7 +6,8 @@ import { majors } from '../fixtures/majors.js';
 import { obj, str, stubAdapter } from '../fixtures/stub-adapter.js';
 import { makeRouteFactory } from './support.js';
 import type { SchemaAdapter } from '../../src/adapter/types.js';
-import type { TypedRequestHandler } from '../../src/route/typed.js';
+import { resolveAdapter, type TypedRequestHandler } from '../../src/route/typed.js';
+import type { ApiDocsOptions } from '../../src/config/types.js';
 
 type AnyTypedHandler = TypedRequestHandler<unknown, unknown, unknown>;
 
@@ -71,5 +72,25 @@ describe.each(majors)('route/stub-adapter (Express $major, AC-005, AC-047, ADR-3
 
     await request(app).post('/no-override').send({ name: 'a' }).expect(200);
     expect(globalAdapter.validate).toHaveBeenCalled();
+  });
+});
+
+describe('route/stub-adapter — F-04 regression: resolveAdapter memoizes toJSONSchema (ADR-03)', () => {
+  it('calling toJSONSchema twice on the same schema through the resolved adapter invokes the underlying adapter once', () => {
+    const toJSONSchemaSpy = vi.fn(() => ({ type: 'object' }) as const);
+    const underlying: SchemaAdapter<unknown> = {
+      name: 'spy-underlying',
+      isSchema: (_x: unknown): _x is unknown => true,
+      validate: () => ({ ok: true as const, data: {} }),
+      toJSONSchema: toJSONSchemaSpy,
+    };
+    const globalOptions = { schemaAdapter: underlying } as unknown as ApiDocsOptions;
+    const resolved = resolveAdapter(globalOptions, {});
+    const schema = { some: 'schema' };
+
+    resolved.toJSONSchema(schema, 'input');
+    resolved.toJSONSchema(schema, 'input');
+
+    expect(toJSONSchemaSpy).toHaveBeenCalledTimes(1);
   });
 });

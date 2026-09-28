@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import type { Request, Response, Router as ExpressRouter } from 'express';
 
+import { memoizeAdapter } from '../adapter/memo.js';
 import { standardSchemaAdapter } from '../adapter/standard.js';
 import type { SchemaAdapter } from '../adapter/types.js';
 import { DEFAULT_OPTIONS } from '../config/defaults.js';
@@ -47,13 +48,18 @@ export function createApiDocs(rawOptions?: unknown): ApiDocsInstance {
   const validated = validateOptions(rawOptions);
   const options = mergeOptions(DEFAULT_OPTIONS as ApiDocsOptions, validated, {}) as ApiDocsOptions;
 
-  const adapter: SchemaAdapter<unknown> =
+  const logger = noopLogger;
+
+  const resolvedAdapter: SchemaAdapter<unknown> =
     (options.schemaAdapter as SchemaAdapter<unknown> | null | undefined) ??
     (standardSchemaAdapter as unknown as SchemaAdapter<unknown>);
+  // ADR-03 (F-04 fix): wrap the resolved adapter in `memoizeAdapter` before it's used to
+  // build the spec, so repeated `toJSONSchema` calls for the same schema identity across
+  // multiple spec rebuilds are cached, not re-derived from scratch.
+  const adapter: SchemaAdapter<unknown> = memoizeAdapter(resolvedAdapter, logger);
 
   const registry = createRegistry();
   const cache = createSpecCache<OpenApiDocument>();
-  const logger = noopLogger;
 
   const route = createRoute({ registry, options, logger });
   const describe = createDescribe({ registry });

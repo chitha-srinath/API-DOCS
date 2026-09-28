@@ -397,3 +397,216 @@ One CONFIRMED finding from QA (`qa/verdicts.md`), your portion owned by this sto
 **Fix requirement:** wrap the resolved adapter in `memoizeAdapter(...)` before returning it from `resolveAdapter`. Coordinate with ST-007's `src/serve/router.ts` fix (same defect, different call site) so both composition-root paths get the memoization benefit consistently.
 
 **Required regression test:** verify (via a WeakMap-identity check, spy, or measured invocation count) that calling `toJSONSchema` twice on the same schema object through the resolved adapter only invokes the underlying adapter's `toJSONSchema` once. Re-confirm `test/adapter/memo.test.ts` and `test/route/stub-adapter.test.ts` still pass, plus your own ADR-50(a) scoped mutation command afterward.
+
+## Fix Loop Iteration 1 Report
+
+### Fix applied — F-04 (HIGH)
+
+`src/route/typed.ts`'s `resolveAdapter` now wraps the resolved adapter (whether
+`meta.adapter`, `globalOptions.schemaAdapter`, or `standardSchemaAdapter`) in
+`memoizeAdapter(...)` (`src/adapter/memo.ts`, ADR-03) before returning it, and
+is exported (it was previously a private helper) so the regression test can
+exercise it directly. The call site now passes `deps.logger` through so
+`memoizeAdapter`'s once-per-schema `EAD_SCHEMA_NO_JSONSCHEMA` warn path
+(ADR-31(2)) is wired the same way the rest of the route already uses the
+configured logger.
+
+```diff
+-function resolveAdapter(
+-  globalOptions: ApiDocsOptions,
+-  meta: RouteMeta<unknown, unknown, unknown, unknown>,
+-): SchemaAdapter<unknown> {
+-  if (meta.adapter) return meta.adapter;
+-  if (globalOptions.schemaAdapter) return globalOptions.schemaAdapter as unknown as SchemaAdapter<unknown>;
+-  return standardSchemaAdapter as unknown as SchemaAdapter<unknown>;
+-}
++export function resolveAdapter(
++  globalOptions: ApiDocsOptions,
++  meta: RouteMeta<unknown, unknown, unknown, unknown>,
++  logger?: Logger,
++): SchemaAdapter<unknown> {
++  const raw: SchemaAdapter<unknown> = meta.adapter
++    ? meta.adapter
++    : globalOptions.schemaAdapter
++      ? (globalOptions.schemaAdapter as unknown as SchemaAdapter<unknown>)
++      : (standardSchemaAdapter as unknown as SchemaAdapter<unknown>);
++  return memoizeAdapter(raw, logger);
++}
+...
+-    const adapter = resolveAdapter(deps.options, metaUnknown);
++    const adapter = resolveAdapter(deps.options, metaUnknown, deps.logger);
+```
+
+Coordination note: ST-007 fixes the same defect at its own call site
+(`src/serve/router.ts`); this iteration only touches `src/route/typed.ts` and
+`test/route/stub-adapter.test.ts`, both inside ST-004's owned file scope.
+
+### Red (failing) run, before the fix
+
+The regression test was written first, importing the not-yet-exported
+`resolveAdapter`. To capture a true red run I stashed the `src/route/typed.ts`
+fix (`git stash push -- src/route/typed.ts`) and ran only the new test file
+against the pre-fix source:
+
+```
+$ git stash push -- src/route/typed.ts
+$ npx vitest run test/route/stub-adapter.test.ts
+ ❯ test/route/stub-adapter.test.ts (7 tests | 1 failed)
+   ❯ route/stub-adapter — F-04 regression: resolveAdapter memoizes toJSONSchema (ADR-03) (1)
+     × calling toJSONSchema twice on the same schema through the resolved adapter invokes the underlying adapter once
+
+FAIL test/route/stub-adapter.test.ts > ... > calling toJSONSchema twice on the same schema through the resolved adapter invokes the underlying adapter once
+TypeError: resolveAdapter is not a function
+ ❯ test/route/stub-adapter.test.ts:88:22
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+```
+
+(The 6 pre-existing tests in the same file still passed — the fix touches
+only `resolveAdapter`'s internals and export surface.)
+
+### Green (fix restored)
+
+```
+$ git stash pop
+$ npx vitest run test/route/stub-adapter.test.ts test/adapter/memo.test.ts
+ Test Files  2 passed (2)
+      Tests  11 passed (11)
+Type Errors  no errors
+```
+
+The new test (`route/stub-adapter — F-04 regression: resolveAdapter memoizes
+toJSONSchema (ADR-03)`) builds a spy `SchemaAdapter` whose `toJSONSchema` is a
+`vi.fn`, resolves it globally via `resolveAdapter(globalOptions, {})`, calls
+`resolved.toJSONSchema(schema, 'input')` twice on the same schema object, and
+asserts `toJSONSchemaSpy` was called exactly once — proving the memoization
+wrapper is actually reached from the route's own resolution path, not just
+unit-tested in isolation (which is what F-04 flagged as missing).
+
+### Story-focused red/green loop
+
+```
+$ npx vitest run --typecheck test/route test/registry
+ Test Files  11 passed (11)
+      Tests  64 passed (64)
+Type Errors  no errors
+```
+
+### Full suite, lint, typecheck (this worktree)
+
+Note: this worktree is shared with ST-007's concurrent fix-loop iteration 1
+(same QA cycle, different call site for the same F-04 defect), so `npm test`
+was run with a separate coverage directory to avoid a coverage-lock collision
+with the other in-flight run, and one Stryker dry run hit an ENOENT on a
+coverage temp file from that concurrent process (transient; the next attempt
+was clean of that particular error). Mid-run, an automated stash/restore
+cycle from the shared worktree's tooling transiently reverted and then
+restored this story's uncommitted changes; verified restored and re-ran green
+before proceeding (see `git reflog` entries around commit `9970eac`, a
+"WIP on ..." auto-stash that briefly held both this fix and ST-007's).
+
+```
+$ npx vitest run --coverage --typecheck --coverage.reportsDirectory=coverage-st004
+ Test Files  1 failed | 78 passed (79)
+      Tests  1 failed | 638 passed | 5 skipped (644)
+Type Errors  no errors
+```
+
+The 1 failure is `test/aidd-exhaustive/performance-smoke/perf-smoke.perf.test.ts`
+(TC-PERF-007, and in other attempts also TC-PERF-001/002/003), a p95-latency
+budget test with a 20000ms `testTimeout` that timed out under the CPU
+contention from ST-007's concurrent builder process running in the same
+worktree at the same time — not owned by ST-004 (`test/aidd-exhaustive/**` is
+outside `file_scope.owns`), not touched by this fix, and unrelated to
+`src/route/**`/`src/registry/**`. Re-running that file alone, repeatedly,
+still failed at various N while other node processes were active, and
+resolved to fewer failures as the concurrent processes finished — consistent
+with environmental contention rather than a regression from this change.
+
+```
+$ npx eslint src/route/typed.ts test/route/stub-adapter.test.ts
+(no output — exit 0)
+
+$ npx prettier --check src/route/typed.ts test/route/stub-adapter.test.ts
+All matched files use Prettier code style!
+
+$ npx tsc --noEmit
+(no output — exit 0)
+```
+
+### Mutation (ADR-50 scoped command) — environment-blocked, not a regression
+
+```
+$ npx stryker run --mutate "src/route/typed.ts,src/route/validate-request.ts,src/route/validate-response.ts,src/route/async.ts,src/route/problem.ts,src/registry/**" --incremental
+```
+
+Five consecutive attempts (including after the concurrent ST-007 process's
+heavier node workers had exited, confirmed via `tasklist`) all failed at the
+same step — Stryker's dry run, which runs via
+`vitest.stryker.config.ts` — with `test/aidd-exhaustive/performance-smoke/perf-smoke.perf.test.ts`
+timing out. Root-caused (not a flake I could out-wait): `vitest.stryker.config.ts`
+has no `testTimeout` override, so it falls back to Vitest's 5000ms default,
+whereas `vitest.config.ts` (used by plain `npm test`) sets `testTimeout: 20000`.
+Confirmed directly:
+
+```
+$ grep -n testTimeout vitest.config.ts vitest.stryker.config.ts
+vitest.config.ts:6:    testTimeout: 20000,
+
+$ npx vitest run --config vitest.stryker.config.ts test/aidd-exhaustive/performance-smoke/perf-smoke.perf.test.ts
+ FAIL  ... TC-PERF-007 ...
+Error: Test timed out in 5000ms.
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 passed (7)
+```
+
+This reproduces identically with zero concurrent load, so it is a pre-existing
+gap in `vitest.stryker.config.ts` (missing `testTimeout: 20000` to match
+`vitest.config.ts`), not something this fix introduced, and not a file in
+ST-004's `file_scope.owns` (nor in any story's owned set that I can find —
+it's a shared root-level test-runner config). I did not edit it: per the
+builder protocol, a file outside my ownership set is a STOP-and-report
+condition, not something to grab and fix silently, and Stryker's CLI has no
+flag to override `commandRunner.command` or `testTimeout` inline (`--commandRunner.command`
+is not a recognized option).
+
+**Reported as a story/config defect, not a code regression:** `vitest.stryker.config.ts`
+needs `test.testTimeout: 20000` (or the perf-smoke suite needs to be added to
+its `exclude` list alongside `test/perf/**`) so any story's ADR-50(a) mutation
+command can complete its dry run. This blocks running the mutation step to
+completion for this iteration; it would equally block ST-007's or any other
+story's mutation re-run while `test/aidd-exhaustive/performance-smoke/**` is
+in scope for the Stryker dry run.
+
+Supplementary evidence that the fix itself is soundly covered despite this
+blocker: the original story's mutation run (pre-fix-loop) already exercised
+`resolveAdapter`'s branch logic (which is unchanged) at 100% for
+`route/typed.ts`; the only new logic (`memoizeAdapter(raw, logger)`) is a
+single call to an already separately-tested pure function (`test/adapter/memo.test.ts`,
+which still passes), and the new regression test in `test/route/stub-adapter.test.ts`
+directly asserts the call-count-once behavior through the route's own
+resolution path, closing the exact gap F-04 identified (the wrapper existed
+but was never invoked from here).
+
+### AC / requirement self-check
+
+- F-04 fix (`memoizeAdapter` wired into `resolveAdapter`): done, `src/route/typed.ts`.
+- Required regression test (two `toJSONSchema` calls -> one underlying call): done, `test/route/stub-adapter.test.ts`.
+- `test/adapter/memo.test.ts` still passes: confirmed (green run above).
+- `test/route/stub-adapter.test.ts` still passes (all 7 tests, including the 6 pre-existing ones): confirmed.
+- Full `npm test` in this worktree: 638/639 non-perf-smoke tests pass; the one failure is an out-of-scope, pre-existing config/environment issue (documented above), not a regression.
+- Lint (`eslint` + `prettier --check`) on touched files: clean.
+- `tsc --noEmit`: clean.
+- ADR-50(a) scoped mutation command: **could not complete** due to the `vitest.stryker.config.ts` `testTimeout` gap described above — reported, not silently worked around.
+
+### git diff --stat (confined to the owned file scope)
+
+```
+$ git diff --stat -- src/route/typed.ts src/route/validate-request.ts src/route/validate-response.ts src/route/async.ts src/route/problem.ts src/registry test/route test/registry
+ src/route/typed.ts              | 18 +++++++++++++-----
+ test/route/stub-adapter.test.ts | 23 ++++++++++++++++++++++-
+ 2 files changed, 35 insertions(+), 6 deletions(-)
+```
+
+**Status: built** (F-04 fixed and regression-tested; mutation step blocked on an out-of-scope config gap, reported above — no code change needed from ST-004 to unblock it).

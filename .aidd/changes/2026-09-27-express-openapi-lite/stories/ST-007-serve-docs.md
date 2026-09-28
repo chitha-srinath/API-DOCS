@@ -2,8 +2,8 @@
 id: ST-007
 title: "Serve: renderers, CDN pins, router, public entries (., ./manual, ./zod), default-adapter wiring, built-dist behaviour tests, perf gate"
 wave: 6
-status: queued
-attempts: 0
+status: built
+attempts: 1
 ac_ids:
   - AC-001
   - AC-003
@@ -199,3 +199,255 @@ Write ALL tests FIRST and capture the red run before any `src/` change. Expected
 
 ## Builder Report
 
+### Summary
+
+Implemented the composition root (`src/serve/router.ts`, `createApiDocs()`), the docs UI
+renderers (`src/docs/render.ts`, `src/docs/cdn.ts`), and the three public entries
+(`src/index.ts`, `src/manual.ts`, `src/zod.ts`) per ADR-41/ADR-38/ADR-24. Wrote the full
+test plan (docs-ui, serve, entries, perf, bench) test-first, hit and fixed the pre-diagnosed
+ADR-55 defect, then drove everything to green. Status: **built**.
+
+### 1. Red run (before any `src/` change)
+
+Command: `npm run build`
+
+```
+[WARN] Ignoring this import because "src/auto-record.ts" was marked as having no side effects [ignored-bare-import]
+    src/auto-record.ts:4:7:  import './introspect/auto-record.js';
+[WARN] Ignoring this import because "src/introspect/auto-record.ts" was marked as having no side effects [ignored-bare-import]
+    src/index.ts:4:7:  import './auto-record.js';
+```
+
+`dist/auto-record.js` built as `0 B`; the side-effect import was stripped from `dist/index.js`
+(ADR-55, exactly as diagnosed). `test/entries/recorder-install.test.ts` red run:
+
+```
+$ npx vitest run test/entries/recorder-install.test.ts --config vitest.config.ts
+ FAIL  test/entries/recorder-install.test.ts > entries/recorder-install > require(dist/index.cjs) installs RECORDER with zero EAD_* warns
+Error: RECORDER not installed on require
+ FAIL  test/entries/recorder-install.test.ts > entries/recorder-install > import(dist/index.js) installs RECORDER with zero EAD_* warns
+Error: RECORDER not installed on import
+Test Files  1 failed (1)
+     Tests  2 failed (2)
+```
+
+All other `test/docs-ui/**`, `test/serve/**`, remaining `test/entries/**` files were also
+authored before any `src/docs`, `src/serve`, or real entry-point code existed, so they failed
+on resolve/import errors against stub entries (`export {}`), the standard "does not exist"
+red per the story's stated expected-red reason.
+
+### 2. ADR-55 fix (scoped exception, exactly the one line)
+
+`package.json` `sideEffects`:
+
+```diff
+   "sideEffects": [
+     "./dist/auto-record.js",
+-    "./dist/auto-record.cjs"
++    "./dist/auto-record.cjs",
++    "src/introspect/auto-record.ts"
+   ],
+```
+
+`tsup.config.ts` untouched, as required. One implementation detail found during the fix:
+`src/index.ts`'s bare import must be written **without** the `.js` extension
+(`import './auto-record';`), matching the original S-01 stub and the tsup
+`keepAutoRecordExternal` esbuild plugin's `onResolve` filter (`/^\.\/auto-record$/`). An
+extension-qualified import (`'./auto-record.js'`) does not match that filter and gets bundled
+inline instead of kept external, silently defeating ADR-24's entry isolation even with the
+`sideEffects` fix applied. Confirmed via `grep -n "auto-record" dist/index.js dist/index.cjs`
+after the fix: `import "./auto-record.js";` / `require("./auto-record.cjs");`.
+
+### 3. Green run
+
+```
+$ npx vitest run test/entries/recorder-install.test.ts test/entries/manual.test.ts --config vitest.config.ts
+ Test Files  2 passed (2)
+      Tests  3 passed (3)
+
+$ npx vitest run test/docs-ui test/serve test/entries --config vitest.config.ts
+ Test Files  14 passed (14)
+      Tests  56 passed (56)
+Type Errors  no errors
+   Duration  7.59s
+```
+
+### 4. Lint / typecheck
+
+```
+$ npm run lint
+> eslint . && prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+
+$ npx tsc --noEmit
+(no output, exit 0)
+```
+
+### 5. Full suite (`npm run build && npm test`, ADR-29 #7)
+
+```
+Test Files  2 failed | 65 passed (67)
+     Tests  2 failed | 362 passed | 5 skipped (369)
+Type Errors  no errors
+```
+
+The 2 failures are both in `test/dist/**` (S-01-owned, outside `file_scope.owns`), and are
+**expected, documented collateral** of authorized S-07 work, not regressions I introduced by
+mistake:
+
+- `test/dist/build-shape.test.ts > does not inline the recorder install call` — asserts
+  `dist/index.js`/`dist/index.cjs` do not contain the literal substring `installRecorder(`.
+  That assertion pre-dates a real `installRecorder` export existing in the bundle; now that
+  `src/index.ts` legitimately re-exports the real `installRecorder` function (ADR-41), its own
+  function *declaration* (`export function installRecorder(expressModule...`) naturally
+  contains the substring `installRecorder(`. The test's intent ("don't eagerly call install at
+  import time") still holds — there is no eager call, only the export — but the substring
+  check is now a false positive against the real implementation. Needs an S-01 follow-up (test
+  is outside my `file_scope.owns`; I did not touch it).
+- `test/dist/pack.test.ts > sideEffects matches the auto-record entries` — asserts
+  `pkg.sideEffects` deep-equals the original 2-element array. This is the exact, foreseeable
+  consequence of the ADR-55 scoped exception (epic.md, "Scoped ownership exception (ADR-55,
+  BACKFLOW)") that authorized me to append `"src/introspect/auto-record.ts"` to that array.
+  Needs an S-01 follow-up to update the expected array to 3 elements; test is outside my
+  `file_scope.owns`, so I did not touch it.
+
+Everything inside my ownership (`test/docs-ui/**`, `test/serve/**`, `test/entries/**`,
+`test/perf/**`) is green. No coverage summary table is printed by this project's `vitest
+--coverage` invocation on this run (v8 provider prints no text table here even on prior
+stories' runs); thresholds are enforced by vitest's own gate and the run did not fail on a
+threshold violation (`AssertionError` count is exactly the 2 above, no coverage-threshold
+error appeared in the log).
+
+Note: one full-suite run under heavy concurrent load on this machine produced spurious 20s
+timeouts in unrelated tests (`test/meta/lint-rules.test.ts`, and transiently
+`test/entries/{no-zod-load,parity,recorder-install}`); a clean re-run immediately after
+reproduced only the 2 `test/dist/**` failures above. Recorded here per the evidence protocol,
+not passed off as a real regression.
+
+### 6. Acceptance criteria self-check
+
+| AC | Status | Evidence |
+|---|---|---|
+| AC-001 | ✅ | `test/entries/parity.test.ts` "no owned file contains the old package name"; `name`/`license` unaffected (S-01 owned, verified passing in `test/dist/manifest.test.ts`). |
+| AC-003 | ✅ | `test/entries/parity.test.ts` — ESM+CJS `.`/`./manual` exact export sets. |
+| AC-004 | ✅ | `test/entries/no-zod-load.test.ts`, `test/entries/zod-subpath.test.ts`, `test/entries/manual.test.ts`. `peerDependencies`/`exports` shape is S-01-owned and unedited by me; verified still passing via `test/dist/manifest.test.ts`. |
+| AC-005 | ✅ | `test/serve/schema-adapter.test.ts` — stub adapter validates and appears in the spec, no core code change. |
+| AC-018 | ✅ | `test/docs-ui/render.test.ts` "default ui is scalar with pinned url". |
+| AC-019 | ✅ | `test/docs-ui/render.test.ts` "swagger-ui loads with pin", "custom cdnUrl is used". |
+| AC-020 | ✅ | No UI package in `package.json` (unedited by me, still present per `test/dist/pack.test.ts`'s passing "no bundled UI assets" check); `src/docs/**` renders via CDN string constants only. |
+| AC-035 | ✅ | `test/serve/zero-config.test.ts` — 200 spec valid via swagger-parser, 200 docs html, 400 problem+json on bad request, 200 on schema-violating response. |
+| AC-036 | ✅ | `test/serve/zero-config.test.ts` "resolved config deep-equals DEFAULT_OPTIONS...deep-frozen", including `schemaAdapter: null`. |
+| AC-037 | ✅ | `test/serve/paths.test.ts`. |
+| AC-043 | ✅ | `test/serve/toggles.test.ts` — all four cases including sync throw naming `serveSpec`/`docs.specUrl`, and `apiDocs.getSpec()` fallback. |
+| AC-045 | ✅ | `test/serve/config-error.test.ts` — all four bad-input cases. |
+| AC-047 | ✅ | `test/serve/schema-adapter.test.ts` "meta.adapter...overrides both the global option and the default". |
+
+Also covered (ADR items named in the test plan, beyond the AC table): ADR-20/44/49 dual-load
+(`test/entries/dual-load.test.ts`), ADR-24 bundle (`test/entries/bundle.test.ts`), ADR-49
+minified cross-bundle brand identity (`test/entries/minified.test.ts`), ADR-40 runtime half
+(`test/entries/recorder-install.test.ts`), ADR-26 perf gate (`test/perf/*.perf.test.ts`,
+harness in `test/perf/harness.ts`), and the four informational `bench/*.bench.ts` files.
+
+### 7. Mutation (ADR-50, scoped, at merge)
+
+Command: `npx stryker run --mutate "src/docs/**,src/serve/**,src/index.ts,src/manual.ts,src/zod.ts" --incremental`
+
+```
+All tests
+  ✓ All tests (killed 83)
+
+Ran 1.00 tests per mutant on average.
+------------|------------------|----------|-----------|------------|----------|----------|
+            | % Mutation score |          |           |            |          |          |
+File        |  total | covered | # killed | # timeout | # survived | # no cov | # errors |
+------------|--------|---------|----------|-----------|------------|----------|----------|
+All files   | 100.00 |  100.00 |       83 |         0 |          0 |        0 |        0 |
+ docs       | 100.00 |  100.00 |       45 |         0 |          0 |        0 |        0 |
+  cdn.ts    | 100.00 |  100.00 |        5 |         0 |          0 |        0 |        0 |
+  render.ts | 100.00 |  100.00 |       40 |         0 |          0 |        0 |        0 |
+ serve      | 100.00 |  100.00 |       38 |         0 |          0 |        0 |        0 |
+  router.ts | 100.00 |  100.00 |       38 |         0 |          0 |        0 |        0 |
+------------|--------|---------|----------|-----------|------------|----------|----------|
+Final mutation score of 100.00 is greater than or equal to break threshold 70
+```
+
+`src/index.ts`/`src/manual.ts`/`src/zod.ts` are pure re-export barrels with no mutable
+statements, so Stryker generated no mutants for them (0 contribution, not a gap).
+
+### 8. `git diff --stat` (confined to ownership set)
+
+```
+ bench/docs-endpoint.bench.ts          |  16 +++++
+ bench/spec-cold.bench.ts              |  19 ++++++
+ bench/spec-endpoint.bench.ts          |  18 ++++++
+ bench/typed-route.bench.ts            |  22 +++++++
+ package.json                          |   3 +-
+ src/docs/cdn.ts                       |  10 +++
+ src/docs/render.ts                    |  68 ++++++++++++++++++++
+ src/index.ts                          |  42 ++++++++++++-
+ src/manual.ts                         |  43 ++++++++++++-
+ src/serve/router.ts                   | 110 +++++++++++++++++++++++++++++++++
+ src/zod.ts                            |   6 +-
+ test/docs-ui/render.test.ts           |  49 +++++++++++++++
+ test/entries/bundle.test.ts           |  62 +++++++++++++++++++
+ test/entries/dual-load.test.ts        |  94 ++++++++++++++++++++++++++++
+ test/entries/manual.test.ts           |  32 ++++++++++
+ test/entries/minified.test.ts         | 113 ++++++++++++++++++++++++++++++++++
+ test/entries/no-zod-load.test.ts      |  46 ++++++++++++++
+ test/entries/parity.test.ts           |  84 +++++++++++++++++++++++++
+ test/entries/recorder-install.test.ts |  64 +++++++++++++++++++
+ test/entries/zod-subpath.test.ts      |  19 ++++++
+ test/perf/docs-endpoint.perf.test.ts  |  14 +++++
+ test/perf/harness.ts                  |  60 ++++++++++++++++++
+ test/perf/spec-cold.perf.test.ts      |  23 +++++++
+ test/perf/spec-endpoint.perf.test.ts  |  16 +++++
+ test/perf/typed-route.perf.test.ts    |  20 ++++++
+ test/serve/config-error.test.ts       |  24 ++++++++
+ test/serve/paths.test.ts              |  35 +++++++++++
+ test/serve/schema-adapter.test.ts     |  76 +++++++++++++++++++++++
+ test/serve/toggles.test.ts            |  59 ++++++++++++++++++
+ test/serve/zero-config.test.ts        |  66 ++++++++++++++++++++
+ 30 files changed, 1309 insertions(+), 4 deletions(-)
+```
+
+`package.json`'s 3-line change is exactly the one authorized ADR-55 `sideEffects` entry. No
+file outside `file_scope.owns` plus that one exception was touched.
+
+### 9. Follow-ups for other owners (not fixed here — outside `file_scope.owns`)
+
+- `test/dist/build-shape.test.ts`: update the "does not inline the recorder install call"
+  assertion so it does not false-positive on the real `installRecorder` export's own function
+  declaration (e.g. assert no eager *call* site like `installRecorder(` immediately followed by
+  a real argument at module top level, or check for the absence of an IIFE-style auto-invoke,
+  rather than banning the substring outright).
+- `test/dist/pack.test.ts`: update the `sideEffects` expectation to the 3-element array
+  (`./dist/auto-record.js`, `./dist/auto-record.cjs`, `src/introspect/auto-record.ts`) per the
+  ADR-55 scoped exception.
+
+### 10. Notes
+
+- `test/entries/bundle.test.ts` and `test/entries/minified.test.ts` create a scratch directory
+  nested under the repo root (`.tmp-bundle-test/`, `.tmp-minified-test/`) rather than the OS
+  tmpdir, so Node's module resolution for the `--external:express` bundles can walk up to this
+  project's own `node_modules`; both remove the directory in the test (`rmSync`/`afterAll`).
+  These directories are not committed (untracked, self-cleaning) but I did not add them to
+  `.gitignore` since that file is outside `file_scope.owns`.
+
+
+## Auditor Report
+
+Verdict: all 10 interrogated ACs (AC-001, AC-003, AC-018, AC-019, AC-020, AC-035, AC-036,
+AC-037, AC-043, AC-045) **PROVEN** by independent reproduction (own `npm run build`, scoped
+`vitest run test/docs-ui test/serve test/entries` → 14/14 files, 56/56 tests; full `npm test`
+→ 67/67 files, 364 passed/5 skipped). The ADR-55 recorder-defect fix was verified with a
+throwaway Node probe outside the test framework (`node -e` requiring `dist/index.cjs`, and a
+standalone `.mjs` importing `dist/index.js`) confirming `Symbol.for('express-api-docs.v1.recorder')`
+is genuinely installed on `express.application` at runtime — **PROVEN**, not merely test-asserted.
+The ADR-50 scoped mutation claim (100.00%, 83/83 killed, 0 survived on
+`src/docs/**,src/serve/**,src/index.ts,src/manual.ts,src/zod.ts`) was reproduced verbatim with
+the story's exact Verification command — **PROVEN**. The Build Fixer's corrections to
+`test/dist/pack.test.ts` and `test/dist/build-shape.test.ts` were read directly and confirmed
+to be legitimate, narrowly-scoped fixes tied to the authorized ADR-55 `sideEffects` change, not
+weakened assertions — full suite genuinely green, no regressions. 0 DISPUTED. No negotiation
+entries filed. Full evidence: `audit/interrogation/ST-007-verdict.md`.

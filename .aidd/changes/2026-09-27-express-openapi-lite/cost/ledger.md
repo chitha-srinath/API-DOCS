@@ -96,3 +96,7 @@
 | 2026-09-28T05:33:02Z | construction | con2a-builder | builder | ST-006 (rate-limit resume) | not measured | 262930 | 50.5 | 4584201 | 514.5 | measured |
 | 2026-09-28T05:33:02Z | construction | con2c-monitor | master-agent | wave-5 | not measured | 44413 | 1.1 | 4628614 | 515.6 | measured |
 | 2026-09-28T05:33:02Z | construction | con2d-interrogation | auditor | ST-006 | not measured | 48123 | 1.9 | 4676737 | 517.5 | measured |
+| 2026-09-28T07:07:35Z | construction | con2a-builder | builder | ST-007 | not measured | 199474 | 71.0 | 4876211 | 588.5 | measured |
+| 2026-09-28T07:07:35Z | construction | con2e-integration | build-fixer | test/dist stale assertions | not measured | 50520 | 1.9 | 4926731 | 590.4 | measured |
+| 2026-09-28T07:07:35Z | construction | con2c-monitor | master-agent | wave-6 | not measured | 54641 | 1.9 | 4981372 | 592.3 | measured |
+| 2026-09-28T07:07:35Z | construction | con2d-interrogation | auditor | ST-007 | not measured | 63736 | 18.1 | 5045108 | 610.4 | measured |

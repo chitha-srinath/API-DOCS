@@ -120,3 +120,8 @@
 2026-09-28T05:33:02Z | construction | master-agent | wave-5 | returned | wave 5 evidence
 2026-09-28T05:33:02Z | construction | auditor | ST-006 | returned | wave 5 evidence
 2026-09-28T05:33:02Z | construction | orchestrator | wave-5 monitoring note | returned | corrected misplaced file (repo-root audit/ instead of change-scoped audit/); moved, stray dir removed
+2026-09-28T07:07:35Z | construction | builder | ST-007 | returned | wave 6 evidence
+2026-09-28T07:07:35Z | construction | build-fixer | test/dist stale assertions | returned | wave 6 evidence
+2026-09-28T07:07:35Z | construction | master-agent | wave-6 | returned | wave 6 evidence
+2026-09-28T07:07:35Z | construction | auditor | ST-007 | returned | wave 6 evidence
+2026-09-28T07:07:35Z | construction | orchestrator | integration check | returned | 2 known ADR-55-caused test/dist failures -> Build Fixer, fixed first attempt, 67/67 files green, independently re-verified

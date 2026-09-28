@@ -2,8 +2,8 @@
 id: ST-008
 title: "Docs and release: README, CHANGELOG, example, README parity tests"
 wave: 7
-status: queued
-attempts: 0
+status: built
+attempts: 1
 ac_ids:
   - "AC-029"
 depends_on:
@@ -180,3 +180,282 @@ Write these FIRST; run `npm test` and capture the red output before writing docs
 Wave 7 is the final wave: the full coverage (90%) gate is enforced after this story, and the full mutation run (break 70) runs nightly per ADR-50. Per ADR-29, the full `npm test` must pass in this worktree before merge.
 
 ## Builder Report
+
+### Corrections to the story text (current shipped reality wins)
+
+The story's prose in a few places carries stale wording. I built against the
+actual `src/` files, not the stale text, per the dispatch instruction:
+
+- **`route()`** is confirmed 4-arg: `route(method, localPath, meta, handler)` returning
+  `[RequestHandler, RequestHandler]` (`src/route/typed.ts`). No 2-arg shorthand exists.
+- **`describe()`** is confirmed a factory: `createDescribe({ registry })` → `describe(method, localPath, meta)`
+  (`src/route/describe.ts`), not a bare `describe(meta)`. In `src/serve/router.ts`, `createApiDocs()` returns
+  an instance whose `.describe` is already this factory's product — callers call `apiDocs.describe(method, localPath, meta)`
+  directly (they never call `createDescribe` themselves). The example (`examples/basic/app.ts`) and README use
+  this exact call shape.
+- **zod peer** is `^4.2.0` in `package.json`'s `peerDependencies` (optional, via `peerDependenciesMeta`). README
+  says only "Requires zod >= 4.2" with no below-4.2 workaround, matching ADR-52.
+- **Public exports**: verified against `src/index.ts` and `src/manual.ts` — both export
+  `createApiDocs, DEFAULT_OPTIONS, ApiDocsConfigError, ApiDocsSchemaError, standardSchemaAdapter, installRecorder`
+  plus types. `src/zod.ts` exports only `zodAdapter` and re-exports `ApiDocsSchemaError`. README's SchemaAdapter
+  and Errors sections and the Configuration defaults table were written directly from `src/config/spec-table.ts`'s
+  `OPTION_SPEC` (19 rows, including `schemaAdapter` default `null`) and `src/config/types.ts`/`src/core/types.ts`
+  for the option names — not from the story's own quoted option list, which is consistent with what's shipped but
+  I re-derived it from source directly to be safe.
+- **`DEFAULT_OPTIONS`** is confirmed a public export of `.` (`src/config/defaults.ts` built from `OPTION_SPEC`,
+  deep-frozen), matching ADR-04/C1 as the story states.
+- **Error brand mechanism**: confirmed ADR-49's `Symbol.for('express-api-docs.v1.brand')` /
+  `Symbol.hasInstance` implementation in `src/adapter/errors.ts` and `src/config/errors.ts` — the README's
+  Error shape section documents `err.code` and `instanceof` exactly as these files implement them, with no
+  mention of `err.name`/`constructor.name` matching.
+- **APM order result**: I did not re-run `test/introspect/apm-order.test.ts` myself (it is owned by S-05,
+  outside my file scope) but reused ST-005's own recorded observation verbatim (see ST-005's Builder Report,
+  "CR-3 (apm-order) observed result, for S-08's README") for the README's APM section: both orders preserved
+  mount prefixes with a transparent passthrough wrapper; neither triggered the `EAD_LAYER_UNRECOGNISED`
+  fallback in that scenario, and the recorder never fails silently in the cases where prefix recovery is
+  genuinely defeated.
+
+No other corrections were needed; the rest of the story's ADR call-outs (ADR-18, ADR-22/28, ADR-23/34, ADR-24,
+ADR-38, ADR-43, ADR-47/52, ADR-50, ADR-53) matched the shipped source exactly.
+
+### ADR-50 mutation gate: no-op for this story
+
+This story adds no files under `src/**` (only `README.md`, `CHANGELOG.md`, `examples/**`, `test/docs/**`).
+Per the story's own verification-commands note, the scoped Stryker run (`npx stryker run --mutate "<src globs>" --incremental`)
+has no mutate globs to run against and is a no-op / skip for this change; I did not invoke it. The nightly
+full mutation run (`npm run mutation`, break threshold 70) is out of scope for a per-story merge gate per
+ADR-50 and runs on its own schedule.
+
+### Red run (tests written first)
+
+Command: `npx vitest run test/docs --no-coverage`
+
+```
+ ❯ test/docs/readme-sections.test.ts (0 test)
+ ❯ test/docs/readme-table.test.ts (0 test)
+ ❯ test/docs/example-smoke.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/docs/example-smoke.test.ts [ test/docs/example-smoke.test.ts ]
+Error: Cannot find module '../../examples/basic/app.js' imported from .../test/docs/example-smoke.test.ts
+
+ FAIL  test/docs/readme-sections.test.ts [ test/docs/readme-sections.test.ts ]
+Error: ENOENT: no such file or directory, open '.../README.md'
+
+ FAIL  test/docs/readme-table.test.ts [ test/docs/readme-table.test.ts ]
+Error: ENOENT: no such file or directory, open '.../README.md'
+
+ Test Files  3 failed | 1 passed (4)
+      Tests  5 passed (5)
+```
+
+(The "1 passed" file/5 tests were the `it.each(specKeys)` cases inside `readme-table.test.ts` collected before
+the top-level `readReadme()` throw aborted the rest of that file's suite — vitest still reported the file as
+failed overall.)
+
+### Green run
+
+Command: `npx vitest run test/docs --no-coverage`
+
+```
+ Test Files  4 passed (4)
+      Tests  57 passed (57)
+Type Errors  no errors
+```
+
+One intermediate red→green iteration: my first draft of the README's zod section contained the literal string
+`import { zodAdapter } from 'express-api-docs'` as a documented anti-example, which tripped my own
+`readme-sections.test.ts` negative assertion (the test forbids that exact string, to stop anyone ever
+documenting it as valid). Rewrote the sentence to describe the constraint without using the literal import
+statement; re-ran and it went green (see full-suite run below).
+
+### Lint
+
+Command: `npm run lint` → `eslint . && prettier --check .`
+
+First pass: 3 eslint warnings (unused `eslint-disable-next-line no-console` directives in
+`examples/basic/server.ts`, since `no-console` is not actually configured/errored in this repo's eslint
+config) and a prettier formatting diff on `examples/basic/app.ts`. Fixed by removing the unneeded disable
+comments and running `npx prettier --write examples/basic/app.ts`. Final result:
+
+```
+> eslint . && prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+```
+
+Exit code 0, zero warnings, zero errors.
+
+### Typecheck
+
+Command: `npx tsc --noEmit` → exit code 0, no output. (`examples/**` is not in `tsconfig.json`'s `include`
+list — owned by S-01, not editable by me — so it is not `tsc`-checked directly; it is exercised by
+`test/docs/example-smoke.test.ts` under vitest's esbuild transform instead, which caught real issues during
+development, e.g. the `createApiDocs`/`route`/`describe` call shapes.)
+
+### AC self-check
+
+- **AC-029** — PASS.
+  - README documents install, quick start, SchemaAdapter, security, docs UI, response validation, the error
+    shape, incremental adoption, route auto-detection (with the `autoDetect: false` opt-out) and configuration
+    — all asserted by `test/docs/readme-sections.test.ts`'s heading/content checks (57 assertions, all green).
+  - The Configuration section's defaults table has one row per every key of `DEFAULT_OPTIONS`
+    (== every `OPTION_SPEC` path, 19 rows including `schemaAdapter` default `null`), each with a non-empty
+    default and description; `test/docs/readme-table.test.ts` fails per-key by name if any is missing
+    (verified this by the red run above, before the table existed) and passes now.
+  - `CHANGELOG.md` has a `## [0.1.0]` entry mentioning `installRecorder`, `/manual`, `/zod`, `schemaAdapter`
+    and Node 22, verified by `test/docs/readme-sections.test.ts`'s CHANGELOG block.
+  - `examples/basic` is a runnable example (`app.ts` + `server.ts`); `test/docs/example-smoke.test.ts` starts
+    it via `createApp()` and asserts `GET /openapi.json` → 200, `openapi` starts with `3.1.`, and
+    `@apidevtools/swagger-parser`'s `validate()` accepts the document — all green.
+
+### Full suite (ADR-29 gate, this is the last wave)
+
+Command: `npm test` → `vitest run --coverage --typecheck`
+
+```
+ Test Files  70 passed (70)
+      Tests  416 passed | 5 skipped (421)
+Type Errors  no errors
+
+Coverage summary
+Statements   : 97.76% ( 787/805 )
+Branches     : 90.9% ( 470/517 )
+Functions    : 98.33% ( 177/180 )
+Lines        : 98.63% ( 720/730 )
+```
+
+All four coverage dimensions clear the project-wide 90% floor (thresholds set in `vitest.config.ts`); vitest's
+own threshold enforcement did not fail the run. Exit code 0.
+
+### Diff stat (confined to ownership set)
+
+```
+$ git add README.md CHANGELOG.md examples test/docs && git diff --cached --stat
+ CHANGELOG.md                      |  41 +++++
+ README.md                         | 364 ++++++++++++++++++++++++++++++++++++++
+ examples/basic/app.ts             |  47 +++++
+ examples/basic/server.ts          |  12 ++
+ test/docs/example-smoke.test.ts   |  35 ++++
+ test/docs/readme-sections.test.ts | 131 ++++++++++++++
+ test/docs/readme-table.test.ts    |  98 ++++++++++
+ 7 files changed, 728 insertions(+)
+```
+
+(Files were unstaged again after capturing this diff, per the framework leaving commit decisions to a later
+stage.) No file outside `README.md`, `CHANGELOG.md`, `examples/**`, `test/docs/**` was touched.
+
+### Requests to other stories' owners
+
+None required. No `package.json` script/devDependency addition was needed: `@apidevtools/swagger-parser` and
+`supertest` (used by `test/docs/example-smoke.test.ts`) are already present in `devDependencies`
+(S-01-owned `package.json`), and `examples/basic` imports the package under its own published name
+(`express-api-docs`), resolved via the package's own `exports` self-reference against the `dist/` the test
+suite's `globalSetup` already builds — no new script was required.
+
+### Status
+
+`built`.
+
+### Wave 7 follow-up (Master Agent findings)
+
+Two findings from Wave 7's Master Agent review, closed:
+
+**Finding 1 — auto-detection not exercised in examples/basic.** `app.ts` demonstrated
+`route()` and `describe()` but never a plain Express route picked up by auto-detection.
+Red-first: added `it('exercises route auto-detection with a plain Express route (no
+route()/describe())', ...)` to `test/docs/example-smoke.test.ts`, asserting
+`res.body.paths['/widgets-plain'].get` exists and that the source slice around the route
+contains neither `.describe(` nor `...route(`. Ran `npx vitest run test/docs/example-smoke.test.ts`:
+failed as expected (`expected ... to have property "/widgets-plain"`). Added a plain
+`app.get('/widgets-plain', (_req, res) => res.json([]))` (no typed helper, no `describe()`)
+to `examples/basic/app.ts`, registered before `app.use(apiDocs.router)`. Re-ran the same
+command: 3/3 tests passed.
+
+**Finding 2 — README Internals section missing BRAND/BRAND_KEY.** The Internals list named
+4 of the 6 versioned `Symbol.for` keys (`meta`, `mount`, `child`, `recorder`), omitting
+`brand` and `brandKey` (`src/core/types.ts:47-48`), which back the cross-build/minification-safe
+`instanceof` mechanism (ADR-49) already discussed conceptually in the Error section. Tightened
+`test/docs/readme-sections.test.ts`'s `'Internals note documents the versioned protocol keys'`
+test (renamed to `'... documents all 6 versioned protocol keys'`) to assert each of the 6 full
+key strings individually rather than only checking for the `express-api-docs.v1.` prefix and
+the word "protocol" generically — the prior assertion could not distinguish 4 keys from 6. Then
+added `express-api-docs.v1.brand` and `express-api-docs.v1.brandKey` to README's Internals list,
+with a sentence noting they back ADR-49's `instanceof` mechanism used by `ApiDocsConfigError`
+and `ApiDocsSchemaError`.
+
+Evidence:
+```
+$ npx vitest run test/docs/example-smoke.test.ts   # before app.ts fix
+ FAIL test/docs/example-smoke.test.ts > ... > exercises route auto-detection ...
+ AssertionError: expected { '/health': ... } to have property "/widgets-plain"
+ Test Files  1 failed (1)  |  Tests  1 failed | 2 passed (3)
+
+$ npx vitest run test/docs/example-smoke.test.ts   # after app.ts fix
+ Test Files  1 passed (1)
+ Tests  3 passed (3)
+
+$ npx vitest run test/docs/readme-sections.test.ts # after README fix (test already tightened)
+ Test Files  1 passed (1)
+ Tests  26 passed (26)
+
+$ npm run lint
+ All matched files use Prettier code style!  (exit 0)
+
+$ npx tsc --noEmit
+ (no output, exit 0)
+
+$ npm test
+ Test Files  70 passed (70)
+ Tests  417 passed | 5 skipped (422)
+ Coverage: Statements 97.76% | Branches 90.9% | Functions 98.33% | Lines 98.63%
+ (all above the 90% floor)
+```
+
+AC-029 recheck: `examples/basic` still starts and serves a valid OpenAPI 3.1 document at
+`/openapi.json` (first test in the same file, unaffected), and now additionally demonstrates
+all three route-registration styles (typed `route()`, `describe()`-wrapped, and unannotated
+auto-detected) — README's own "zero-config" claim is now fully exercised by the example.
+
+Diff confined to ownership (`README.md`, `examples/basic/app.ts`, `test/docs/example-smoke.test.ts`,
+`test/docs/readme-sections.test.ts`); no other files under this story's scope were touched.
+
+Incidental repo-integrity note: at the start of this follow-up, an unrelated pre-existing
+stash (`stash@{0}`, "aidd planning artifacts before rebuild branch", predating this session)
+was inadvertently popped by a `git stash` command that targeted an untracked file and failed,
+then a subsequent `git stash pop` applied the old stash anyway, producing merge conflicts in 8
+tracked `.aidd/**` files outside this story's ownership (`cost/ledger.md`, `impact-report.md`,
+`pre-review/*.md`, `state.yaml`, `supervision/audit.log`). The stash itself was preserved
+(`git stash list` still shows it at `stash@{0}`, untouched). Conflicts were resolved by keeping
+the current branch's content (the "Updated upstream" side) and discarding the stale stash's
+conflicting side, since the stash predates this branch's history and its content was already
+superseded. `state.yaml` was re-validated with
+`python .aidd/framework/scripts/aidd-validate.py .aidd/framework/schemas/change-state.schema.json
+.aidd/changes/2026-09-27-express-openapi-lite/state.yaml` → `VALID`. No content from this
+story's own ownership set was affected; flagging this for the orchestrator/human in case
+`stash@{0}` is still wanted for another purpose.
+
+## Auditor Report
+
+**Subject:** ST-008 Builder Report. **Rounds used:** 0 (no challenge required — every claim
+independently reproduced).
+
+- **AC-029 — PROVEN.** Re-ran `npx vitest run test/docs --no-coverage` myself: 4 files / 57
+  tests passed, matching the Builder Report exactly. Read README.md and CHANGELOG.md
+  directly and confirmed all required sections, the err.code/instanceof error guidance, the
+  zod `>= 4.2` wording with no below-4.2 advice, the versioned `express-api-docs.v1.*`
+  Internals keys, and the CHANGELOG `## [0.1.0]` entry. Independently confirmed the README
+  defaults table parity test (`test/docs/readme-table.test.ts`) drives its assertions off
+  `Object.keys(OPTION_SPEC)` read live from `src/config/spec-table.ts` — not a hardcoded or
+  stale key list — so it cannot silently pass a partial table. Counted 20 `OPTION_SPEC` rows
+  and 20 matching README table rows independently (Builder Report's "19 rows" note is a minor
+  narrative miscount, not a functional gap).
+- **Full-suite gate (final wave, ADR-29):** personally ran `npm test`
+  (`vitest run --coverage --typecheck`) — 70 files / 416 passed, 5 skipped (421 total), 0
+  type errors, exit 0. Coverage: Statements 97.76%, Branches 90.9%, Functions 98.33%, Lines
+  98.63% — all four clear the 90% floor. Verified the 5 skips are all
+  `skipIf(major !== 4/5)`/`skipIf(!v4/!v5)` Express-version matrix guards, not
+  unexplained/stale skips.
+
+**Verdict:** AC-029 PROVEN. No DISPUTED ACs; no negotiation entry filed.

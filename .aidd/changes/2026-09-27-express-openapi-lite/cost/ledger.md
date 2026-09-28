@@ -100,3 +100,7 @@
 | 2026-09-28T07:07:35Z | construction | con2e-integration | build-fixer | test/dist stale assertions | not measured | 50520 | 1.9 | 4926731 | 590.4 | measured |
 | 2026-09-28T07:07:35Z | construction | con2c-monitor | master-agent | wave-6 | not measured | 54641 | 1.9 | 4981372 | 592.3 | measured |
 | 2026-09-28T07:07:35Z | construction | con2d-interrogation | auditor | ST-007 | not measured | 63736 | 18.1 | 5045108 | 610.4 | measured |
+| 2026-09-28T07:27:41Z | construction | con2a-builder | builder | ST-008 | not measured | 90225 | 6.2 | 5135333 | 616.6 | measured |
+| 2026-09-28T07:27:41Z | construction | con2a-builder | builder | ST-008 wave-7 followup (auto-detect example, README brand keys) | not measured | 57985 | 5.4 | 5193318 | 622.0 | measured |
+| 2026-09-28T07:27:41Z | construction | con2c-monitor | master-agent | wave-7 | not measured | 48482 | 1.7 | 5241800 | 623.7 | measured |
+| 2026-09-28T07:27:41Z | construction | con2d-interrogation | auditor | ST-008 | not measured | 43770 | 2.4 | 5285570 | 626.1 | measured |

@@ -125,3 +125,8 @@
 2026-09-28T07:07:35Z | construction | master-agent | wave-6 | returned | wave 6 evidence
 2026-09-28T07:07:35Z | construction | auditor | ST-007 | returned | wave 6 evidence
 2026-09-28T07:07:35Z | construction | orchestrator | integration check | returned | 2 known ADR-55-caused test/dist failures -> Build Fixer, fixed first attempt, 67/67 files green, independently re-verified
+2026-09-28T07:27:41Z | construction | builder | ST-008 | returned | wave 7 evidence
+2026-09-28T07:27:41Z | construction | builder | ST-008 wave-7 followup (auto-detect example, README brand keys) | returned | wave 7 evidence
+2026-09-28T07:27:41Z | construction | master-agent | wave-7 | returned | wave 7 evidence
+2026-09-28T07:27:41Z | construction | auditor | ST-008 | returned | wave 7 evidence
+2026-09-28T07:27:41Z | construction | orchestrator | stash incident | returned | ST-008 followup dispatch accidentally popped a stale stash (own artifact from early Inception, pre-rebuild); caused whitespace-only diff on audit.log (harmless), verified all 8 other affected files byte-identical to committed HEAD, state.yaml re-validated VALID; reverted the diff and dropped the superseded stash

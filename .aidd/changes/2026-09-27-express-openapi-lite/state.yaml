@@ -12,15 +12,15 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
   budget_tokens: 5600000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 1200
-  spent_tokens: 5045108        # derived from cost/ledger.md — never asserted
-  spent_minutes: 610.4
+  spent_tokens: 5285570        # derived from cost/ledger.md — never asserted
+  spent_minutes: 626.1
   by_phase:
     inception:
       tokens: 2694542
       minutes: 102.0
     construction:
-      tokens: 756006
-      minutes: 242.3           # phase -> {tokens, minutes}; sums to spent_*
+      tokens: 2591028
+      minutes: 524.1           # phase -> {tokens, minutes}; sums to spent_*
   projection_tokens: null
   stops:
     - at: "2026-09-27T12:59:42Z"
@@ -136,7 +136,7 @@ stories:
     attempts: 1
     wave: 6
   ST-008:
-    status: ready
+    status: built
     attempts: 1
     wave: 7
 fix_loop:
@@ -217,4 +217,8 @@ history:
     event: "[construction 2/4] wave 5 (ST-006) built, 16/16 PROVEN, mutation 100%, determinism verified structurally · stories/ST-006-spec-builder.md · gates: 1/3 · rigor: critical · next: wave 6 (ST-007)"
   - at: "2026-09-28T07:07:35Z"
     event: "[construction 3/4] wave 6 (ST-007) built, 10/10 PROVEN incl. runtime-verified ADR-55 fix; build-fixer resolved 2 stale test/dist assertions, 67/67 files green · stories/ST-007-serve-docs.md · gates: 1/3 · rigor: critical · next: wave 7 (ST-008)"
-updated_at: "2026-09-28T07:07:35Z"
+  - at: "2026-09-28T07:27:41Z"
+    event: "[construction 3/4] wave 7 (ST-008) built, final wave; AC-029 PROVEN, full suite 70/70 green project-wide; 2 product-quality findings closed (auto-detect example, README brand keys); stash incident caught+resolved, no data loss · stories/ST-008-docs-release.md · gates: 1/3 · rigor: critical · next: final integration check, supervisor audit"
+  - at: "2026-09-28T07:30:20Z"
+    event: "[construction 4/4] supervisor VIOLATIONS: by_phase.construction stale since wave 3; recomputed from ledger (inception 2694542tok/102.0min, construction 2591028tok/524.1min, sums to spent_*); remediated · state.yaml · gates: 1/3 · rigor: critical · next: gate g2_plan re-approval"
+updated_at: "2026-09-28T07:27:41Z"

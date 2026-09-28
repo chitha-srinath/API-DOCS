@@ -116,3 +116,7 @@
 2026-09-27T19:31:03Z | construction | architect | ADR-55 backflow | returned | root cause diagnosed (package.json sideEffects array is esbuild's source-level allowlist); fix prescribed (1-line addition); S-07 ownership exception granted, S-01/tsup.config.ts untouched
 2026-09-27T19:31:03Z | construction | orchestrator | backflow followup | dispatched | describe() signature divergence (ADR-56 candidate), same agent sequentially resumed
 2026-09-27T19:32:17Z | construction | architect | ADR-56 backflow | returned | describe() 3-arg factory ratified as public API, C4 amended, zero rework (ST-005 already matches)
+2026-09-28T05:33:02Z | construction | builder | ST-006 (rate-limit resume) | returned | wave 5 evidence
+2026-09-28T05:33:02Z | construction | master-agent | wave-5 | returned | wave 5 evidence
+2026-09-28T05:33:02Z | construction | auditor | ST-006 | returned | wave 5 evidence
+2026-09-28T05:33:02Z | construction | orchestrator | wave-5 monitoring note | returned | corrected misplaced file (repo-root audit/ instead of change-scoped audit/); moved, stray dir removed

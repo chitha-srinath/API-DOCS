@@ -12,8 +12,8 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
   budget_tokens: 5600000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 1200
-  spent_tokens: 4321271        # derived from cost/ledger.md — never asserted
-  spent_minutes: 464.0
+  spent_tokens: 4676737        # derived from cost/ledger.md — never asserted
+  spent_minutes: 517.5
   by_phase:
     inception:
       tokens: 2694542
@@ -128,7 +128,7 @@ stories:
     attempts: 1
     wave: 4
   ST-006:
-    status: ready
+    status: built
     attempts: 1
     wave: 5
   ST-007:
@@ -213,4 +213,6 @@ history:
     event: "[construction] both wave-4 backflows resolved: ADR-55 (dist sideEffects defect diagnosed, S-07 exception granted) and ADR-56 (describe() ratified, zero rework) · architecture.md · gates: 1/3 · rigor: critical · next: wave 5 status"
   - at: "2026-09-27T19:33:34Z"
     event: "[construction] both wave-4 backflows resolved: ADR-55 (dist sideEffects defect diagnosed, S-07 exception granted) and ADR-56 (describe() ratified, zero rework) · architecture.md · gates: 1/3 · rigor: critical · next: wave 5 status"
-updated_at: "2026-09-27T19:33:34Z"
+  - at: "2026-09-28T05:33:02Z"
+    event: "[construction 2/4] wave 5 (ST-006) built, 16/16 PROVEN, mutation 100%, determinism verified structurally · stories/ST-006-spec-builder.md · gates: 1/3 · rigor: critical · next: wave 6 (ST-007)"
+updated_at: "2026-09-28T05:33:02Z"

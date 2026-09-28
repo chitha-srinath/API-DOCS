@@ -2,8 +2,8 @@
 id: ST-006
 title: "Spec builder: dedupe, glob, naming, canonical sort and fingerprint cache"
 wave: 5
-status: queued
-attempts: 0
+status: built
+attempts: 1
 ac_ids:
   - AC-005
   - AC-011
@@ -212,3 +212,160 @@ Story-focused red/green run: `npx vitest run test/spec`. **Merge rule (ADR-29 #7
 
 ## Builder Report
 
+### Summary
+
+Implemented `src/spec/{build,naming,canonical,cache,glob}.ts` (exactly the 5 files the
+component contract names) and the full `test/spec/**` suite named in the story's test
+plan. `buildSpec(ops, config, adapter)` is pure (no Express/zod/registry-impl import,
+verified by an automated test), dedupes with typed/describe > plain precedence,
+self-excludes `specPath`/`docsPath`, applies `autoDetect`/`include`/`exclude` via the
+in-house glob, builds parameters/requestBody/responses (incl. the auto-400 ProblemDetails
+`$ref`), security inheritance, naming defaults/strategies with an id-ordered collision
+suffix mechanism (`assignOperationIds`), info/servers/tags overrides, and a canonical key
+sort for byte-stable output. `createSpecCache` implements the ADR-09 nested-fingerprint
+lazy cache with `invalidate()`.
+
+### TDD evidence
+
+**Red** (`test/spec/` written first; `src/spec/` moved aside to force the story's
+predicted failure mode, then restored):
+
+```
+$ mv src/spec src/spec.bak && npx vitest run test/spec
+...
+FAIL  test/spec/build.test.ts [ test/spec/build.test.ts ]
+Error: Cannot find module '../../src/spec/build.js' imported from .../test/spec/build.test.ts
+FAIL  test/spec/cache.test.ts ... Cannot find module '../../src/spec/cache.js'
+FAIL  test/spec/canonical.test.ts ... Cannot find module '../../src/spec/canonical.js'
+FAIL  test/spec/glob.test.ts ... Cannot find module '../../src/spec/glob.js'
+FAIL  test/spec/stub-adapter.test.ts ... Cannot find module '../../src/spec/build.js'
+FAIL  test/spec/ac023.test.ts ... (same failure mode)
+ Test Files  6 failed (6)
+      Tests  no tests
+```
+Matches the story's "Expected red: module-resolution errors ... because `src/spec/`
+does not exist yet."
+
+**Green** (after restoring `src/spec/`):
+
+```
+$ npx vitest run test/spec
+ Test Files  6 passed (6)
+      Tests  35 passed (35)
+Type Errors  no errors
+```
+
+### Lint / typecheck
+
+```
+$ npm run lint
+> eslint . && prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+(eslint: no errors)
+
+$ npx tsc --noEmit
+(no output — success)
+```
+
+### Full `npm test` (ADR-29 #7 merge rule — global thresholds, not just the focused path)
+
+```
+$ npm test
+ Test Files  53 passed (53)
+      Tests  308 passed | 5 skipped (313)
+Type Errors  no errors
+
+Coverage summary
+Statements   : 97.63% ( 742/760 )
+Branches     : 90.38% ( 451/499 )
+Functions    : 98.21% ( 165/168 )
+Lines        : 98.68% ( 677/686 )
+```
+All four thresholds (90/90/90/90) met.
+
+### Mutation (ADR-50 scoped run)
+
+```
+$ npx stryker run --mutate "src/spec/**" --incremental
+Mutation testing 100% (elapsed: 1h 6m) 383/383 tested (0 survived, 7 timed out)
+All tests
+  ✓ All tests (killed 376)
+
+              | % Mutation score |          |           |            |          |          |
+File          |  total | covered | # killed | # timeout | # survived | # no cov | # errors |
+All files     | 100.00 |  100.00 |      376 |         7 |          0 |        0 |        0 |
+ build.ts     | 100.00 |  100.00 |      244 |         0 |          0 |        0 |        0 |
+ cache.ts     | 100.00 |  100.00 |       30 |         0 |          0 |        0 |        0 |
+ canonical.ts | 100.00 |  100.00 |       19 |         0 |          0 |        0 |        0 |
+ glob.ts      | 100.00 |  100.00 |       31 |         7 |          0 |        0 |        0 |
+ naming.ts    | 100.00 |  100.00 |       52 |         0 |          0 |        0 |        0 |
+
+Final mutation score of 100.00 is greater than or equal to break threshold 70
+```
+Score: **100.00 / threshold 70** — pass.
+
+Note on process: an earlier attempt at this run was piped through `tail`, whose
+stdout buffering made the log file appear stuck at 0 bytes for ~50 minutes; I
+mistook this for the ADR-50 "stale-sandbox" symptom, killed the node processes at
+83% progress, cleared `.stryker-tmp/` and `reports/`, and reran directly to a log
+file (no `tail` in the pipeline) per the retry-once guidance. The rerun completed
+cleanly with the score above — recorded here for the audit trail even though the
+underlying cause was a local piping artifact, not a real stale sandbox.
+
+### AC self-check
+
+| AC | Check | Result |
+|---|---|---|
+| AC-005 | stub-adapter.test.ts: stub schema appears in requestBody | ✅ |
+| AC-011 | build.test.ts: auto-400 ProblemDetails $ref present with a request schema, absent without one | ✅ |
+| AC-015 | build.test.ts + ac023.test.ts: openapi `3.1.0`, swagger-parser validates every spec-producing test | ✅ |
+| AC-016 | build.test.ts: `/users/{id}` path param, query param, requestBody, response schemas from adapter | ✅ |
+| AC-017 | build.test.ts: bearer/apiKey/oauth2 schemes present; op security references one | ✅ |
+| AC-023 | ac023.test.ts (both majors): `/api/users/{id}` get+post, operationId, path param, 200, tag `api` | ✅ |
+| AC-030 | build.test.ts: `autoDetect:false` hides plain ops; `exclude` filters; typed unaffected | ✅ |
+| AC-031 | build.test.ts dedupe test: typed/describe beat plain, exactly one op survives | ✅ |
+| AC-032 | cache.test.ts: route added to nested router after mount triggers rebuild (fingerprint change) | ✅ |
+| AC-033 | build.test.ts: default and custom specPath/docsPath self-excluded | ✅ |
+| AC-034 | canonical.test.ts + build.test.ts (id-ordered collisions) + cache fingerprint semantics | ✅ |
+| AC-038 | build.test.ts: info/servers/tags overrides applied exactly; ADR-08 default verified | ✅ |
+| AC-039 | build.test.ts: global security inherited; route `security:[]` kept empty | ✅ |
+| AC-041 | build.test.ts: `include:['/api/**']` + custom `detectedDefaultResponse` | ✅ |
+| AC-042 | build.test.ts: default naming (`getUsersById`/`users`); custom strategies; explicit wins | ✅ |
+| AC-047 | stub-adapter.test.ts: global stub adapter used; per-route `meta.adapter` overrides parameter | ✅ |
+
+### Ownership-scoped diff
+
+```
+$ git diff --stat -- src/spec test/spec
+ src/spec/build.ts              | 281 +++++++++++++++++++++++++++++++++++++
+ src/spec/cache.ts              |  65 +++++++++
+ src/spec/canonical.ts          |  20 +++
+ src/spec/glob.ts               |  42 ++++++
+ src/spec/naming.ts             |  51 +++++++
+ test/spec/ac023.test.ts        |  47 +++++++
+ test/spec/build.test.ts        | 310 +++++++++++++++++++++++++++++++++++++++++
+ test/spec/cache.test.ts        |  62 +++++++++
+ test/spec/canonical.test.ts    |  27 ++++
+ test/spec/glob.test.ts         |  33 +++++
+ test/spec/stub-adapter.test.ts |  50 +++++++
+ 11 files changed, 988 insertions(+)
+```
+Confirmed confined to `src/spec/**` and `test/spec/**` (`git status --short` shows no
+other tracked changes outside this set; `.mcp.json` is an untracked pre-existing repo
+artifact, not touched by this story).
+
+### Status: built
+
+
+## Auditor Report
+
+Verdict: **16/16 ACs PROVEN, 0 DISPUTED.** Full verdict: `audit/interrogation/ST-006-verdict.md`.
+No challenge round issued (round 0 direct interrogation settled every AC). Independent
+verification performed: re-ran `npx vitest run test/spec` live (6 files / 35 tests passed,
+matching the Builder Report exactly); read `src/spec/build.ts` and the AC-tagged tests in
+`test/spec/{build,cache,ac023,stub-adapter}.test.ts` line-by-line against the PRD Then-clauses;
+independently reproduced the ADR-50 scoped mutation claim from the raw
+`reports/stryker-incremental.json` (376 Killed + 7 Timeout + 0 Survived = 383, only the 5
+`src/spec/**` files present), corroborating the console summary despite the builder's
+self-disclosed tail-buffering/kill/rerun incident. No negotiation entries filed.

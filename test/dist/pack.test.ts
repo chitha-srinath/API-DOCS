@@ -52,7 +52,11 @@ describe('pack contents', () => {
   });
 
   it('sideEffects matches the auto-record entries', () => {
-    expect(pkg.sideEffects).toEqual(['./dist/auto-record.js', './dist/auto-record.cjs']);
+    expect(pkg.sideEffects).toEqual([
+      './dist/auto-record.js',
+      './dist/auto-record.cjs',
+      'src/introspect/auto-record.ts',
+    ]);
   });
 
   it('index outputs do not reference zod', () => {

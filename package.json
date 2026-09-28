@@ -58,7 +58,8 @@
   },
   "sideEffects": [
     "./dist/auto-record.js",
-    "./dist/auto-record.cjs"
+    "./dist/auto-record.cjs",
+    "src/introspect/auto-record.ts"
   ],
   "scripts": {
     "build": "tsup",

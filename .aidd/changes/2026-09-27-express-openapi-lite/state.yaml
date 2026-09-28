@@ -10,7 +10,7 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
   reason: "critical trigger: public API contract (published SDK surface, exported .d.ts, OpenAPI output) + infra/deploy config (.github/workflows CI) named in intent"
   escalations: []        # append-only, one-way: {from, to, trigger, at}
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
-  budget_tokens: 5600000 # standard default (derived, not measured); tunable in constitution.md
+  budget_tokens: 20000000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 1200
   spent_tokens: 5413235        # derived from cost/ledger.md — never asserted
   spent_minutes: 627.9
@@ -225,4 +225,6 @@ history:
     event: "[construction 4/4] Supervisor COMPLIANT, construction phase closed · supervision/construction-report.md · gates: 1/3 · rigor: critical · next: gate g2_plan re-approval before qa"
   - at: "2026-09-28T20:12:26Z"
     event: "[qa 0/17] G2 re-approved by human · epic.md · gates: 2/3 · rigor: critical · next: qa step 1"
-updated_at: "2026-09-28T20:12:26Z"
+  - at: "2026-09-28T20:13:53Z"
+    event: "[qa 0/17] human raised budget_tokens 5.6M->20M pre-emptively before QA; block never triggered · state.yaml · gates: 2/3 · rigor: critical · next: qa step 1"
+updated_at: "2026-09-28T20:13:53Z"

@@ -7,7 +7,7 @@
 | field | value |
 |---|---|
 | rigor_mode | critical |
-| budget_tokens | 5600000 |
+| budget_tokens | 20000000 |
 | budget_minutes | 1200 |
 | derived_by | raised (stops row 1) |
 

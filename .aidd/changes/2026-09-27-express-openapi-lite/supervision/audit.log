@@ -130,3 +130,4 @@
 2026-09-28T07:27:41Z | construction | master-agent | wave-7 | returned | wave 7 evidence
 2026-09-28T07:27:41Z | construction | auditor | ST-008 | returned | wave 7 evidence
 2026-09-28T07:27:41Z | construction | orchestrator | stash incident | returned | ST-008 followup dispatch accidentally popped a stale stash (own artifact from early Inception, pre-rebuild); caused whitespace-only diff on audit.log (harmless), verified all 8 other affected files byte-identical to committed HEAD, state.yaml re-validated VALID; reverted the diff and dropped the superseded stash
+2026-09-28T07:31:52Z | construction | supervisor | construction phase-boundary audit | returned | COMPLIANT (cost violation remediated, re-verified)

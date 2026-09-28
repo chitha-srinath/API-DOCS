@@ -104,3 +104,4 @@
 | 2026-09-28T07:27:41Z | construction | con2a-builder | builder | ST-008 wave-7 followup (auto-detect example, README brand keys) | not measured | 57985 | 5.4 | 5193318 | 622.0 | measured |
 | 2026-09-28T07:27:41Z | construction | con2c-monitor | master-agent | wave-7 | not measured | 48482 | 1.7 | 5241800 | 623.7 | measured |
 | 2026-09-28T07:27:41Z | construction | con2d-interrogation | auditor | ST-008 | not measured | 43770 | 2.4 | 5285570 | 626.1 | measured |
+| 2026-09-28T07:31:52Z | construction | con4-supervisor | supervisor | construction phase-boundary audit | not measured | 127665 | 1.8 | 5413235 | 627.9 | measured |

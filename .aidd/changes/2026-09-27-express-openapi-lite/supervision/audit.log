@@ -166,3 +166,4 @@
 2026-09-28T21:35:27Z | qa | builder | ST-004 fix loop 1 | returned | fix loop iteration 1
 2026-09-28T21:35:27Z | qa | builder | ST-007 fix loop 1 | returned | fix loop iteration 1
 2026-09-28T21:35:27Z | qa | orchestrator | cross-cutting infra fix | returned | fixed vitest.stryker.config.ts (missing perf-smoke exclude + testTimeout), independently found by 2 of 3 fix-loop builders; re-verified full suite 79/79 files, 639/644 tests, coverage 98.54/93.04/99.45/99.33
+2026-09-29T05:55:25Z | qa | orchestrator | ST-006 mutation re-verify | returned | 86.96% overall (src/spec 84.43%, build.ts 82.46%, glob.ts 100%), threshold 70 met, 89m52s

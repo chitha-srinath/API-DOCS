@@ -54,9 +54,18 @@ Independently traced F-01/F-02/F-03/F-04 and F-06 against source before the adve
 
 | Finding | Severity (final) | Verdict | Disposition |
 |---|---|---|---|
-| F-01 | CRITICAL | CONFIRMED (scope widened: reachable via default adapter too) | BLOCKING → fix loop |
-| F-02 | HIGH | CONFIRMED | BLOCKING → fix loop |
+| F-01 | CRITICAL | CONFIRMED (scope widened: reachable via default adapter too) | FIXED, step 6 iteration 1 |
+| F-02 | HIGH (widened: also a crash path) | CONFIRMED | FIXED, step 6 iteration 1 |
 | F-03 | LOW (demoted from HIGH) | REFUTED at HIGH, real mechanism at LOW | Advisory, not blocking |
-| F-04 | HIGH | CONFIRMED | BLOCKING → fix loop |
+| F-04 | HIGH | CONFIRMED | FIXED, step 6 iteration 1 (both call sites) |
+| F-21 | LOW (new, from exhaustive testing) | — | Advisory, not blocking |
 
-3 findings enter the step 6 fix loop: **F-01, F-02, F-04**.
+## Fix Loop Iteration 1 — closure evidence
+
+All 3 blocking findings fixed with TDD red-then-green evidence (see each story's "Fix Loop Iteration 1 Report" section) and independently re-verified by the orchestrator:
+
+- **Full suite**: 79/79 files, 639/644 tests (5 legitimate skips), 0 type errors, coverage 98.54/93.04/99.45/99.33 (up from pre-fix).
+- **F-01/F-02 mutation gate** (ST-006, `src/spec/**`): 86.96% overall, `src/spec` 84.43%, `build.ts` (F-01's fix) 82.46%, `glob.ts` (F-02's fix) 100% — threshold 70 met.
+- **F-04 mutation gates** (ST-004, ST-007): re-verification in progress.
+
+A cross-cutting infra gap was found and fixed along the way: `vitest.stryker.config.ts` was missing an exclude for the new `test/aidd-exhaustive/performance-smoke/**` suite and a `testTimeout` override, blocking every mutation re-run regardless of the actual fix — independently reproduced by 2 of 3 fix-loop builders with zero concurrent load, confirming it as real and not environmental noise.

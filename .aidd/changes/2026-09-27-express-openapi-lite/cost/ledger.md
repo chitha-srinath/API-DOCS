@@ -135,3 +135,4 @@
 | 2026-09-30T00:20:00Z | qa | e2e-verifier | e2e-verifier | step 7 E2E verification (critical, clean-state, determinism repeats) | not measured | 81468 | 43.1 | 7130731 | 809.1 | measured |
 | 2026-09-30T00:40:00Z | qa | build-fixer | build-fixer | fix loop iter: pack.test.ts + perf-smoke timeout config | not measured | 45195 | 17.1 | 7175926 | 826.2 | measured |
 | 2026-09-30T01:10:00Z | qa | e2e-verifier | e2e-verifier | step 7 E2E re-verification (2nd dispatch, critical, clean-state, determinism repeats) | not measured | 90373 | 33.3 | 7266299 | 859.5 | measured |
+| 2026-09-30T01:35:00Z | qa | build-fixer | build-fixer | fix loop iter 2: vitest maxWorkers concurrency fix | not measured | 46536 | 22.4 | 7312835 | 881.9 | measured |

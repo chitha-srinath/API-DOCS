@@ -12,8 +12,8 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
   budget_tokens: 20000000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 2500
-  spent_tokens: 7266299        # derived from cost/ledger.md — never asserted
-  spent_minutes: 965.7
+  spent_tokens: 7312835        # derived from cost/ledger.md — never asserted
+  spent_minutes: 988.1
   by_phase:
     inception:
       tokens: 2694542
@@ -22,8 +22,8 @@ cost:                    # actual spend against the mode's ceilings — see prot
       tokens: 2718693
       minutes: 525.9           # phase -> {tokens, minutes}; sums to spent_*
     qa:
-      tokens: 217036
-      minutes: 93.5           # NOTE: pre-existing gap — prior qa dispatches (steps 1-6) were never folded into by_phase.qa despite spent_* already reflecting them (872.2 > inception+construction); flagging for supervisor, not silently backfilled
+      tokens: 263572
+      minutes: 115.9           # NOTE: pre-existing gap — prior qa dispatches (steps 1-6) were never folded into by_phase.qa despite spent_* already reflecting them (872.2 > inception+construction); flagging for supervisor, not silently backfilled
   projection_tokens: null
   stops:
     - at: "2026-09-27T12:59:42Z"
@@ -268,4 +268,6 @@ history:
     event: "[qa 7/17] human raised budget_minutes 1200->2500 mid-e2e-verification (full mutation run ~4hr estimate) · state.yaml · gates: 2/3 · rigor: critical · next: await e2e results"
   - at: "2026-09-30T01:10:00Z"
     event: "[qa 7/17] E2E re-verification (2nd fresh dispatch) RED again: build/lint/typecheck/pack/audit/e2e-smoke all green; full suite disagreed both determinism runs — run1 failed test/entries/minified.test.ts (known quarantine, hookTimeout 20000ms vs esbuild subprocess), run2 failed test/meta/lint-rules.test.ts (NEW flake, testTimeout 20000ms vs ESLint lintText call), 3rd corroboration inside Stryker dry run; root cause: Windows-host CPU/AV contention under ~74-78 concurrent vitest workers pushes these two CPU-bound subprocess/lint tests past fixed 20000ms budgets non-deterministically — confirmed NOT app regressions (both pass reliably alone/parallelism-1/reverse-order/TZ=UTC: 78/78 files, 637 passed, 0 failed). Coverage (from clean parallelism-1 run): stmts 98.56%/branches 93.35%/fns 99.45%/lines 99.34%, above 90% target. Mutation: instrumented 1698 mutants, infeasible session-bounded again (na). Both flaky tests quarantined, disposition pending · qa/verification-report.md, qa/determinism-report.md · gates: 2/3 · rigor: critical · tests_green/e2e_verified/evidence_reproduced remain pending · next: fix loop iteration 2/3 — widen timeout/concurrency remedy (already applied to pack.test.ts) to lint-rules.test.ts and minified.test.ts, or reduce default vitest worker concurrency on this host"
-updated_at: "2026-09-30T01:10:00Z"
+  - at: "2026-09-30T01:35:00Z"
+    event: "[qa 6/17 fix loop iter 2] build-fixer: root cause is worker-pool oversubscription (78 files -> ~75 concurrent vitest workers on 8-core Windows host); minified.test.ts (esbuild subprocess in beforeAll) and lint-rules.test.ts (ESLint lintText) occasionally exceed fixed 20000ms timeouts under contention. Chose systemic fix over 2nd timeout bump (bumping already failed once): maxWorkers:4 in vitest.config.ts. Self-caught+fixed a regression in its own explanatory comment (banned old-package-name string tripped manifest.test.ts) before declaring done. Verified npm test green 2/2 consecutive runs post-fix, coverage matches baseline (98.56/93.35/99.45/99.34%); wall-clock +25-30% (~98s->120-125s), judged acceptable. Reported confidence high-not-absolute: only 2 green samples, root cause addressed not just symptom, recommends maxWorkers:2 or isolated low-concurrency config if this recurs a 3rd time (loop budget: 1 iteration left) · vitest.config.ts, build-log.md · gates: 2/3 · rigor: critical · next: commit (already self-committed afd973b — NOTE for supervisor: build-fixer committed directly, deviating from single-writer/orchestrator-commits norm; accepting the commit as-is rather than reverting, but flagging the process deviation), re-dispatch E2E Verifier for 3rd fresh step-7 re-proof"
+updated_at: "2026-09-30T01:35:00Z"

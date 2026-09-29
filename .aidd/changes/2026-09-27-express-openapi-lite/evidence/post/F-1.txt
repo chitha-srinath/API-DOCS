@@ -1,0 +1,74 @@
+$ npm run build
+
+> express-api-docs@0.1.0 build
+> tsup
+
+[34mCLI[39m Building entry: {"index":"src/index.ts","manual":"src/manual.ts","zod":"src/zod.ts","auto-record":"src/auto-record.ts"}
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.5.1
+[34mCLI[39m Using tsup config: C:\sai\code practice\Package\API-DOCS\tsup.config.ts
+[34mCLI[39m Target: es2022
+[34mCLI[39m Cleaning output folder
+[34mESM[39m Build start
+[34mCJS[39m Build start
+[32mESM[39m [1mdist\index.js       [22m[32m46.10 KB[39m
+[32mESM[39m [1mdist\manual.js      [22m[32m46.06 KB[39m
+[32mESM[39m [1mdist\zod.js         [22m[32m2.03 KB[39m
+[32mESM[39m [1mdist\auto-record.js [22m[32m3.86 KB[39m
+[32mESM[39m ⚡️ Build success in 200ms
+[32mCJS[39m [1mdist\index.cjs       [22m[32m47.76 KB[39m
+[32mCJS[39m [1mdist\manual.cjs      [22m[32m47.70 KB[39m
+[32mCJS[39m [1mdist\auto-record.cjs [22m[32m5.00 KB[39m
+[32mCJS[39m [1mdist\zod.cjs         [22m[32m3.10 KB[39m
+[32mCJS[39m ⚡️ Build success in 202ms
+[34mDTS[39m Build start
+[32mDTS[39m ⚡️ Build success in 4300ms
+[32mDTS[39m [1mdist\auto-record.d.ts     [22m[32m13.00 B[39m
+[32mDTS[39m [1mdist\zod.d.ts             [22m[32m241.00 B[39m
+[32mDTS[39m [1mdist\index.d.ts           [22m[32m7.26 KB[39m
+[32mDTS[39m [1mdist\manual.d.ts          [22m[32m714.00 B[39m
+[32mDTS[39m [1mdist\types-BKNLo49R.d.ts  [22m[32m4.31 KB[39m
+[32mDTS[39m [1mdist\auto-record.d.cts    [22m[32m13.00 B[39m
+[32mDTS[39m [1mdist\zod.d.cts            [22m[32m243.00 B[39m
+[32mDTS[39m [1mdist\index.d.cts          [22m[32m7.26 KB[39m
+[32mDTS[39m [1mdist\manual.d.cts         [22m[32m716.00 B[39m
+[32mDTS[39m [1mdist\types-BKNLo49R.d.cts [22m[32m4.31 KB[39m
+EXIT:0
+
+$ npm pack --dry-run
+npm notice
+npm notice package: express-api-docs@0.1.0
+npm notice Tarball Contents
+npm notice 1.1kB LICENSE
+npm notice 15.5kB README.md
+npm notice 5.1kB dist/auto-record.cjs
+npm notice 13B dist/auto-record.d.cts
+npm notice 13B dist/auto-record.d.ts
+npm notice 4.0kB dist/auto-record.js
+npm notice 48.9kB dist/index.cjs
+npm notice 7.4kB dist/index.d.cts
+npm notice 7.4kB dist/index.d.ts
+npm notice 47.2kB dist/index.js
+npm notice 48.8kB dist/manual.cjs
+npm notice 716B dist/manual.d.cts
+npm notice 714B dist/manual.d.ts
+npm notice 47.2kB dist/manual.js
+npm notice 4.4kB dist/types-BKNLo49R.d.cts
+npm notice 4.4kB dist/types-BKNLo49R.d.ts
+npm notice 3.2kB dist/zod.cjs
+npm notice 243B dist/zod.d.cts
+npm notice 241B dist/zod.d.ts
+npm notice 2.1kB dist/zod.js
+npm notice 2.7kB package.json
+npm notice Tarball Details
+npm notice name: express-api-docs
+npm notice version: 0.1.0
+npm notice filename: express-api-docs-0.1.0.tgz
+npm notice package size: 64.8 kB
+npm notice unpacked size: 251.3 kB
+npm notice shasum: 0bc4ed5722ba77caae8205379d3882ef466fa5fe
+npm notice integrity: sha512-lufC9QpprrARM[...]VInfKCtXL00Gg==
+npm notice total files: 21
+npm notice
+express-api-docs-0.1.0.tgz
+EXIT:0

@@ -138,3 +138,4 @@
 | 2026-09-30T01:35:00Z | qa | build-fixer | build-fixer | fix loop iter 2: vitest maxWorkers concurrency fix | not measured | 46536 | 22.4 | 7312835 | 881.9 | measured |
 | 2026-09-30T02:05:00Z | qa | e2e-verifier | e2e-verifier | step 7 E2E re-verification (3rd dispatch, critical, clean-state, determinism repeats) | not measured | 65698 | 26.7 | 7378533 | 908.6 | measured |
 | 2026-09-29T23:50:20Z | qa | con2e-integration | e2e-verifier | step 7 e2e+determinism | not measured | 176120 | 1252.6 | 7554653 | 2161.2 | measured |
+| 2026-09-29T23:59:29Z | qa | con1-evidence-post | evidence-capturer | step 8 | not measured | 67591 | 7.5 | 7622244 | 2168.7 | measured |

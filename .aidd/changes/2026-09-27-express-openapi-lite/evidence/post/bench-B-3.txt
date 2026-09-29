@@ -1,0 +1,24 @@
+bench: B-3 typed-route
+command: npx vitest bench --run bench/typed-route.bench.ts
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |bench| bench/typed-route.bench.ts [ bench/typed-route.bench.ts ]
+TypeError: bench is not a function
+ ❯ bench/typed-route.bench.ts:19:3
+     17|   app.post('/users', validate, handler);
+     18|
+     19|   bench('POST /users', async () => {
+       |   ^
+     20|     await request(app).post('/users').send({ name: 'x' });
+     21|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  05:26:25
+   Duration  10.40s (worker 95%, environment 5%)
+
+EXIT: non-zero (see below)
+DEGRADED: 'npx vitest bench' fails in this environment with 'TypeError: bench is not a function' (vitest 5.0.2) — vitest bench appears incompatible/removed in this pinned version. ADR-26 explicitly states these bench/*.bench.ts files are informational-only trend reports and NOT the gate. Falling back to the actual enforced gate (npm run perf / test/perf/*.perf.test.ts) below.

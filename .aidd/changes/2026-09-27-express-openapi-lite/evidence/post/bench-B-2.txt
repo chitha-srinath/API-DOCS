@@ -1,0 +1,24 @@
+bench: B-2 spec-cold
+command: npx vitest bench --run bench/spec-cold.bench.ts
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |bench| bench/spec-cold.bench.ts [ bench/spec-cold.bench.ts ]
+TypeError: bench is not a function
+ ❯ bench/spec-cold.bench.ts:15:3
+     13|   app.get('/users/:id', validate, handler);
+     14|
+     15|   bench('GET /openapi.json (invalidated each time)', async () => {
+       |   ^
+     16|     apiDocs.invalidate();
+     17|     await request(app).get('/openapi.json');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  05:26:14
+   Duration  9.08s (worker 96%, environment 4%)
+
+EXIT: non-zero (see below)
+DEGRADED: 'npx vitest bench' fails in this environment with 'TypeError: bench is not a function' (vitest 5.0.2) — vitest bench appears incompatible/removed in this pinned version. ADR-26 explicitly states these bench/*.bench.ts files are informational-only trend reports and NOT the gate. Falling back to the actual enforced gate (npm run perf / test/perf/*.perf.test.ts) below.

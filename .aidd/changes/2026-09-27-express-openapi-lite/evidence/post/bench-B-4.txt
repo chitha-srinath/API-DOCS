@@ -1,0 +1,24 @@
+bench: B-4 docs-endpoint
+command: npx vitest bench --run bench/docs-endpoint.bench.ts
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |bench| bench/docs-endpoint.bench.ts [ bench/docs-endpoint.bench.ts ]
+TypeError: bench is not a function
+ ❯ bench/docs-endpoint.bench.ts:13:3
+     11|   app.use(apiDocs.router);
+     12|
+     13|   bench('GET /docs', async () => {
+       |   ^
+     14|     await request(app).get('/docs');
+     15|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  05:26:37
+   Duration  9.18s (worker 96%, environment 4%)
+
+EXIT: non-zero (see below)
+DEGRADED: 'npx vitest bench' fails in this environment with 'TypeError: bench is not a function' (vitest 5.0.2) — vitest bench appears incompatible/removed in this pinned version. ADR-26 explicitly states these bench/*.bench.ts files are informational-only trend reports and NOT the gate. Falling back to the actual enforced gate (npm run perf / test/perf/*.perf.test.ts) below.

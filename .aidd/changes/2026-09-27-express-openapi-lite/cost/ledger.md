@@ -129,3 +129,6 @@
 | 2026-09-28T21:35:27Z | qa | con2a-builder | builder | ST-006 fix loop 1 | not measured | 98818 | 17.4 | 6825263 | 727.6 | measured |
 | 2026-09-28T21:35:27Z | qa | con2a-builder | builder | ST-004 fix loop 1 | not measured | 82857 | 20.6 | 6908120 | 748.2 | measured |
 | 2026-09-28T21:35:27Z | qa | con2a-builder | builder | ST-007 fix loop 1 | not measured | 68078 | 14.7 | 6976198 | 762.9 | measured |
+| 2026-09-29T06:14:25Z | qa | qa1-dim | reviewer | correctness closure re-check | not measured | 16146 | 0.5 | 6992344 | 763.4 | measured |
+| 2026-09-29T06:14:25Z | qa | qa1-dim | reviewer | performance closure re-check | not measured | 25442 | 0.8 | 7017786 | 764.2 | measured |
+| 2026-09-29T06:14:25Z | qa | qa1-dim | reviewer | spec-compliance closure re-check | not measured | 31477 | 1.8 | 7049263 | 766.0 | measured |

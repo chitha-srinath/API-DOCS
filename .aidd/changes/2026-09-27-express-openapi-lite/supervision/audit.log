@@ -168,3 +168,9 @@
 2026-09-28T21:35:27Z | qa | orchestrator | cross-cutting infra fix | returned | fixed vitest.stryker.config.ts (missing perf-smoke exclude + testTimeout), independently found by 2 of 3 fix-loop builders; re-verified full suite 79/79 files, 639/644 tests, coverage 98.54/93.04/99.45/99.33
 2026-09-29T05:55:25Z | qa | orchestrator | ST-006 mutation re-verify | returned | 86.96% overall (src/spec 84.43%, build.ts 82.46%, glob.ts 100%), threshold 70 met, 89m52s
 2026-09-29T06:06:08Z | qa | orchestrator | ST-004 mutation re-verify | returned | 86.51% overall (typed.ts 71.43%, registry.ts 95.45%), threshold 70 met, 9m52s
+2026-09-29T06:07:02Z | qa | orchestrator | ST-007 mutation re-verify | returned | 86.54% overall (router.ts 100%), threshold 70 met, 29s (incremental cache warm)
+2026-09-29T06:07:02Z | qa | orchestrator | step 6 re-check dispatch | dispatched | re-run ONLY the 3 affected reviewer dimensions (correctness, performance, spec-compliance) against the fixed code, per playbook step 6
+2026-09-29T06:14:25Z | qa | reviewer | correctness closure re-check | returned | fix loop closure: CLOSED
+2026-09-29T06:14:25Z | qa | reviewer | performance closure re-check | returned | fix loop closure: CLOSED
+2026-09-29T06:14:25Z | qa | reviewer | spec-compliance closure re-check | returned | fix loop closure: CLOSED
+2026-09-29T06:14:25Z | qa | orchestrator | F-22 found+fixed | returned | spec-compliance closure re-check surfaced a new MEDIUM finding (silent \$defs id collision); fixed same iteration (hoistSchemaDefs throws on genuine mismatch), 2 new regression tests, full suite re-verified 79/79 files

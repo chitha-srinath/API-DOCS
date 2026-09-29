@@ -62,6 +62,12 @@ linear growth, well under budget). Effective counts after verification: 1 CRITIC
 |---|---|---|---|---|
 | F-21 | state-concurrency-idempotency (`qa/tests/state-concurrency-idempotency.md`) | `src/registry/registry.ts:11-16`, `src/spec/build.ts:55-72` | `RouteRegistry.register()` has no dedup; `dedupe()`'s first-registration-wins tie-break silently discards a developer's accidental duplicate `route()`/`describe()` call for the same method+path with no `EAD_*`-style warning. No AC violated. | LOW/advisory |
 
+## New from step 6 fix-loop closure re-check
+
+| # | Source | file:line | Claim | Severity |
+|---|---|---|---|---|
+| F-22 | spec-compliance closure re-check | `src/spec/build.ts` `hoistSchemaDefs` (~line 151, `if (!(name in defs))`) | Two different schemas sharing the same `.meta({id})` name silently collide: first-writer-wins, the second schema's actual definition is discarded, but both operations' `$ref`s point at the surviving entry — a structurally-valid but semantically-wrong OpenAPI doc (e.g. a route documented as accepting a `string` when its real schema is a `number`), with no error or warning. Independently reproduced via probe: `SwaggerParser.validate()` passes (so this does NOT reopen F-01), but the mismatch is silent. | MEDIUM |
+
 ## Delta (0 findings, 2 degradations)
 
 F-20 area (informational, not a numbered finding): `qa/findings-delta.md` confirms ADR-54/55/56 intent-fidelity, structure-fit, and (within the `na`-sigma scope) no regression. Two protocol-compliant degradations noted there: the pre-construction snapshot predates the source tree (no literal tree-diff possible for structure-fit), and both quality-baseline.md packs carry `coverage: na`/`lint: na`, so sigma-regression on those two axes is out of scope per `context-snapshots.md`.

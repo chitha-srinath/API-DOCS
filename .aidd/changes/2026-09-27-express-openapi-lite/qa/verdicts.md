@@ -67,6 +67,20 @@ All 3 blocking findings fixed with TDD red-then-green evidence (see each story's
 - **Full suite**: 79/79 files, 639/644 tests (5 legitimate skips), 0 type errors, coverage 98.54/93.04/99.45/99.33 (up from pre-fix).
 - **F-01/F-02 mutation gate** (ST-006, `src/spec/**`): 86.96% overall, `src/spec` 84.43%, `build.ts` (F-01's fix) 82.46%, `glob.ts` (F-02's fix) 100% — threshold 70 met.
 - **F-04 mutation gate, ST-004** (`src/route/typed.ts`, `src/registry/**`): 86.51% overall, `typed.ts` (F-04's fix location) 71.43%, `registry.ts` 95.45% — threshold 70 met.
-- **F-04 mutation gate, ST-007** (`src/docs/**`, `src/serve/**`, entries): re-verification in progress.
+- **F-04 mutation gate, ST-007** (`src/docs/**`, `src/serve/**`, entries): 86.54% overall, `router.ts` (F-04's fix location) 100% — threshold 70 met.
+
+**All three mutation gates pass. All three findings' TDD fixes are independently re-verified.**
+
+## Step 6 closure re-check (per-dimension, scoped to each fix)
+
+Per the playbook's step 6 requirement to "re-run ONLY affected reviewer dimensions and test categories": the correctness, performance, and spec-compliance reviewers each re-reviewed their own original finding against the fixed code.
+
+- **F-02 (correctness):** CLOSED. `REGEXP_METACHARS` confirmed to have no `/g` flag; both the escape-alternation bug and the crash path are eliminated by the same one-line fix. `test/spec/glob.test.ts` + `test/aidd-exhaustive/boundary-edge/...` re-run: 2 files, 59 tests, all pass.
+- **F-04 (performance):** CLOSED. Both composition-root call sites (`src/route/typed.ts`, `src/serve/router.ts`) confirmed to wrap the resolved adapter in `memoizeAdapter` by direct code read. Memoization empirically confirmed via `test/serve/adapter-memo.test.ts` (spy adapter invoked exactly once across 3 rebuilds). No new performance regression: `memoizeAdapter`'s overhead is O(1) per call (one WeakMap lookup), negligible against the schema-derivation cost it replaces.
+- **F-01 (spec-compliance):** CLOSED, with one new finding surfaced. `hoistSchemaDefs`/`rewriteDefsRefs` confirmed correctly wired for both `pathParameters` and `queryParameters`, working on both the default `standardSchemaAdapter` and the opt-in `zodAdapter` (independently reproduced via a throwaway probe, not just the test file). Same-schema-reuse across multiple operations confirmed to produce a single entry, no duplication. **New finding (F-22, MEDIUM):** two *different* schemas sharing the same `.meta({id})` name collided silently (first-writer-wins, semantically wrong but structurally valid docs) — logged and fixed (see below), not part of F-01's original scope.
+
+## F-22 (MEDIUM) — found and fixed in the same iteration
+
+`hoistSchemaDefs` (`src/spec/build.ts`) now compares colliding `$defs` entries by content: the benign case (the same named schema reused across many routes) stays a silent no-op; a genuine mismatch throws a clear error naming the colliding id, rather than silently producing a route documented with the wrong type. Two new regression tests added (`test/spec/defs-hoist.test.ts`). Full suite re-verified: 79/79 files, 641/646 tests, coverage 98.54/93.25/99.45/99.33. Mutation re-verification in progress.
 
 A cross-cutting infra gap was found and fixed along the way: `vitest.stryker.config.ts` was missing an exclude for the new `test/aidd-exhaustive/performance-smoke/**` suite and a `testTimeout` override, blocking every mutation re-run regardless of the actual fix — independently reproduced by 2 of 3 fix-loop builders with zero concurrent load, confirming it as real and not environmental noise.

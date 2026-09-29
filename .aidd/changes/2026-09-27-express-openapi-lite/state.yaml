@@ -243,4 +243,6 @@ history:
     event: "[qa 6/17] F-01 widened to requestBody/response (found via api-contract re-run), fixed + 3 new regression tests, api-contract now 28/28 · src/spec/build.ts · gates: 2/3 · rigor: critical · next: ST-006 mutation re-verify"
   - at: "2026-09-29T06:44:50Z"
     event: "[qa 6/17] fix loop fully closed (iterations 1-2): F-01/F-02/F-04/F-22 all fixed+verified; exhaustive_tests_passed PASSED · qa/test-report.md · gates: 2/3 · rigor: critical · next: step 7 e2e verification"
-updated_at: "2026-09-29T06:44:50Z"
+  - at: "2026-09-29T18:26:08Z"
+    event: "[qa 7/17] E2E verifier dispatched (critical rigor, clean-state, human-approved single-run mutation scope exception) · qa/verification-report.md · gates: 2/3 · rigor: critical · next: awaiting e2e results"
+updated_at: "2026-09-29T18:26:08Z"

@@ -64,4 +64,39 @@ describe('spec/build: $defs hoisting for named/reused schemas (F-01)', () => {
     expect(components.schemas.UserIdZod).toBeDefined();
     await validates(spec); // would throw "Missing $ref pointer" before the fix
   });
+
+  // F-22 (MEDIUM, found during the F-01 fix-loop closure re-check): a naive
+  // first-writer-wins hoist silently drops a colliding def under the same
+  // name, producing a spec that validates but is semantically wrong.
+  it('the SAME named schema reused across two routes hoists once, no duplication, no error', () => {
+    const status = z.enum(['a', 'b']).meta({ id: 'Shared' });
+    const ops: SpecOperation[] = [
+      op({
+        method: 'get',
+        path: '/a',
+        source: 'typed',
+        meta: { query: z.object({ status } as { status: typeof status }) },
+      }),
+      op({
+        method: 'get',
+        path: '/b',
+        source: 'typed',
+        meta: { query: z.object({ status } as { status: typeof status }) },
+      }),
+    ];
+    expect(() => buildSpec(ops, DEFAULT_OPTIONS as ApiDocsOptions, standardSchemaAdapter)).not.toThrow();
+    const spec = buildSpec(ops, DEFAULT_OPTIONS as ApiDocsOptions, standardSchemaAdapter);
+    const components = spec.components as { schemas: Record<string, unknown> };
+    expect(components.schemas.Shared).toBeDefined();
+  });
+
+  it('two DIFFERENT schemas sharing the same .meta({id}) name throw a clear error instead of silently colliding', () => {
+    const collideString = z.string().meta({ id: 'Collide' });
+    const collideNumber = z.number().meta({ id: 'Collide' });
+    const ops: SpecOperation[] = [
+      op({ method: 'get', path: '/a', source: 'typed', meta: { query: z.object({ id: collideString }) } }),
+      op({ method: 'get', path: '/b', source: 'typed', meta: { query: z.object({ id: collideNumber }) } }),
+    ];
+    expect(() => buildSpec(ops, DEFAULT_OPTIONS as ApiDocsOptions, standardSchemaAdapter)).toThrow(/Collide/);
+  });
 });

@@ -148,9 +148,27 @@ function hoistSchemaDefs(schema: JsonSchemaWithDefs, defs: DefsCollector): JsonO
   const { $defs, ...rest } = schema;
   if ($defs) {
     for (const [name, defSchema] of Object.entries($defs)) {
-      if (!(name in defs)) {
-        defs[name] = rewriteDefsRefs(defSchema);
+      const rewritten = rewriteDefsRefs(defSchema);
+      if (name in defs) {
+        // Two different .meta({id}) schemas sharing the same name would
+        // otherwise collide silently: first-writer-wins while every $ref
+        // still points at the surviving entry, producing a structurally
+        // valid but semantically wrong document (e.g. a route documented
+        // as a string when its real schema is a number) with no warning.
+        // Benign re-registration of the *same* schema (the common case -
+        // one named schema reused across many routes) must stay a no-op,
+        // so only a genuine content mismatch fails fast.
+        if (JSON.stringify(defs[name]) !== JSON.stringify(rewritten)) {
+          throw new Error(
+            `express-api-docs: two different schemas both use the name "${name}" ` +
+              `(via .meta({ id: '${name}' }) or an equivalent named/reused schema). ` +
+              `Named schemas must be unique per name across the whole app - rename one ` +
+              'of them, or reuse the exact same schema instance/definition.',
+          );
+        }
+        continue;
       }
+      defs[name] = rewritten;
     }
   }
   return rewriteDefsRefs(rest) as JsonObjectSchema;

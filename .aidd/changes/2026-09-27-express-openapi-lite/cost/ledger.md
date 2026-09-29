@@ -134,3 +134,4 @@
 | 2026-09-29T06:14:25Z | qa | qa1-dim | reviewer | spec-compliance closure re-check | not measured | 31477 | 1.8 | 7049263 | 766.0 | measured |
 | 2026-09-30T00:20:00Z | qa | e2e-verifier | e2e-verifier | step 7 E2E verification (critical, clean-state, determinism repeats) | not measured | 81468 | 43.1 | 7130731 | 809.1 | measured |
 | 2026-09-30T00:40:00Z | qa | build-fixer | build-fixer | fix loop iter: pack.test.ts + perf-smoke timeout config | not measured | 45195 | 17.1 | 7175926 | 826.2 | measured |
+| 2026-09-30T01:10:00Z | qa | e2e-verifier | e2e-verifier | step 7 E2E re-verification (2nd dispatch, critical, clean-state, determinism repeats) | not measured | 90373 | 33.3 | 7266299 | 859.5 | measured |

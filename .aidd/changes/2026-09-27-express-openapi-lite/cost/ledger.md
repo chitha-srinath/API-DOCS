@@ -8,7 +8,7 @@
 |---|---|
 | rigor_mode | critical |
 | budget_tokens | 20000000 |
-| budget_minutes | 1200 |
+| budget_minutes | 2500 |
 | derived_by | raised (stops row 1) |
 
 ## Dispatches

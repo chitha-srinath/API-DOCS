@@ -11,7 +11,7 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
   escalations: []        # append-only, one-way: {from, to, trigger, at}
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
   budget_tokens: 20000000 # standard default (derived, not measured); tunable in constitution.md
-  budget_minutes: 1200
+  budget_minutes: 2500
   spent_tokens: 7175926        # derived from cost/ledger.md — never asserted
   spent_minutes: 932.4
   by_phase:
@@ -259,4 +259,6 @@ history:
     event: "[qa 7/17] E2E verification RED: full suite failed both determinism runs (5 consistent timeout failures: test/dist/pack.test.ts pack-contents, perf-smoke TC-PERF-001/002/003/007); test/entries/minified.test.ts quarantined (determinism disagreement, suspected hook-timeout margin vs CPU load, disposition pending); mutation testing infeasible this dispatch (1202 mutants, session-bounded) — prior mutation_floor_met left as-is, not reproduced; coverage unproducible while suite red; F-01/F-02/F-04/F-22 fix-loop closures re-confirmed 2/2 clean and unaffected · qa/verification-report.md, qa/determinism-report.md · gates: 2/3 · rigor: critical · tests_green/e2e_verified/evidence_reproduced reverted to pending · next: fix loop for timeout config (pack.test.ts owned ST-001, perf-smoke unowned QA artifact, minified.test.ts owned ST-007) — NOTE for supervisor: fix_loop.iteration field read 0 despite history recording iterations 1-2 already closed pre-step-7; stale counter, flagging for audit rather than silently renumbering"
   - at: "2026-09-30T00:40:00Z"
     event: "[qa 6/17 fix loop] build-fixer: root cause was config-wiring gap (perf-smoke ran under default 20000ms testTimeout instead of its dedicated 120000ms config; pack.test.ts subprocess I/O exceeded default timeout) — not a perf regression, confirmed by running perf-smoke standalone under its own config (7/7 pass, real p95/heap numbers). Minimal diff: vitest.config.ts excludes perf-smoke dir + hookTimeout 20000; per-test 60000ms timeout on pack.test.ts's slow case. 4/5 assigned reds now green; full suite re-run 77 files/632 passed/10 skipped, 1 file still red = test/entries/minified.test.ts (the pre-existing quarantined determinism-disagreement test, not one of the 5 assigned targets, flaked again under full-suite parallel load) · vitest.config.ts, test/dist/pack.test.ts, build-log.md · gates: 2/3 · rigor: critical · next: commit fix, re-dispatch E2E Verifier for fresh step-7 re-proof (must re-run full determinism repeats itself, not trust this single-run confirmation)"
-updated_at: "2026-09-30T00:40:00Z"
+  - at: "2026-09-29T20:07:17Z"
+    event: "[qa 7/17] human raised budget_minutes 1200->2500 mid-e2e-verification (full mutation run ~4hr estimate) · state.yaml · gates: 2/3 · rigor: critical · next: await e2e results"
+updated_at: "2026-09-29T20:07:17Z"

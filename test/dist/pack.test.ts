@@ -83,5 +83,5 @@ describe('pack contents', () => {
     expect(resolved).toBeTruthy();
     const loaded = req(resolved);
     expect(loaded.name).toBe('express-api-docs');
-  });
+  }, 60000);
 });

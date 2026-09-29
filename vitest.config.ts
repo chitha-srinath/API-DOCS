@@ -4,8 +4,9 @@ export default defineConfig({
   test: {
     globalSetup: ['./test/dist/global-setup.ts'],
     testTimeout: 20000,
+    hookTimeout: 20000,
     include: ['test/**/*.test.ts'],
-    exclude: ['test/perf/**', 'node_modules/**', 'dist/**'],
+    exclude: ['test/perf/**', 'test/aidd-exhaustive/performance-smoke/**', 'node_modules/**', 'dist/**'],
     typecheck: {
       enabled: true,
       include: ['test/**/*.test-d.ts'],

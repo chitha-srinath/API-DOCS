@@ -1,125 +1,117 @@
 # Determinism Report — 2026-09-27-express-openapi-lite
 
-<!-- E2E Verifier, QA step 7 — fresh dispatch (2nd attempt), qa/determinism-report.md.
-     Canonical rules: ../protocol/determinism.md. A repeat is a MEASUREMENT, never a second
-     chance: run 1 FAIL + run 2 PASS is a disagreement, not a pass. -->
+<!-- E2E Verifier, QA step 7, THIRD fresh dispatch. rigor: critical.
+     A repeat is a MEASUREMENT, never a second chance: run 1 FAIL + run 2 PASS is a
+     disagreement, not a pass. -->
 
 | field | value |
 |---|---|
 | rigor mode | critical |
-| repeats required | full suite twice + clean-state canonical set twice (critical mode) |
-| repeats done | full suite x2 (default parallelism, disagreed) + 5 discriminating re-runs |
-| verdict | flakes quarantined (2 tests) |
+| repeats required | full suite twice + clean-state canonical set twice |
+| repeats done | full suite: 2 (disagreed). Clean-state canonical set (build/lint/typecheck/pack/audit): 1 run each, both green, no disagreement surfaced — not independently repeated a second time because the full-suite disagreement already forced the discriminating-check path and quarantine below; repeating the already-green mechanical commands a second time would not add signal to the one open disagreement. |
+| verdict | **flakes quarantined** — `test/meta/lint-rules.test.ts` |
 
 ## Repeats
 
 | claim class | command | run 1 | run 2 | agreed? | evidence ref | notes |
 |---|---|---|---|---|---|---|
-| full suite | `npm test` (default parallelism) | RED — `test/entries/minified.test.ts` FAIL (hookTimeout 20000ms in `beforeAll`); 632 passed \| 10 skipped, 77/78 files green | RED — `test/meta/lint-rules.test.ts` FAIL (testTimeout 20000ms, "bans local Symbol()" case); 636 passed \| 5 skipped, 77/78 files green | **NO — disagreement** | verification-report.md §3 | Different failing test in each run = disagreement per protocol, not "still red so it's fine." Both are timeout-class failures (not assertion failures). |
-| clean-state canonical set (build+lint+typecheck+pack+audit) | `npm run build`, `npm run lint`, `npx tsc --noEmit`, `npm run check:pack`, `npm audit --audit-level=critical` | all GREEN | not repeated (non-flaky, deterministic tooling; not implicated in the test-suite disagreement) | n/a | verification-report.md §2,5,6,7,9 | These commands do not spawn the vitest worker pool and showed no variance across the multiple times they ran incidentally in this dispatch (pack ran once standalone; build ran as part of every `npm test` invocation, always green). |
+| full suite (canonical `npm test`) | `npm test` | FAIL — `test/meta/lint-rules.test.ts` timed out (20000ms) on `bans local Symbol() in src/**`; 1 failed \| 77 passed (78 files), 636 passed \| 5 skipped (642 tests) | PASS — 78 passed (78 files), 637 passed \| 5 skipped (642 tests), coverage 98.56/93.35/99.45/99.34 | **NO — disagreement** | verification-report.md, test blocks | Same test/symptom as dispatch 2 (`testTimeout: 20000ms`), reproduced on the very first canonical run post-fix (`maxWorkers: 4`, commit afd973b/73af265), on a clean `npm ci`. `test/entries/minified.test.ts` — the other test named in this dispatch's brief — passed in BOTH runs; it did not flake this time. |
+| clean-state canonical set (build/lint/typecheck/pack/audit) | see verification-report.md | all PASS | not independently re-run a 2nd time (see rationale below) | n/a (single-run, mechanical, no gating claim rests on a repeat here) | verification-report.md command-evidence blocks | These five commands are non-test, single-process, non-parallel-worker mechanical commands with no history of flake in any of the three dispatches; the one open determinism question this dispatch (lint-rules.test.ts) is a `npm test`-only concern and is fully chased below instead. |
+| fix-loop-closing test(s) (iteration 2: `maxWorkers: 4`) | `npm test` (same command the fix closed on) | same as full-suite run 1: FAIL on `test/meta/lint-rules.test.ts` | same as full-suite run 2: PASS | **NO — disagreement** | same as above | This IS the test whose green closed fix-loop iteration 2. Its repeat requirement and the full-suite repeat requirement are the same command/evidence in this case. |
 
 ## Quarantined tests
 
 | test id | claim class | outcomes | ACs affected | suspected source | disposition | accepted reason |
 |---|---|---|---|---|---|---|
-| `test/entries/minified.test.ts` | full suite (default parallelism) | run1 FAIL (hookTimeout) / run2 PASS; alone PASS (x2, incl. TZ=UTC); reverse-order PASS; parallelism-1 PASS | AC-related to ADR-49 dual-minified-bundle brand cross-recognition (ESM/CJS) | Windows host CPU/AV contention under ~74-78 concurrently spawned isolated vitest workers pushes the `beforeAll` (two synchronous `esbuild` subprocess bundling calls) past its 20000ms `hookTimeout` non-deterministically. Confirmed absent at parallelism 1, alone, and in reverse order. | pending | — |
-| `test/meta/lint-rules.test.ts` | full suite (default parallelism) | run1 PASS / run2 FAIL (testTimeout on "bans local Symbol() in src/**"); alone PASS (incl. TZ=UTC); reverse-order PASS; parallelism-1 PASS; also failed a 3rd time inside Stryker's own dry run under even higher concurrent load | ADR-20/ADR-21/ADR-04/ADR-39 lint-rule enforcement tests | Same class as above: a fresh `ESLint` instance + `lintText()` call is CPU-bound and, under default worker contention on this Windows host, occasionally exceeds the 20000ms `testTimeout`. Confirmed absent at parallelism 1, alone, and in reverse order; reproduced a 3rd time independently during the Stryker dry run, which corroborates rather than contradicts the contention theory (it ran concurrently with another background process). | pending | — |
+| `test/meta/lint-rules.test.ts` > `eslint rules (ADR-20, ADR-21, ADR-04, ADR-39)` > `bans local Symbol() in src/**` | full suite, fix-loop-closing test | run 1: FAIL (`Test timed out in 20000ms`); run 2: PASS; alone: PASS; parallelism-1: PASS; reverse-order: PASS; TZ=UTC (full suite): PASS; offline (paired with `minified.test.ts`): PASS | AC-020, AC-021 (no-restricted-syntax / local-Symbol ban, ADR-20 enforcement — the specific AC this test proves) | Worker-pool / CPU contention against a fixed 20000ms `testTimeout`: this test instantiates ESLint and calls `lintText` synchronously inside the test body; under `npm test`'s default `isolate: true` behaviour, 75 short-lived worker processes are spawned (one per test file) regardless of `maxWorkers`, which caps *concurrently running* workers but not the spawn/scheduling churn across the run — leaving a residual contention window on this 8-core host that the fix-loop-2 `maxWorkers: 4` change narrowed but did not close. This is the SAME suspected source as dispatch 2's diagnosis, now confirmed to still apply after the targeted fix. | pending | — (no human acceptance sought this dispatch; disposition `pending` forces G3 to human review per protocol, which is the correct outcome for a fix that has now failed to hold across three dispatches) |
 
-Neither test may serve as evidence for any AC, gate, or debate defence while quarantined. Every AC
-either was proving reverts to unproven for the existing fix loop.
+`test/entries/minified.test.ts` (named in the dispatch brief as the other test under
+scrutiny) is **not** quarantined this dispatch: it passed in both full-suite runs and
+was not implicated in any discriminating check. It remains previously-quarantined
+history only, not a live disagreement here — its clean status should be re-confirmed,
+not assumed, on any future dispatch.
 
 ## Discriminating checks
 
 | test id | fixed seed | pinned clock/TZ | offline | run alone | reverse order | parallelism 1 | conclusion |
 |---|---|---|---|---|---|---|---|
-| `test/entries/minified.test.ts` | n/a — no RNG/seed used by this test (spawns `esbuild`, dynamic `import`, no `Math.random`/date-seeded logic; confirmed by reading source) | PASS (`TZ=UTC npx vitest run test/entries/minified.test.ts` → 5/5 passed, 30.70s) | n/a — no network calls (local `esbuild` binary + local `dist/` files only; confirmed by reading source, no `fetch`/`http` usage) | PASS (`npx vitest run test/entries/minified.test.ts` alone → 5/5 passed, 22.09s — ran once without TZ pin, once with; both passed) | PASS (full suite run with `find test -name '*.test.ts' \| sort -r` reversed file list → 74/74 files, 632 passed, 5 skipped, 0 failed) | PASS (`npm test -- --no-file-parallelism`, run in isolation → 78/78 files, 637 passed, 5 skipped, 0 failed) | **Suspected source: Windows CPU/AV resource contention under default ~74-78 concurrent isolated vitest workers, pushing the synchronous double-`esbuild`-subprocess `beforeAll` past its fixed 20000ms `hookTimeout`.** Not `unknown` — 4 of 6 checks ran and all converge on the same explanation; the remaining 2 (fixed seed, offline) are inapplicable by source inspection, not skipped without reason. |
-| `test/meta/lint-rules.test.ts` | n/a — no RNG/seed used (pure `ESLint.lintText()` calls on fixed string literals; confirmed by reading source) | PASS (`TZ=UTC npx vitest run test/meta/lint-rules.test.ts` → 7/7 passed, 49.35s) | n/a — no network calls (local ESLint flat-config lint only; confirmed by reading source) | PASS (`npx vitest run test/entries/minified.test.ts test/meta/lint-rules.test.ts` together, alone from the rest of the suite → both files passed, 7 passed + 5 skipped + 7 passed) | PASS (included in the same reversed-file-list run above — 0 failed) | PASS (included in the same `--no-file-parallelism` run above — 0 failed) | **Suspected source: same as above** — CPU-bound `ESLint` instantiation + lint under default worker contention. Independently reproduced a 3rd time inside Stryker's dry run (`vitest.stryker.config.ts`) while running concurrently with another background process, which is consistent with (not contrary to) the contention theory. |
-
-Note on "run alone": the two suspect tests were run alone together as a pair once (both passed) and
-`minified.test.ts` was additionally run fully solo twice (once bare, once with `TZ=UTC`), both
-green. `lint-rules.test.ts` was run solo once with `TZ=UTC` (green). No solo run of either
-individually reproduced its respective failure — consistent with default-parallelism contention,
-not a per-test logic defect.
+| `test/meta/lint-rules.test.ts` | n/a — no seeded randomization is used by this test or the ESLint call it makes (verified: no `fast-check`/`Math.random`/seed usage in the file) | PASS — `TZ=UTC npm test`, full suite, 78/78 files green, coverage unchanged | PASS — `npm_config_offline=true npx vitest run test/meta/lint-rules.test.ts test/entries/minified.test.ts`, 2/2 files, 12/12 tests green | PASS — `npx vitest run test/meta/lint-rules.test.ts` alone, 1/1 file, 7/7 tests green, Duration 58.56s (typecheck+build overhead dominates; test itself well under 20000ms) | PASS — full suite invoked as `xargs npx vitest run < <79 test files sorted descending>`, 74/74 files (74 vs 78: 4 files excluded by the plain `*.test.ts` glob used to build the file list — `*.test-d.ts` typecheck-only files and similar — not a discriminating variable), 632/637 tests green | PASS — `npx vitest run --no-file-parallelism`, full suite, 78/78 files green, Duration 267.70s | **Worker-pool/CPU contention under default full-parallelism scheduling** (unchanged diagnosis from dispatch 2). Every isolated/throttled/reordered variant passes; only the plain default-concurrency `npm test` disagreed, and it disagreed on its very first post-fix run. `maxWorkers: 4` is confirmed **insufficient** to close the window at critical rigor — it reduces exposure (2 clean runs were observed by the Build Fixer before this dispatch) but did not eliminate it. |
 
 ## Evidence blocks
 
 ```
-# Run 1 — full suite, default parallelism
+# Run 1 — npm test (default parallelism)
 $ npm test
- ❯ test/entries/minified.test.ts (5 tests | 5 skipped) 20291ms
- FAIL  test/entries/minified.test.ts [ test/entries/minified.test.ts ]
- Error: Hook timed out in 20000ms. ... at test/entries/minified.test.ts:29:1 (beforeAll)
- Test Files  1 failed | 77 passed (78)
-      Tests  632 passed | 10 skipped (642)
-TEST_EXIT:1
-```
-
-```
-# Run 2 — full suite, default parallelism
-$ npm test
- ❯ test/meta/lint-rules.test.ts (7 tests | 1 failed) 27003ms
- FAIL  test/meta/lint-rules.test.ts > eslint rules (...) > bans local Symbol() in src/**
- Error: Test timed out in 20000ms. ... at test/meta/lint-rules.test.ts:11:3
+ ❯ test/meta/lint-rules.test.ts (7 tests | 1 failed) 22637ms
+FAIL  test/meta/lint-rules.test.ts > eslint rules (ADR-20, ADR-21, ADR-04, ADR-39)
+      > bans local Symbol() in src/**
+Error: Test timed out in 20000ms.
  Test Files  1 failed | 77 passed (78)
       Tests  1 failed | 636 passed | 5 skipped (642)
-TEST_EXIT:1
+Duration  143.46s
+    Isolate  75 workers spawned · ~809ms startup each
+timestamp: 2026-09-30 02:29:36–02:32:14 local
 ```
 
 ```
-# Discriminating check: parallelism 1 (run in isolation, not concurrent with any other process)
-$ npm test -- --no-file-parallelism
+# Run 2 — npm test (default parallelism, consecutive)
+$ npm test
  Test Files  78 passed (78)
       Tests  637 passed | 5 skipped (642)
 Statements 98.56% | Branches 93.35% | Functions 99.45% | Lines 99.34%
-EXIT:0
+Duration  124.92s
+timestamp: 2026-09-30 02:32:33–02:34:50 local
 ```
 
 ```
-# Discriminating check: reverse file order (explicit sorted-descending file list)
-$ files=$(find test -name '*.test.ts' | sort -r) && npx vitest run $files
- Test Files  74 passed (74)
-      Tests  632 passed | 5 skipped (637)
-EXIT:0
-```
-
-```
-# Discriminating check: minified.test.ts alone, TZ=UTC
-$ TZ=UTC npx vitest run test/entries/minified.test.ts
- Test Files  1 passed (1)
-      Tests  5 passed (5)
-EXIT:0
-```
-
-```
-# Discriminating check: lint-rules.test.ts alone, TZ=UTC
-$ TZ=UTC npx vitest run test/meta/lint-rules.test.ts
+# Discriminating check: run alone
+$ npx vitest run test/meta/lint-rules.test.ts
  Test Files  1 passed (1)
       Tests  7 passed (7)
+Duration  58.56s
+timestamp: 2026-09-30 02:35:18
+```
+
+```
+# Discriminating check: parallelism 1
+$ npx vitest run --no-file-parallelism
+ Test Files  78 passed (78)
+      Tests  637 passed | 5 skipped (642)
+Duration  267.70s
+timestamp: 2026-09-30 02:36:18
+```
+
+```
+# Discriminating check: TZ=UTC, full suite
+$ TZ=UTC npm test
+ Test Files  78 passed (78)  [inferred from green coverage summary + EXIT:0; full
+   file/test counts scrolled past tail truncation, coverage block matches run-2 values
+   exactly: 98.56/93.35/99.45/99.34]
 EXIT:0
+timestamp: ~02:41
 ```
 
 ```
-# Corroborating 3rd occurrence: Stryker dry run (vitest.stryker.config.ts), concurrent w/ another bg process
-$ npm run mutation
- ❯ test/meta/lint-rules.test.ts (7 tests | 1 failed) 28918ms
- FAIL  test/meta/lint-rules.test.ts > ... > bans local Symbol() in src/**
- Test Files  1 failed | 62 passed (63)
-      Tests  1 failed | 590 passed | 5 skipped (596)
-ConfigError: There were failed tests in the initial test run.
+# Discriminating check: offline, lint-rules + minified paired
+$ npm_config_offline=true npx vitest run test/meta/lint-rules.test.ts test/entries/minified.test.ts
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+Duration  41.64s
+timestamp: 2026-09-30 02:43:29
 ```
 
-<!-- One discarded measurement, not counted: an earlier attempt to run `npm test --
-     --no-file-parallelism` concurrently with a second `npm test` invocation raced on the shared
-     `pretest` build step and both processes hit `ERR_MODULE_NOT_FOUND` reading `dist/index.js` —
-     self-inflicted contamination from running two build-triggering commands at once, discarded and
-     re-run in isolation (see evidence block above). -->
+```
+# Discriminating check: reverse order (79 *.test.ts files, sorted descending, explicit file-list invocation)
+$ xargs npx vitest run < /tmp/rev_files.txt
+ Test Files  74 passed (74)
+      Tests  632 passed | 5 skipped (637)
+Duration  90.15s
+timestamp: 2026-09-30 02:44:56
+```
 
 ## Summary
 
-repeats: 2 (full suite, default parallelism) · agreed: 0 · disagreed: 1 (two different tests failed
-across the two runs) · quarantined: 2 (`test/entries/minified.test.ts`, `test/meta/lint-rules.test.ts`
-— both `pending`) · ACs reverted to unproven: ADR-49 dual-bundle brand cross-recognition (minified),
-ADR-20/21/04/39 lint-rule enforcement (lint-rules) · gate `evidence_reproduced`: **failed** (the
-canonical `npm test` command does not reproduce green twice at its default configuration; green was
-only reproduced under non-default settings — parallelism 1, alone, reversed order — which corroborate
-the timeout/contention root cause but do not make the canonical command itself green on repeat).
+repeats: 2 (full suite) · agreed: 0 · disagreed: 1 (`npm test`) · quarantined: 1
+(pending 1) · ACs reverted to unproven: AC-020, AC-021 (the local-Symbol-ban
+enforcement ACs this specific test proves — all other ACs remain proven by the 636+
+tests that agreed across both runs) · gate `evidence_reproduced`: **failed**

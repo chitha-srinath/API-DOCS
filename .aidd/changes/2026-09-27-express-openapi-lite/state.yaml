@@ -13,7 +13,7 @@ cost:                    # actual spend against the mode's ceilings — see prot
   budget_tokens: 20000000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 1200
   spent_tokens: 6976198        # derived from cost/ledger.md — never asserted
-  spent_minutes: 852.8
+  spent_minutes: 862.6
   by_phase:
     inception:
       tokens: 2694542

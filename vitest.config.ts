@@ -5,6 +5,14 @@ export default defineConfig({
     globalSetup: ['./test/dist/global-setup.ts'],
     testTimeout: 20000,
     hookTimeout: 20000,
+    // Bound worker concurrency below the host's logical CPU count so CPU-bound
+    // subprocess-spawning tests (esbuild bundling, ESLint lintText) aren't starved
+    // when vitest's default per-file worker isolation queues dozens of workers at
+    // once — this was the root cause of two non-deterministic hookTimeout/testTimeout
+    // flakes (test/entries/minified.test.ts, test/meta/lint-rules.test.ts) under
+    // default parallelism. See .aidd/changes/*/qa/determinism-report.md,
+    // build-log.md "QA fix loop — worker concurrency" entry.
+    maxWorkers: 4,
     include: ['test/**/*.test.ts'],
     exclude: ['test/perf/**', 'test/aidd-exhaustive/performance-smoke/**', 'node_modules/**', 'dist/**'],
     typecheck: {

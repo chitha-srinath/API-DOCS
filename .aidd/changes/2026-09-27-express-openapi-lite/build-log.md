@@ -160,3 +160,115 @@ determinism-disagreement test explicitly out of scope for this dispatch (tracked
 separately via `disposition: pending`), reproducing the same variable-CPU-load flake
 already on record, not a new regression and not one of the 5 assigned targets. No other
 test file regressed.
+
+## Entry: QA fix loop iteration 2 — worker concurrency (minified.test.ts / lint-rules.test.ts non-determinism)
+
+**Trigger:** E2E Verifier's `qa/determinism-report.md` (fresh dispatch, critical rigor)
+found the canonical `npm test` command disagreed across two consecutive default-parallelism
+runs: run 1 failed `test/entries/minified.test.ts` (`beforeAll` hookTimeout, 20000ms),
+run 2 failed `test/meta/lint-rules.test.ts` (`testTimeout`, 20000ms, `bans local Symbol()`
+case). Both tests passed reliably alone, in reverse file order, and under
+`--no-file-parallelism`. This is the second recurrence of this failure class in this QA
+cycle (first was `pack.test.ts` + 4 perf-smoke tests, fix loop iteration 1, see entry
+"Wave integration check red" above / "5 test-timeout reds" — that fix bumped the global
+`hookTimeout` 10000ms → 20000ms and excluded perf-smoke from the default run).
+
+**Root cause:** confirmed via reproduction — a plain `npm test` run reports
+`Isolate  75 workers spawned` (one worker per test file, vitest's default `isolate: true`
+behavior; 78 test files total). Two of those files spawn their own CPU-heavy subprocess
+work inside a single hook/test (`minified.test.ts`'s `beforeAll` runs esbuild bundling
+twice synchronously; `lint-rules.test.ts` instantiates ESLint and calls `lintText`
+repeatedly). With up to ~75 vitest worker processes racing for this Windows host's 8
+logical CPUs, these two CPU-bound tests occasionally get starved past their fixed
+20000ms timeout — not an assertion failure, not a logic regression. Bumping the timeout
+again (the iteration-1 pattern) would only narrow the window, not remove the contention,
+and this is now a repeating pattern rather than an isolated one-off, so a general fix was
+preferred per the dispatch's guidance.
+
+**Fix:** added `maxWorkers: 4` to `vitest.config.ts`'s `test` block (bounding vitest's
+concurrent worker pool to half of the host's 8 logical CPUs), with a comment explaining
+why. This leaves headroom for the CPU-bound subprocess work these two tests do, without
+touching any test file, timeout value, or assertion. It generalizes to any future
+CPU-bound test, not just these two.
+
+**Self-caught regression during verification:** the first draft of the explanatory
+comment quoted the change's slug `2026-09-27-express-openapi-lite` verbatim inside
+`vitest.config.ts`, which contains the substring `express-openapi-lite` (the project's
+pre-rename old package name, banned repo-wide by
+`test/dist/manifest.test.ts`'s "contains the old package name in no file outside .aidd/"
+case). Caught by running the full suite once before declaring done; reworded the comment
+to reference the report path pattern instead of the literal slug, then reverified.
+
+**Verification (evidence):**
+
+```
+# Reproduce, default settings, no fix yet (baseline)
+$ npm test
+ Test Files  78 passed (78)
+      Tests  637 passed | 5 skipped (642)
+    Isolate  75 workers spawned · ~992ms startup each (spawn + environment, per file)
+EXIT:0   # ran green this time — consistent with a flake, not a deterministic failure
+```
+
+```
+# Two target tests, direct run, after adding maxWorkers: 4
+$ npx vitest run test/entries/minified.test.ts test/meta/lint-rules.test.ts
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+EXIT:0
+```
+
+```
+# First full-suite run after the fix caught a self-inflicted regression
+# (own comment text matched the old-name-ban scanner) — test/dist/manifest.test.ts failed:
+ Test Files  1 failed | 77 passed (78)
+      Tests  1 failed | 636 passed | 5 skipped (642)
+# fixed by rewording the vitest.config.ts comment (no code/behavior change)
+```
+
+```
+# manifest.test.ts alone, after reword — confirms the self-inflicted issue is resolved
+$ npx vitest run test/dist/manifest.test.ts
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+EXIT:0
+```
+
+```
+# Full suite, default settings, run 1/2 (post-fix, canonical `npm test`)
+$ npm test
+ Test Files  78 passed (78)
+      Tests  637 passed | 5 skipped (642)
+Statements 98.56% | Branches 93.35% | Functions 99.45% | Lines 99.34%
+EXIT:0
+```
+
+```
+# Full suite, default settings, run 2/2 (post-fix, canonical `npm test`, consecutive)
+$ npm test
+ Test Files  78 passed (78)
+      Tests  637 passed | 5 skipped (642)
+Statements 98.56% | Branches 93.35% | Functions 99.45% | Lines 99.34%
+EXIT:0
+```
+
+**Files touched:**
+- `vitest.config.ts` — added `maxWorkers: 4` + explanatory comment. No test file,
+  timeout value, or assertion changed.
+
+**Tradeoff noted:** full-suite wall-clock time increased (~98s baseline → ~120-125s with
+`maxWorkers: 4`) because fewer files run concurrently. Considered acceptable: correctness
+and determinism of the canonical `npm test` command take priority over suite speed, and
+the increase is modest (roughly +25-30%).
+
+**Confidence:** high but not absolute. Both runs of the canonical `npm test` command
+were green twice in a row post-fix (in addition to the two target tests passing directly),
+and the fix addresses the measured root cause (worker-pool oversubscription on an 8-core
+host) rather than papering over a symptom with a timeout bump — which is why this is
+judged more durable than the iteration-1 per-test-timeout pattern. However, two green
+runs is a much smaller sample than the dozens of runs it would take to fully rule out a
+rare residual flake under worse host contention (e.g., if another heavy process is
+running concurrently, as happened with the Stryker corroboration in the determinism
+report). If a third recurrence of this class occurs, the next lever to pull is reducing
+`maxWorkers` further (e.g., to 2) or moving the two CPU-bound tests to run in a
+dedicated low-concurrency project/config, not another timeout bump.

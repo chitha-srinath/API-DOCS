@@ -99,4 +99,45 @@ describe('spec/build: $defs hoisting for named/reused schemas (F-01)', () => {
     ];
     expect(() => buildSpec(ops, DEFAULT_OPTIONS as ApiDocsOptions, standardSchemaAdapter)).toThrow(/Collide/);
   });
+
+  // F-01 widened (found by re-running the api-contract exhaustive suite after the
+  // params/query fix above): requestBody and response schemas have the exact same
+  // dangling-$ref defect - a $ref resolves relative to the WHOLE document, not to
+  // wherever $defs happens to be nested, so embedding it untouched inside
+  // requestBody/response is just as broken as the params/query case was.
+  it('requestBody with a .meta({id})-tagged schema hoists $defs and validates (default adapter)', async () => {
+    const named = z.object({ id: z.string(), label: z.string() }).meta({ id: 'BodyThing' });
+    const ops: SpecOperation[] = [op({ method: 'post', path: '/things', source: 'typed', meta: { body: named } })];
+    const spec = buildSpec(ops, DEFAULT_OPTIONS as ApiDocsOptions, standardSchemaAdapter);
+    const components = spec.components as { schemas: Record<string, unknown> };
+    expect(components.schemas.BodyThing).toBeDefined();
+    const paths = spec.paths as Record<string, Record<string, Record<string, unknown>>>;
+    const requestBody = paths['/things']?.post?.requestBody;
+    expect(JSON.stringify(requestBody)).not.toContain('#/$defs/');
+    await validates(spec); // would throw "Missing $ref pointer" before the widened fix
+  });
+
+  it('response with a .meta({id})-tagged schema hoists $defs and validates (default adapter)', async () => {
+    const named = z.object({ id: z.string(), label: z.string() }).meta({ id: 'ResponseThing' });
+    const ops: SpecOperation[] = [op({ method: 'get', path: '/things', source: 'typed', meta: { response: named } })];
+    const spec = buildSpec(ops, DEFAULT_OPTIONS as ApiDocsOptions, standardSchemaAdapter);
+    const components = spec.components as { schemas: Record<string, unknown> };
+    expect(components.schemas.ResponseThing).toBeDefined();
+    await validates(spec);
+  });
+
+  it('the SAME named schema reused for both requestBody (input) and response (output) does not false-positive as a collision', async () => {
+    // Zod's toJSONSchema adds additionalProperties:false for io:'output' but
+    // not io:'input' - the identical logical schema produces different JSON
+    // depending on direction. This must stay a benign no-op, not throw.
+    const named = z.object({ id: z.string(), label: z.string() }).meta({ id: 'RoundTrip' });
+    const ops: SpecOperation[] = [
+      op({ method: 'post', path: '/things', source: 'typed', meta: { body: named, response: named } }),
+    ];
+    expect(() => buildSpec(ops, DEFAULT_OPTIONS as ApiDocsOptions, standardSchemaAdapter)).not.toThrow();
+    const spec = buildSpec(ops, DEFAULT_OPTIONS as ApiDocsOptions, standardSchemaAdapter);
+    const components = spec.components as { schemas: Record<string, unknown> };
+    expect(components.schemas.RoundTrip).toBeDefined();
+    await validates(spec);
+  });
 });

@@ -144,6 +144,29 @@ function rewriteDefsRefs<T>(value: T): T {
  * (merged into `components.schemas` by `buildSpec`) and rewrites refs to point there,
  * returning the schema with `$defs` stripped.
  */
+/**
+ * Ignores `additionalProperties` at every level before comparing two schemas
+ * for the collision check below. Zod's `toJSONSchema` (and Standard Schema's
+ * `~standard.jsonSchema`) add `additionalProperties: false` for `io: 'output'`
+ * but not `io: 'input'` - so the SAME named schema, reused for both a request
+ * body ('input') and a response ('output') (an ordinary, common pattern),
+ * produces genuinely different JSON for the identical logical schema. That
+ * is adapter-driven io variance, not a developer naming two different
+ * schemas the same thing, and must not trip the collision guard below.
+ */
+function stripAdditionalProperties(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripAdditionalProperties);
+  if (value !== null && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (k === 'additionalProperties') continue;
+      out[k] = stripAdditionalProperties(v);
+    }
+    return out;
+  }
+  return value;
+}
+
 function hoistSchemaDefs(schema: JsonSchemaWithDefs, defs: DefsCollector): JsonObjectSchema {
   const { $defs, ...rest } = schema;
   if ($defs) {
@@ -156,9 +179,13 @@ function hoistSchemaDefs(schema: JsonSchemaWithDefs, defs: DefsCollector): JsonO
         // valid but semantically wrong document (e.g. a route documented
         // as a string when its real schema is a number) with no warning.
         // Benign re-registration of the *same* schema (the common case -
-        // one named schema reused across many routes) must stay a no-op,
-        // so only a genuine content mismatch fails fast.
-        if (JSON.stringify(defs[name]) !== JSON.stringify(rewritten)) {
+        // one named schema reused across many routes, or the same schema
+        // used for both a request body and a response) must stay a no-op,
+        // so only a genuine content mismatch - after normalizing away known
+        // adapter io-direction variance - fails fast.
+        const existingNorm = JSON.stringify(stripAdditionalProperties(defs[name]));
+        const newNorm = JSON.stringify(stripAdditionalProperties(rewritten));
+        if (existingNorm !== newNorm) {
           throw new Error(
             `express-api-docs: two different schemas both use the name "${name}" ` +
               `(via .meta({ id: '${name}' }) or an equivalent named/reused schema). ` +
@@ -210,10 +237,20 @@ function queryParameters(
   }));
 }
 
-function requestBodyOf(op: SpecOperation, adapter: SchemaAdapter<unknown>): Record<string, unknown> | undefined {
+function requestBodyOf(
+  op: SpecOperation,
+  adapter: SchemaAdapter<unknown>,
+  defs: DefsCollector,
+): Record<string, unknown> | undefined {
   const meta = metaOf(op);
   if (meta.body === undefined) return undefined;
-  const schema = adapter.toJSONSchema(meta.body, 'input');
+  // F-01 (widened): a $ref like '#/$defs/X' resolves relative to the whole
+  // OpenAPI document, not to wherever it happens to be nested - embedding
+  // the adapter's raw $defs bag inline here does NOT make the $ref
+  // self-contained, it leaves a dangling reference exactly like the
+  // params/query case did. Hoist here too, same as pathParameters/
+  // queryParameters.
+  const schema = hoistSchemaDefs(adapter.toJSONSchema(meta.body, 'input') as JsonSchemaWithDefs, defs);
   return { required: true, content: { 'application/json': { schema } } };
 }
 
@@ -226,12 +263,14 @@ function responsesOf(
   op: SpecOperation,
   adapter: SchemaAdapter<unknown>,
   config: ApiDocsOptions,
+  defs: DefsCollector,
 ): Record<string, unknown> {
   const meta = metaOf(op);
   const responses: Record<string, unknown> = {};
 
   if (meta.response !== undefined) {
-    const schema = adapter.toJSONSchema(meta.response, 'output');
+    // F-01 (widened): same dangling-$ref risk as requestBody - hoist here too.
+    const schema = hoistSchemaDefs(adapter.toJSONSchema(meta.response, 'output') as JsonSchemaWithDefs, defs);
     responses['200'] = { description: 'OK', content: { 'application/json': { schema } } };
   } else if (op.source === 'plain' && config.detectedDefaultResponse) {
     const { status, description } = config.detectedDefaultResponse;
@@ -279,13 +318,13 @@ function buildOperation(
 ): Record<string, unknown> {
   const meta = metaOf(op);
   const parameters = [...pathParameters(op, adapter, defs), ...queryParameters(op, adapter, defs)];
-  const requestBody = requestBodyOf(op, adapter);
+  const requestBody = requestBodyOf(op, adapter, defs);
   const security = securityOf(op, config);
 
   const operation: Record<string, unknown> = {
     operationId,
     tags: tagsOf(op, config),
-    responses: responsesOf(op, adapter, config),
+    responses: responsesOf(op, adapter, config, defs),
   };
   if (meta.summary !== undefined) operation.summary = meta.summary;
   if (meta.description !== undefined) operation.description = meta.description;

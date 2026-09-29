@@ -13,7 +13,7 @@ cost:                    # actual spend against the mode's ceilings — see prot
   budget_tokens: 20000000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 1200
   spent_tokens: 7049263        # derived from cost/ledger.md — never asserted
-  spent_minutes: 865.7
+  spent_minutes: 872.2
   by_phase:
     inception:
       tokens: 2694542
@@ -86,7 +86,7 @@ gates:
     notes: "re-approved post-construction: ADR-54 (route() 4-arg), ADR-55 (dist sideEffects defect fixed+verified), ADR-56 (describe() 3-arg) all ratified/closed with zero story rework; construction complete 8/8 stories, supervisor COMPLIANT"
 quality_gates:
   tests_green: passed
-  exhaustive_tests_passed: pending
+  exhaustive_tests_passed: passed
   qa_findings_resolved: pending
   e2e_verified: pending
   mutation_floor_met: passed
@@ -241,4 +241,6 @@ history:
     event: "[qa 6/17] fix loop closure: F-01/F-02/F-04 all CLOSED per scoped reviewer re-checks; new F-22 MEDIUM found+fixed same iteration · qa/verdicts.md · gates: 2/3 · rigor: critical · next: ST-006 mutation re-verify (F-22), then re-integration"
   - at: "2026-09-29T06:37:36Z"
     event: "[qa 6/17] F-01 widened to requestBody/response (found via api-contract re-run), fixed + 3 new regression tests, api-contract now 28/28 · src/spec/build.ts · gates: 2/3 · rigor: critical · next: ST-006 mutation re-verify"
-updated_at: "2026-09-29T06:37:36Z"
+  - at: "2026-09-29T06:44:50Z"
+    event: "[qa 6/17] fix loop fully closed (iterations 1-2): F-01/F-02/F-04/F-22 all fixed+verified; exhaustive_tests_passed PASSED · qa/test-report.md · gates: 2/3 · rigor: critical · next: step 7 e2e verification"
+updated_at: "2026-09-29T06:44:50Z"

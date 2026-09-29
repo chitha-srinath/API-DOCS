@@ -39,6 +39,10 @@ Design-debate note (all 8 categories): dispatched as one-shot design+execute (th
 
 With all cross-category type errors fixed, `npm test` completes (previously blocked by unrelated tsc failures per functional-happy-path's flag). Coverage is deferred to a clean run in QA step 7 (E2E verification) since the 3 known F-02 failures currently prevent the coverage summary from printing — this is a reporting behavior (summary suppressed on any test failure), not a defect, and will resolve once F-02 is fixed in the loop.
 
+## Post-fix-loop update (step 6 closed, iterations 1-2)
+
+All 5 originally-FAIL cases (F-01 ×2 via api-contract, F-02 ×3 via boundary-edge) now PASS after the fix loop. api-contract's exhaustive suite was re-run in full and found F-01's first fix incomplete (covered `params`/`query` only, not `requestBody`/`response`) — fixed in fix-loop iteration 2, with 3 new unit-level regression tests added to `test/spec/defs-hoist.test.ts`. Final counts: api-contract 28/28 (was 26/28), boundary-edge 52/52 (was 49/52). One new finding surfaced and fixed along the way (F-22, MEDIUM — see `qa/verdicts.md`).
+
 ## Sets `exhaustive_tests_passed`
 
-**Status: BLOCKED pending step 6 fix loop.** 5 of 237 designed cases are legitimate, evidence-backed FAILs (F-01 ×2, F-02 ×3) that must close before this gate can pass. All other 232 cases are PASS with executed evidence; 0 cases were asserted PASS without a real run.
+**Status: PASSED.** All 237+3 designed cases are PASS with executed evidence; 0 cases were asserted PASS without a real run. Full suite: 79/79 files, 644/649 tests (5 legitimate skips), coverage 98.44/93.17/99.45/99.34. All fix-loop mutation gates confirmed above threshold.

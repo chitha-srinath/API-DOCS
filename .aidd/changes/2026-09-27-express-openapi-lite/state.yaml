@@ -12,8 +12,8 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
   budget_tokens: 20000000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 2500
-  spent_tokens: 7778911        # derived from cost/ledger.md — never asserted
-  spent_minutes: 2173.2
+  spent_tokens: 7816216        # derived from cost/ledger.md — never asserted
+  spent_minutes: 2174.0
   by_phase:
     inception:
       tokens: 2694542
@@ -22,8 +22,8 @@ cost:                    # actual spend against the mode's ceilings — see prot
       tokens: 2718693
       minutes: 525.9           # phase -> {tokens, minutes}; sums to spent_*
     qa:
-      tokens: 2365676
-      minutes: 1545.3           # NOTE: pre-existing gap — prior qa dispatches (steps 1-6) were never folded into by_phase.qa despite spent_* already reflecting them; flagging for supervisor, not silently backfilled. Recomputed 2026-09-30 as spent_* minus inception+construction after steps 9/11/12 ledger rows added.
+      tokens: 2402981
+      minutes: 1546.1           # NOTE: pre-existing gap — prior qa dispatches (steps 1-6) were never folded into by_phase.qa despite spent_* already reflecting them; flagging for supervisor, not silently backfilled. Recomputed 2026-09-30 as spent_* minus inception+construction after steps 9/11/12/16 ledger rows added.
   projection_tokens: null
   stops:
     - at: "2026-09-27T12:59:42Z"
@@ -106,7 +106,7 @@ quality_gates:
   acs_verified: passed
   evidence_captured: passed
   supervision_compliant: passed
-  critic_approved: pending
+  critic_approved: passed
   auditor_approved: passed
   debate_complete: passed
   tally_reconciled: passed
@@ -296,4 +296,6 @@ history:
     event: "[qa 14/17] step 13 negotiation skipped (no DISPUTED ACs from step 12); g_test_report approved by human (let-me-look gate) · qa/test-report.md, stories/ · gates: 2/3 · next: step 15 cost close-out, step 16 critic verdict"
   - at: "2026-09-30T13:35:00Z"
     event: "[qa 15/17] cost close-out: corrected 2 ledger rows (tally/auditor dispatches) that were wrongly recorded 0 tokens/0 min despite real usage being available (103957tok/2.4min, 52710tok/2.1min) - not silently left wrong; recomputed spent_tokens 7622244->7778911, spent_minutes 2168.7->2173.2, by_phase.qa backfilled to 2365676tok/1545.3min; within_cost_budget PASSED (39% tokens, 87% minutes, no pending stops); qa_findings_resolved PASSED (all findings closed: F-01/02/04/22 fixed+verified, F-03 refuted, F-21 advisory-only) · cost/ledger.md · gates: 2/3 · rigor: critical · next: step 16 critic verdict"
-updated_at: "2026-09-30T13:35:00Z"
+  - at: "2026-09-30T13:50:00Z"
+    event: "[qa 16/17] Critic verdict: APPROVE WITH CONDITIONS. 47/47 ACs proven across 3 independent layers, all findings closed/refuted, full suite green, mutation 84.39%%, security clean. 3 conditions for PR body: (1) produce receipts-v1 artifacts on a POSIX host/CI, does not block merge - no AC depends on them; (2) track 2 quarantined flaky tests to de-quarantine; (3) opportunistic npm audit fix for dev-only qs moderate advisory. critic_approved set PASSED · qa/critic-verdict.md · gates: 2/3 · rigor: critical · next: step 17 supervisor final audit, gate G3"
+updated_at: "2026-09-30T13:50:00Z"

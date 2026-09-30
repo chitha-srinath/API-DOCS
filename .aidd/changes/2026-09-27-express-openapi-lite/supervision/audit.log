@@ -190,3 +190,5 @@
 2026-09-30T13:05:00Z | qa | orchestrator | stale gate fix | returned | evidence_reproduced was stuck at failed from an earlier RED e2e cycle despite history recording it PASSED at the final green e2e dispatch; corrected to passed
 2026-09-30T13:20:00Z | qa | human | gate | returned | g_test_report approved (let-me-look), 0 open FAILs
 2026-09-30T13:35:00Z | qa | orchestrator | step 15 cost close-out | returned | corrected 2 ledger rows wrongly recorded 0 tokens/min; spent_tokens 7622244->7778911, spent_minutes 2168.7->2173.2; within_cost_budget PASSED (39% tokens, 87% minutes); qa_findings_resolved PASSED
+2026-09-30T13:50:00Z | qa | orchestrator | step 16 dispatch | dispatched | Critic, synthesizes existing evidence, no re-run
+2026-09-30T13:50:00Z | qa | critic | step 16 | returned | APPROVE WITH CONDITIONS (receipts-v1 CI follow-up, quarantine tracking, npm audit fix); critic_approved PASSED

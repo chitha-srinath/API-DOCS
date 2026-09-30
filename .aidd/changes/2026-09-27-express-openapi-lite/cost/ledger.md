@@ -140,3 +140,4 @@
 | 2026-09-29T23:50:20Z | qa | con2e-integration | e2e-verifier | step 7 e2e+determinism | not measured | 176120 | 1252.6 | 7554653 | 2161.2 | measured |
 | 2026-09-29T23:59:29Z | qa | con1-evidence-post | evidence-capturer | step 8 | not measured | 67591 | 7.5 | 7622244 | 2168.7 | measured |
 | 2026-09-30T12:20:00Z | qa | ac-assessor | ac-assessor | step 9 AC matrix (47/47 PASS) | not measured | 0 | 0.0 | 7622244 | 2168.7 | measured |
+| 2026-09-30T12:50:00Z | qa | tally | tally | step 11 tally reconciliation | not measured | 0 | 0.0 | 7622244 | 2168.7 | measured |

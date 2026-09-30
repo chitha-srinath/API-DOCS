@@ -183,3 +183,5 @@
 2026-09-30T12:20:00Z | qa | orchestrator | step 9 dispatch | dispatched | AC Assessor, critical rigor, re-execute every owning test file per AC rather than trust prior reports
 2026-09-30T12:20:00Z | qa | ac-assessor | step 9 | returned | 47/47 ACs PASS with directly re-executed evidence; BLOCKING infra gap disclosed: aidd-evidence.py capture requires POSIX process groups, hard-fails on this native Windows host, no usable WSL distro with python3 found; receipts-v1 artifacts (evidence/receipts/**, evidence/acceptance.json) outstanding, semantic AC verdicts unaffected
 2026-09-30T12:20:00Z | qa | human | decision | returned | record documented platform gap and proceed on substantive AC evidence; receipts-v1 mechanical artifacts to be produced on a POSIX host (CI/WSL) before delivery can claim full receipts-v1 compliance
+2026-09-30T12:50:00Z | qa | orchestrator | step 11 dispatch | dispatched | Tally, no Jira ticket for this change, work from PRD ACs + story frontmatter only
+2026-09-30T12:50:00Z | qa | tally | step 11 | returned | 47/47 ACs RECONCILED, 0 GAP, 0 orphans, 1 routed note (receipts-v1 env gap, no AC verdict affected); tally_reconciled PASSED

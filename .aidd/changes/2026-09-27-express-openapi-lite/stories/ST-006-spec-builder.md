@@ -563,3 +563,16 @@ loop (other unrelated in-progress changes visible in `git status` — `src/route
 — belong to a concurrent fix-loop dispatch for F-04, not this story, and were not touched).
 
 ### Status: built (both F-01 and F-02 fixed and verified; ADR-50(a) mutation re-run blocked by a pre-existing, out-of-scope environmental test failure — see above)
+
+## Auditor Report (QA step 12 — final audit)
+
+Interrogated AC-005, AC-011, AC-015, AC-016, AC-017, AC-023, AC-030..AC-034, AC-038,
+AC-039, AC-041, AC-042, AC-047 (this story's share). Independently re-ran
+`npx vitest run test/spec/build.test.ts test/spec/glob.test.ts` (both green) and
+`node test/aidd-exhaustive/api-contract/run.mjs` (28/28 PASS) to confirm the F-01
+($defs hoisting, including the requestBody/response widening) and F-02 (glob
+escapeChar lastIndex) fixes owned by this story hold live on this host, not just as
+recorded in `qa/verdicts.md`.
+
+**Verdict: all of this story's claimed ACs — PROVEN.** No DISPUTED ACs.
+Full matrix: `audit/interrogation/qa-final-verdict.md`.

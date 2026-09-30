@@ -630,3 +630,15 @@ be cleanly completed in this pass due to concurrent-load contention in an unowne
 recommend re-verification once the shared worktree is quiet. Frontmatter status left as
 `built` (no defect remains in owned code; the blocker is environmental/external, not a defect
 in this fix).
+
+## Auditor Report (QA step 12 — final audit)
+
+Interrogated AC-001, AC-003, AC-004, AC-018, AC-019, AC-020, AC-035, AC-036, AC-037,
+AC-043, AC-045, AC-047 (this story's share) against `qa/ac-matrix.md`. Confirmed F-04's
+second wired call site (`src/serve/router.ts`'s memoizeAdapter wrap) via the
+`qa/verdicts.md` mutation-gate evidence (router.ts 100%, threshold 70 met) and
+`test/serve/adapter-memo.test.ts`'s spy-invoked-once assertion, cited but not
+independently re-run this round given the direct code read confirming the wiring.
+
+**Verdict: all of this story's claimed ACs — PROVEN.** No DISPUTED ACs.
+Full matrix: `audit/interrogation/qa-final-verdict.md`.

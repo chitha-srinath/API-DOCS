@@ -558,3 +558,13 @@ No AC required a challenge round. No AC is DISPUTED. Nothing routes to
 `negotiation.md`.
 
 Full per-AC evidence: `audit/interrogation/ST-001-verdict.md`.
+
+## Auditor Report (QA step 12 — final audit)
+
+Interrogated `qa/ac-matrix.md` rows for AC-001, AC-002, AC-004, AC-020, AC-025, AC-026,
+AC-027, AC-028 against this story's `ac_ids`. Independently re-ran `npm run build`
+(exit 0, ESM/CJS/DTS emitted) and `npx vitest run test/meta/workflows.test.ts`
+(16/16 passed) rather than trusting the matrix's citation alone.
+
+**Verdict: AC-001, AC-002, AC-004, AC-020, AC-025, AC-026, AC-027, AC-028 — all PROVEN.**
+No DISPUTED ACs for this story. Full matrix: `audit/interrogation/qa-final-verdict.md`.

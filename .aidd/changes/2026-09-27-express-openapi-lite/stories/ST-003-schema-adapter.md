@@ -438,3 +438,15 @@ The Builder Report's other self-flagged gap — the scoped Stryker mutation run
 tie their proof to a mutation score), but it is escalated to the Master Agent as a required
 merge-gate item before this story is certified for merge. Full verdict:
 `audit/interrogation/ST-003-verdict.md`.
+
+## Auditor Report (QA step 12 — final audit)
+
+Interrogated AC-004, AC-005, AC-006, AC-016, AC-035, AC-047 (this story's share).
+Independently reproduced the F-01 fix this story's `src/adapter/zod.ts` output feeds:
+`npx vitest run test/spec/build.test.ts` → 16/16 passed; `node
+test/aidd-exhaustive/api-contract/run.mjs` → 28/28 PASS, including TC-CONTRACT-020's
+`SwaggerParser.validate threw: false` for a `.meta({id})`-tagged schema via the default
+adapter.
+
+**Verdict: AC-004, AC-005, AC-006, AC-016, AC-035, AC-047 — all PROVEN.** No DISPUTED
+ACs for this story. Full matrix: `audit/interrogation/qa-final-verdict.md`.

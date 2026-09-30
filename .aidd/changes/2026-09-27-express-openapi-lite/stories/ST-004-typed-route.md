@@ -610,3 +610,13 @@ $ git diff --stat -- src/route/typed.ts src/route/validate-request.ts src/route/
 ```
 
 **Status: built** (F-04 fixed and regression-tested; mutation step blocked on an out-of-scope config gap, reported above — no code change needed from ST-004 to unblock it).
+
+## Auditor Report (QA step 12 — final audit)
+
+Interrogated AC-005..AC-014, AC-021, AC-024, AC-040, AC-044, AC-047 (this story's share).
+Confirmed F-04's fix (memoizeAdapter wired into `src/route/typed.ts`'s composition-root
+call site) is real by direct code read and by the mutation-gate evidence in
+`qa/verdicts.md` (typed.ts 71.43%, threshold 70 met) — not merely asserted.
+
+**Verdict: all of this story's claimed ACs — PROVEN.** No DISPUTED ACs.
+Full matrix: `audit/interrogation/qa-final-verdict.md`.

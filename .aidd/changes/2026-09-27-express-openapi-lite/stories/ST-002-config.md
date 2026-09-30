@@ -400,3 +400,14 @@ no challenge round issued. Evidence re-executed live by the auditor: `npm test` 
 Story-level scope narrowings (spec-generation deferred to ST-006/ST-007, runtime validation
 deferred to ST-004) match the story's own AC annotations, not builder-invented narrowing.
 Full verdict: `audit/interrogation/ST-002-verdict.md`.
+
+## Auditor Report (QA step 12 — final audit)
+
+Interrogated AC-005, AC-036, AC-038, AC-039, AC-040, AC-041, AC-042, AC-044, AC-045,
+AC-046, AC-047 (this story's share) against `qa/ac-matrix.md`. Read `test/config/merge.test.ts`
+and `test/config/validate.test.ts` source directly to confirm the `AC-044a`/`AC-044b`
+labelled sub-cases assert what AC-044's Given/When/Then requires (route-level override
+wins over global for both request- and response-validation config).
+
+**Verdict: all 11 ACs — PROVEN.** No DISPUTED ACs for this story.
+Full matrix: `audit/interrogation/qa-final-verdict.md`.

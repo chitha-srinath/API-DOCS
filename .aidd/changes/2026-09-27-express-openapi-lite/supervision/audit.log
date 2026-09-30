@@ -185,3 +185,6 @@
 2026-09-30T12:20:00Z | qa | human | decision | returned | record documented platform gap and proceed on substantive AC evidence; receipts-v1 mechanical artifacts to be produced on a POSIX host (CI/WSL) before delivery can claim full receipts-v1 compliance
 2026-09-30T12:50:00Z | qa | orchestrator | step 11 dispatch | dispatched | Tally, no Jira ticket for this change, work from PRD ACs + story frontmatter only
 2026-09-30T12:50:00Z | qa | tally | step 11 | returned | 47/47 ACs RECONCILED, 0 GAP, 0 orphans, 1 routed note (receipts-v1 env gap, no AC verdict affected); tally_reconciled PASSED
+2026-09-30T13:05:00Z | qa | orchestrator | step 12 dispatch | dispatched | Auditor final audit, critical rigor, 2-round budget, interrogates ac-matrix.md row by row
+2026-09-30T13:05:00Z | qa | auditor | step 12 | returned | 47/47 PROVEN, 0 DISPUTED, settled round 1, independent re-execution corroborated ac-matrix.md; auditor_approved PASSED
+2026-09-30T13:05:00Z | qa | orchestrator | stale gate fix | returned | evidence_reproduced was stuck at failed from an earlier RED e2e cycle despite history recording it PASSED at the final green e2e dispatch; corrected to passed

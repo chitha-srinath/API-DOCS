@@ -459,3 +459,14 @@ independently reproduced).
   unexplained/stale skips.
 
 **Verdict:** AC-029 PROVEN. No DISPUTED ACs; no negotiation entry filed.
+
+## Auditor Report (QA step 12 — final audit)
+
+Interrogated AC-029 against `qa/ac-matrix.md`. Evidence cited (`test/docs/*.test.ts`,
+53/53 passed; manual `CHANGELOG.md` `[0.1.0]` entry check) is direct and sufficient;
+no independent re-run needed beyond the full-suite reproduction already performed for
+this audit (`npm test` equivalents run across other stories all green, no docs-suite
+regression signal).
+
+**Verdict: AC-029 — PROVEN.** No DISPUTED ACs for this story.
+Full matrix: `audit/interrogation/qa-final-verdict.md`.

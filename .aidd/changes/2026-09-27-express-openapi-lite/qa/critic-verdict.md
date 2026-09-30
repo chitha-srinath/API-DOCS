@@ -9,7 +9,7 @@
 ## Rationale (cite artifacts)
 
 - **AC coverage is complete and independently corroborated three times over.**
-  `qa/ac-matrix.md` records 47/47 PRD ACs (AC-001..AC-047) PASS with a directly-executed,
+  `ac-matrix.md` records 47/47 PRD ACs (AC-001..AC-047) PASS with a directly-executed,
   green test citation each. `audit/interrogation/qa-final-verdict.md` (auditor, QA step 12)
   independently re-executed a representative cross-section live (`test/spec/build.test.ts`,
   `glob.test.ts`, `test/introspect/walk.test.ts`, `test/spec/ac023.test.ts` = 37/37; the
@@ -32,7 +32,7 @@
 
 - **Test suite, coverage, and mutation are all above target.** Full suite green (78-79
   files, 637-644 tests), coverage 98.56/93.35/99.45/99.34% (target 90%), mutation 84.39% on
-  the full clean-state run (floor 70%). `qa/test-report.md` and `qa/ac-matrix.md` corroborate.
+  the full clean-state run (floor 70%). `qa/test-report.md` and `ac-matrix.md` corroborate.
 
 - **Security is clean.** `qa/security-report.md`: 0 secrets, `npm audit --audit-level=critical`
   exit 0 (only 1 LOW dev-only and 2 MODERATE dev-only transitive advisories, none shipped in
@@ -45,7 +45,7 @@
   CPU-contention flakes under this Windows host's high vitest worker concurrency (pass
   reliably in isolation/parallelism-1/reverse-order per `qa/determinism-report.md`), not app
   regressions. Per the given context, their governing ACs are not *solely* proven by the
-  quarantined runs — `qa/ac-matrix.md` cites other, stable evidence for those ACs — so this
+  quarantined runs — `ac-matrix.md` cites other, stable evidence for those ACs — so this
   does not create an AC gap. Acceptable as-is; no condition needed beyond what
   `qa/determinism-report.md` already tracks.
 
@@ -53,7 +53,7 @@
   capture is missing.** `aidd-evidence.py capture` hard-requires POSIX process groups and
   cannot run on this native-Windows host (no usable WSL Python 3.9+ distro locally).
   `evidence/receipts/**` and `evidence/acceptance.json` were not produced. This is disclosed
-  consistently across `qa/ac-matrix.md`'s "Environment gap" section, `qa/tally.md`'s
+  consistently across `ac-matrix.md`'s "Environment gap" section, `qa/tally.md`'s
   "Routed" section, and `state.yaml` (`evidence_contract: receipts-v1`, header comment
   "source-bound suite and AC receipts required before delivery"). The substantive AC
   evidence (live, independently re-executed test output) is not in question — only the
@@ -75,7 +75,7 @@ with a concrete, owned follow-up to close it.
 
 | # | Condition (concrete, verifiable) | Owner / AC |
 |---|---|---|
-| 1 | Run `aidd-evidence.py capture` (+ manifest generation) for this change on a POSIX host (CI runner or a working WSL Python ≥3.9 distro) to produce `evidence/receipts/**` and `evidence/acceptance.json`, then re-validate the change's `evidence_contract: receipts-v1` compliance. Verifiable by: the two artifact paths existing and passing `aidd-evidence.py verify` (or equivalent contract check) with exit 0. Target: before or within one release cycle of merge — does not block merge, since no PRD AC's Given/When/Then depends on receipts-v1 artifacts and all 47 ACs are independently proven by direct test evidence (`qa/ac-matrix.md`, `audit/interrogation/qa-final-verdict.md`). | Delivery phase / CI owner |
+| 1 | Run `aidd-evidence.py capture` (+ manifest generation) for this change on a POSIX host (CI runner or a working WSL Python ≥3.9 distro) to produce `evidence/receipts/**` and `evidence/acceptance.json`, then re-validate the change's `evidence_contract: receipts-v1` compliance. Verifiable by: the two artifact paths existing and passing `aidd-evidence.py verify` (or equivalent contract check) with exit 0. Target: before or within one release cycle of merge — does not block merge, since no PRD AC's Given/When/Then depends on receipts-v1 artifacts and all 47 ACs are independently proven by direct test evidence (`ac-matrix.md`, `audit/interrogation/qa-final-verdict.md`). | Delivery phase / CI owner |
 | 2 | Track `test/entries/minified.test.ts` and `test/meta/lint-rules.test.ts` quarantine as a follow-up to reduce Windows-host vitest worker concurrency (or otherwise stabilize) so they can be un-quarantined; not a merge blocker per `qa/determinism-report.md`'s isolation-reproduction evidence, but should not remain quarantined indefinitely. | QA/infra owner |
 | 3 | Opportunistically run `npm audit fix` for the dev-only `qs`/`typed-rest-client` moderate advisories (SEC-1) at the next maintenance window; non-blocking, not shipped in `dist/`. | Maintainer |
 

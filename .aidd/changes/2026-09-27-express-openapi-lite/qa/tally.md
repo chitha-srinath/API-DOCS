@@ -4,12 +4,12 @@ No Jira ticket for this change (`jira.ticket: null`, `jira.sync: false` in `stat
 per dispatch instructions the Jira read ladder is skipped; every tracked work item below
 is a PRD AC (AC-001..AC-047, `prd.md`) joined to its claiming story/stories (`stories/*`
 frontmatter `ac_ids`), the diff files that realized it (from each story's Builder Report
-`git diff --stat`), the tests that prove it (`qa/ac-matrix.md`, cross-checked against
+`git diff --stat`), the tests that prove it (`ac-matrix.md`, cross-checked against
 `qa/test-report.md`), and its pre/post evidence (`evidence/pre/manifest.md`,
 `evidence/post/manifest.md`).
 
 `prd.md`'s "Affected flows" table lists only 7 end-to-end flows (F-1..F-7) against 47 ACs;
-most ACs are proven at the unit/integration level (`qa/ac-matrix.md`), not by a dedicated
+most ACs are proven at the unit/integration level (`ac-matrix.md`), not by a dedicated
 F-flow. Per the tally role's step-3 rule, ACs with no owning flow get `na` with that stated
 reason in the pre/post evidence columns — this is not a gap, since AC-matrix already
 supplies independently-executed, green test evidence for every AC.
@@ -79,19 +79,19 @@ for this orphan scan, not silently-owned orphans.
 
 ## Routed
 
-No missing AC proof to route: `qa/ac-matrix.md` (QA step 9, AC Assessor) already records
+No missing AC proof to route: `ac-matrix.md` (QA step 9, AC Assessor) already records
 all 47/47 ACs as PASS with a directly-executed, green test reference for each, cross-checked
 against every owning story's `ac_ids` and Builder Report here. The one procedural gap on
 record — `evidence_contract: receipts-v1` mechanical capture (`aidd-evidence.py capture`)
 cannot run on this Windows host (`os.name != 'posix'` hard-fail; no usable WSL distro with
 Python 3.9+) — is not an AC-proof gap or a diff-ownership finding; it is already documented
-in `qa/ac-matrix.md`'s "Environment gap" section and is routed here for visibility only,
+in `ac-matrix.md`'s "Environment gap" section and is routed here for visibility only,
 addressed to the delivery/QA-gate loop (not the AC-matrix fix loop, since no AC verdict is
 affected):
 
 | item id | destination | note |
 |---|---|---|
-| receipts-v1 (evidence contract) | delivery/QA-gate loop | `evidence/receipts/**` and `evidence/acceptance.json` remain unproduced on this host per `qa/ac-matrix.md`'s "Environment gap" section (`aidd-evidence.py capture` requires POSIX process groups; this host is native Windows with no usable WSL Python 3.9+ distro). Does not flip any AC's semantic verdict — all 47 ACs are independently proven by directly-executed test output — but the receipts-v1 machine-readable artifacts must be produced on a POSIX host (CI/WSL) before delivery can claim receipts-v1 compliance. |
+| receipts-v1 (evidence contract) | delivery/QA-gate loop | `evidence/receipts/**` and `evidence/acceptance.json` remain unproduced on this host per `ac-matrix.md`'s "Environment gap" section (`aidd-evidence.py capture` requires POSIX process groups; this host is native Windows with no usable WSL Python 3.9+ distro). Does not flip any AC's semantic verdict — all 47 ACs are independently proven by directly-executed test output — but the receipts-v1 machine-readable artifacts must be produced on a POSIX host (CI/WSL) before delivery can claim receipts-v1 compliance. |
 
 ## Summary
 

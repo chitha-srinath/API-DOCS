@@ -404,7 +404,7 @@ Full verdict: `audit/interrogation/ST-002-verdict.md`.
 ## Auditor Report (QA step 12 — final audit)
 
 Interrogated AC-005, AC-036, AC-038, AC-039, AC-040, AC-041, AC-042, AC-044, AC-045,
-AC-046, AC-047 (this story's share) against `qa/ac-matrix.md`. Read `test/config/merge.test.ts`
+AC-046, AC-047 (this story's share) against `ac-matrix.md`. Read `test/config/merge.test.ts`
 and `test/config/validate.test.ts` source directly to confirm the `AC-044a`/`AC-044b`
 labelled sub-cases assert what AC-044's Given/When/Then requires (route-level override
 wins over global for both request- and response-validation config).
@@ -416,5 +416,5 @@ Full matrix: `audit/interrogation/qa-final-verdict.md`.
 
 Approved by human (let-me-look). Consolidated `qa/test-report.md`: 237+3 exhaustive cases,
 all PASS, 0 open FAILs. Full suite 79/79 files, 644/649 tests (5 legit skips), coverage
-98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `qa/ac-matrix.md` and
+98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `ac-matrix.md` and
 this story's `## Auditor Report` section above for per-AC verdicts.

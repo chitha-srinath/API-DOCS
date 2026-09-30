@@ -634,7 +634,7 @@ in this fix).
 ## Auditor Report (QA step 12 — final audit)
 
 Interrogated AC-001, AC-003, AC-004, AC-018, AC-019, AC-020, AC-035, AC-036, AC-037,
-AC-043, AC-045, AC-047 (this story's share) against `qa/ac-matrix.md`. Confirmed F-04's
+AC-043, AC-045, AC-047 (this story's share) against `ac-matrix.md`. Confirmed F-04's
 second wired call site (`src/serve/router.ts`'s memoizeAdapter wrap) via the
 `qa/verdicts.md` mutation-gate evidence (router.ts 100%, threshold 70 met) and
 `test/serve/adapter-memo.test.ts`'s spy-invoked-once assertion, cited but not
@@ -647,5 +647,5 @@ Full matrix: `audit/interrogation/qa-final-verdict.md`.
 
 Approved by human (let-me-look). Consolidated `qa/test-report.md`: 237+3 exhaustive cases,
 all PASS, 0 open FAILs. Full suite 79/79 files, 644/649 tests (5 legit skips), coverage
-98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `qa/ac-matrix.md` and
+98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `ac-matrix.md` and
 this story's `## Auditor Report` section above for per-AC verdicts.

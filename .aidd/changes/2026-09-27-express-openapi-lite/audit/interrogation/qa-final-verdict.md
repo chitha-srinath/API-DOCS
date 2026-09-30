@@ -5,7 +5,7 @@ round-2 challenge.
 
 ## Method
 
-Interrogated `qa/ac-matrix.md` (47 rows), `qa/findings.md`, `qa/verdicts.md` (step 3
+Interrogated `ac-matrix.md` (47 rows), `qa/findings.md`, `qa/verdicts.md` (step 3
 adversarial verification of F-01/F-02/F-03/F-04), `qa/tally.md` (47/47 RECONCILED), and
 the 8 story files' `ac_ids`/Builder/Fix-Loop reports. Independently re-executed a
 representative cross-section rather than trusting the matrix's citations verbatim:
@@ -104,16 +104,16 @@ re-verified, or on mocked evidence where the AC demands a real path.
 `evidence_contract: receipts-v1`'s mechanical capture (`aidd-evidence.py capture`) cannot
 run on this native-Windows host (`os.name != 'posix'` hard-fail, no usable WSL distro
 with Python 3.9+), so `evidence/receipts/**` and `evidence/acceptance.json` are
-unproduced. This is a delivery/gate-readiness gap already surfaced in `qa/ac-matrix.md`
+unproduced. This is a delivery/gate-readiness gap already surfaced in `ac-matrix.md`
 and `qa/tally.md`'s Routed section, addressed to the orchestrator/delivery phase — it
 does not flip any AC to DISPUTED because no AC's Given/When/Then requires receipts-v1
 artifacts; every AC is independently proven by directly-executed, green test output
-captured in this report and in `qa/ac-matrix.md`.
+captured in this report and in `ac-matrix.md`.
 
 ## Self-verification
 
 - No DISPUTED verdict issued without a named evidence gap (none issued here).
 - No PROVEN verdict issued without cited, independently re-executed evidence (this
-  round's own commands above, plus `qa/ac-matrix.md`'s per-AC citations, which were
+  round's own commands above, plus `ac-matrix.md`'s per-AC citations, which were
   spot-verified rather than assumed).
 - All 47 PRD AC ids (AC-001..AC-047) appear exactly once.

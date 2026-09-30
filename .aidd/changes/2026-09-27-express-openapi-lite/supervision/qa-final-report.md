@@ -57,7 +57,7 @@ original plan).
 - [x] Mutation >= floor, coverage >= target — mutation 84.39% (floor 70%), coverage
   98.56/93.35/99.45/99.34% (target 90%) — qa/verification-report.md, critic-verdict.md.
 - [x] evidence/post + manifest complete, perf within budget — row 182, quality_gates.evidence_captured/perf_within_budget: passed.
-- [x] AC matrix: every AC PASS — qa/ac-matrix.md 47/47, quality_gates.acs_verified: passed.
+- [x] AC matrix: every AC PASS — ac-matrix.md 47/47, quality_gates.acs_verified: passed.
 - [x] Auditor final audit clean — audit/interrogation/qa-final-verdict.md, 47/47 PROVEN, quality_gates.auditor_approved: passed.
 - [x] debate_complete passed, all 3 surfaces closed within pool of 6 — history row
   2026-09-30T12:35:00Z: "all three debate surfaces closed with 0/6 exchanges used (no
@@ -90,7 +90,7 @@ All checklist items but the final human-approval step are satisfied with evidenc
   named (prd.md, requirements.json, intent.md; architecture.md, epic.md, stories/*,
   pre-review/*; qa/test-report.md) exist on disk per prior reads in this session's context
   and the paths match exactly what QA artifacts reference throughout (qa/tally.md,
-  qa/ac-matrix.md, qa/critic-verdict.md all cite the same story/artifact set). No orphaned
+  ac-matrix.md, qa/critic-verdict.md all cite the same story/artifact set). No orphaned
   or mismatched path was found.
 - cost/ledger.md spot-check: the two rows flagged as corrected at step 15 (tally and
   auditor step-12 dispatches) now show real, non-zero values — `103957` tok / `2.4` min and
@@ -107,13 +107,13 @@ All checklist items but the final human-approval step are satisfied with evidenc
 
 Auditor's final audit (audit/interrogation/qa-final-verdict.md, step 12) returned 47/47
 PROVEN, 0 DISPUTED. No negotiation ladder items exist to adjudicate at this step. Confirmed
-against qa/tally.md (0 gaps, 0 orphans) and qa/ac-matrix.md (47/47 PASS). No adjudication
+against qa/tally.md (0 gaps, 0 orphans) and ac-matrix.md (47/47 PASS). No adjudication
 action required.
 
 ## 5. Explicit assessment of the three flagged items
 
 **(a) receipts-v1 POSIX platform gap.** COMPLIANT treatment. The gap is disclosed
-consistently and identically across three independent artifacts (qa/ac-matrix.md
+consistently and identically across three independent artifacts (ac-matrix.md
 "Environment gap" section with the actual `python -c "import os;print(os.name)"` → `nt`
 command output; qa/tally.md's "Routed" section; qa/critic-verdict.md's rationale and
 condition #1), plus state.yaml's `evidence_contract: receipts-v1` header comment and
@@ -131,7 +131,7 @@ human reviewing G3 should see the condition explicitly (it already is, verbatim,
 qa/critic-verdict.md).
 
 **(b) 2 quarantined flaky tests.** No AC's only evidence is a quarantined test. Cross-check:
-qa/ac-matrix.md contains zero citations of `minified.test.ts` or `lint-rules.test.ts` (grep
+ac-matrix.md contains zero citations of `minified.test.ts` or `lint-rules.test.ts` (grep
 returned no matches) — no AC row cites either test at all, quarantined or otherwise, so no
 AC can be resting solely on them. qa/determinism-report.md's FINAL dispatch reports 0
 quarantined (both flakes resolved to clean agreement in the last E2E run that actually

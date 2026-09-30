@@ -561,7 +561,7 @@ Full per-AC evidence: `audit/interrogation/ST-001-verdict.md`.
 
 ## Auditor Report (QA step 12 — final audit)
 
-Interrogated `qa/ac-matrix.md` rows for AC-001, AC-002, AC-004, AC-020, AC-025, AC-026,
+Interrogated `ac-matrix.md` rows for AC-001, AC-002, AC-004, AC-020, AC-025, AC-026,
 AC-027, AC-028 against this story's `ac_ids`. Independently re-ran `npm run build`
 (exit 0, ESM/CJS/DTS emitted) and `npx vitest run test/meta/workflows.test.ts`
 (16/16 passed) rather than trusting the matrix's citation alone.
@@ -573,5 +573,5 @@ No DISPUTED ACs for this story. Full matrix: `audit/interrogation/qa-final-verdi
 
 Approved by human (let-me-look). Consolidated `qa/test-report.md`: 237+3 exhaustive cases,
 all PASS, 0 open FAILs. Full suite 79/79 files, 644/649 tests (5 legit skips), coverage
-98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `qa/ac-matrix.md` and
+98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `ac-matrix.md` and
 this story's `## Auditor Report` section above for per-AC verdicts.

@@ -462,7 +462,7 @@ independently reproduced).
 
 ## Auditor Report (QA step 12 — final audit)
 
-Interrogated AC-029 against `qa/ac-matrix.md`. Evidence cited (`test/docs/*.test.ts`,
+Interrogated AC-029 against `ac-matrix.md`. Evidence cited (`test/docs/*.test.ts`,
 53/53 passed; manual `CHANGELOG.md` `[0.1.0]` entry check) is direct and sufficient;
 no independent re-run needed beyond the full-suite reproduction already performed for
 this audit (`npm test` equivalents run across other stories all green, no docs-suite
@@ -475,5 +475,5 @@ Full matrix: `audit/interrogation/qa-final-verdict.md`.
 
 Approved by human (let-me-look). Consolidated `qa/test-report.md`: 237+3 exhaustive cases,
 all PASS, 0 open FAILs. Full suite 79/79 files, 644/649 tests (5 legit skips), coverage
-98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `qa/ac-matrix.md` and
+98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `ac-matrix.md` and
 this story's `## Auditor Report` section above for per-AC verdicts.

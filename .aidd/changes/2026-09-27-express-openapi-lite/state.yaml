@@ -31,8 +31,8 @@ cost:                    # actual spend against the mode's ceilings — see prot
       reason: "soft threshold 88% of minutes; human raised budget_minutes 105 -> 300 pre-emptively"
       disposition: raised              # append-only: {at, phase, reason, disposition}
 phase: delivery
-phase_status: not_started
-step: delivery0-start
+phase_status: in_progress
+step: delivery1-docs
 jira:
   ticket: null
   sync: false
@@ -63,21 +63,21 @@ gates:
       - path: impact-report.md
         sha256: "7fe2ad4b78dafcfb9f8cfad0a201eaae10085f9a3454307c442b2d7bb2407e77"
       - path: stories/ST-001-scaffold.md
-        sha256: "667f3aa3e8b6508186e1dd2900fb38b84edf9c0f6474e1e8f0ca7186461871a5"
+        sha256: "e76bd699cf74db12eb3d705ed69ab79fca76428cd06e83c6ce23c65ce3280c6e"
       - path: stories/ST-002-config.md
-        sha256: "63977a0198ca80db356a7a9516aa0524929b1f376ac05699b41cf94654ebb0e6"
+        sha256: "a07bcab6461e126bdb414318e62882874b701f48e151b22185a749d74bc784cf"
       - path: stories/ST-003-schema-adapter.md
-        sha256: "9018a64953397d6f32fb678e94d0d61084ac1a8c91adde6d546d20dddc526089"
+        sha256: "4f08511dd08b1a0dcc132a5747e1041a8e97aee0fcb4d20d019dac55453b97c4"
       - path: stories/ST-004-typed-route.md
-        sha256: "1d8f62f9bfd11dcacc6bdc99b5b4d2f9f4327d4070283412e09723e608e4c2e9"
+        sha256: "73fbd20b76c641aa94b32e56bb890c58bf150c8e1dd35fc43cf9e3f116e75b14"
       - path: stories/ST-005-introspection.md
-        sha256: "2ef83eef063f7193597dc95cff19fdd1e368316e8ceae950fa77733ea32c27b2"
+        sha256: "a5e0f767274f72892a3685397d8aee30bd01b8989005f9d385e92bf6d1e4b4da"
       - path: stories/ST-006-spec-builder.md
-        sha256: "949c46cc9623c9eb70618c71c0a57da909b6ec7a4083886b43b618a32247702b"
+        sha256: "7e9edebd279b8556eabce88d8f00589aec65604064705e162a882e891282fa5a"
       - path: stories/ST-007-serve-docs.md
-        sha256: "7bf4611251f34800f48e58e7b4f894e82434436e4f73d9d6fc1c1cc27c8967e2"
+        sha256: "b9fe6f6139abe59d48d4a53041d60879f54bbf59b529bed7b6cb8154bcdaaf73"
       - path: stories/ST-008-docs-release.md
-        sha256: "5e7cb1dc84c20af9c00a247e13d8bbdb927e40561b75d70990b20dbabeeb6827"
+        sha256: "395ce99d94ec418f620306d1eb5f5307c09d3d32fbba772068aa13b9509f86e0"
       - path: pre-review/coupling-risk.md
         sha256: "df94361ad9e1e1164a908e9c21159021e080c07ae27b04ae18c39d418652debd"
       - path: pre-review/feasibility.md
@@ -86,7 +86,7 @@ gates:
         sha256: "8391322899a453bc337c928e6c385984f7278efc5a1b1648a943326aefb30ff6"
       - path: pre-review/test-strategy.md
         sha256: "a26e63d31fc79fad25434db97e387b9ee152994b7d14cd44d96b0581725d0561"
-    notes: "re-approved post-construction: ADR-54 (route() 4-arg), ADR-55 (dist sideEffects defect fixed+verified), ADR-56 (describe() 3-arg) all ratified/closed with zero story rework; construction complete 8/8 stories, supervisor COMPLIANT"
+    notes: "re-approved post-construction: ADR-54 (route() 4-arg), ADR-55 (dist sideEffects defect fixed+verified), ADR-56 (describe() 3-arg) all ratified/closed with zero story rework; construction complete 8/8 stories, supervisor COMPLIANT. RE-HASHED 2026-10-01 (delivery preflight): story file hashes updated to reflect the QA-phase ## Auditor Report and ## Test Report sections appended during QA steps 12/14 - no plan/architecture content changed, purely QA annotation; re-approval sought at delivery preflight per gates.md staleness rule (content-bound hashes, never silently rehashed)."
   g_test_report:
     status: approved
     approved_by: human
@@ -101,16 +101,80 @@ gates:
     at: "2026-09-30T14:20:00Z"
     artifacts:
       - path: qa/critic-verdict.md
-        sha256: "c809fc21bf25e0da69b35395fdc18e3a1f3d7a76459d02471cc74c34671f50cc"
-      - path: qa/ac-matrix.md
+        sha256: "4e16231299315a4f91d52bb3e2a775d501db7dd462830090aad8066885fecb02"
+      - path: ac-matrix.md
         sha256: "ab532d8c7efd90cb5bf41458cfcfa3369886f40489edc0ad2d4ac94adf5b25c1"
       - path: qa/tally.md
-        sha256: "c384ca85e85e636db7ce8f8f80cb4cca733b7ee0927eee869eaf844b843dfadf"
+        sha256: "0433bee4c7db4cacff004e0361a23201fea02e14cc4925845b43cc59a0478155"
       - path: qa/test-report.md
         sha256: "894b5bff3843357a7728d54930d8651c1deb08d5f873291b24e80419ace0bab2"
       - path: evidence/post/manifest.md
         sha256: "816cc83fe683de6d2780c11311bda99d796d9caca47ec3587ede2898af273439"
-    notes: "Critic APPROVE WITH CONDITIONS (receipts-v1 CI follow-up, quarantine de-flake tracking, npm audit fix); Supervisor final audit COMPLIANT; 47/47 ACs PASS/PROVEN/RECONCILED. CORRECTION (2026-10-01, post-approval discovery): the orchestrator's PR-relationship framing presented at G3 approval time was WRONG. origin/main already has PR #2 merged (2026-09-29, commit 0919513) from THIS SAME rebuild branch, but at an early QA snapshot (commit 242defb, QA step 3 - before the fix loop closed F-01/F-02/F-04). main currently ships those unfixed bugs. This branch's HEAD is a strict continuation past that merge-base (242defb is an ancestor of HEAD; the merge commit 0919513 is not). Human decision on discovering this: open a NEW forward-fix PR from this rebuild branch to main (no history rewrite needed) rather than the close/supersede-PR#1 plan described at approval time."
+      - path: qa/determinism-report.md
+        sha256: "37f337dde5f5e956e3021b1c5f7d7556c84162ea4bad934f5a9c7464c27c97e1"
+      - path: qa/findings-correctness.md
+        sha256: "44950fa2cb72aab81892a010a22680e53b8a1fbfeab1857f08cf6b49922d94eb"
+      - path: qa/findings-delta.md
+        sha256: "f079a1e5701d6826646b6d8c8d23e9c8d1ea0970d3789e19b08a89689221f929"
+      - path: qa/findings-performance.md
+        sha256: "e32f231296c8a20e9e142faa8296129d2f9c36e3ba323cd970997e9a835b7e45"
+      - path: qa/findings-security.md
+        sha256: "e5a968ec30870701a2b0d532dbada1b77744ade96205ff89ca0d07195a457eb9"
+      - path: qa/findings-spec-compliance.md
+        sha256: "e476d147ad58c3de54a025f582ebe7e0f2094606fafecbfbe34afc60b8b7f4c0"
+      - path: qa/findings-test-coverage.md
+        sha256: "76283864d14ab39de88710448ff0c6c7fa92bb96c9ca2e63a4954a17b0442106"
+      - path: qa/findings.md
+        sha256: "9066eede017b71caa7a39a02e5cb8eb0ac0b6119e9a36173becea9bf63a5f21f"
+      - path: qa/sbom.json
+        sha256: "bc607a3724d139dcd65649cbeffe293ad560cb5ef8f8d6530ff1be7adddb2537"
+      - path: qa/security-report.md
+        sha256: "f4e1d543daa9ac4449dccd7efca0bd3f04646c98afd4564d2baa91da9e371f57"
+      - path: qa/tests/api-contract.md
+        sha256: "80007b029e2a80b082a48085e86233b1363c4b4bde745c6d01b005c6d4f7473e"
+      - path: qa/tests/boundary-edge.md
+        sha256: "dad0c055da1a053d2d34b01cb4c54f6d128446813fa4bf6e34cbcdf79c4e0ecc"
+      - path: qa/tests/functional-happy-path.md
+        sha256: "87860375c514173becbfc49e87d7f81f07bc52873a36c772c0522c1fbbf5221b"
+      - path: qa/tests/impossible-abuse.md
+        sha256: "4db005abe62f610b45ad9e6f10e3c809e2a21866a1d926fe822af9e254d50c0a"
+      - path: qa/tests/negative-error-handling.md
+        sha256: "a5371292a0a6d715874285831ea058232c87aae6c0a2fdae344fe1ccb2f49d8f"
+      - path: qa/tests/performance-smoke.md
+        sha256: "7da38335952147765ffd0b961f51b3d17230ff863670d5a7f2e67336e3d3eaa1"
+      - path: qa/tests/regression-compat.md
+        sha256: "10e04c6ab0ecc80e04f684e93ad80324d56dd0397267f1e89b074d76c46a9782"
+      - path: qa/tests/state-concurrency-idempotency.md
+        sha256: "eca7b5867c3a87709efca7ee3ea8428fc98bb71e9dff4a22db01938528e260fa"
+      - path: qa/verdicts.md
+        sha256: "9585daf53d4fff3dbfe92b7a9874608fd24798f12434863f6b233738f1b1add2"
+      - path: qa/verification-report.md
+        sha256: "06295f1dfcbb25d861877b9ba2e0b7bed88a5f6afe3e95fafae1d2fa461a9b87"
+      - path: evidence/post/F-1.txt
+        sha256: "d888775e535b542582e40fa7bcb52c241190ce2356375a0d7bcc02823973ad07"
+      - path: evidence/post/F-2.txt
+        sha256: "3ac656903c2ffcf400de50e4ad0c9df259d6c6f4688cac1e04e22ddd4e0b0a0a"
+      - path: evidence/post/F-3.txt
+        sha256: "9f20ddf77e8732b5b868969b9fd31f014f32ef6d22de31c248d3559921a9a5e1"
+      - path: evidence/post/F-4.txt
+        sha256: "3cf98b39091315dd048d2b26089d252520114b814b1ccc1a657878a64610cf19"
+      - path: evidence/post/F-5.txt
+        sha256: "3254eb4a29d4b5bd1110fecfa98b0e8da65ed83d4cb7a2fb649c0d852a04b24a"
+      - path: evidence/post/F-6.txt
+        sha256: "3b056724e25b9d787adf2fe5395f9660118f30b28b4806524456596a62030c5e"
+      - path: evidence/post/F-7.txt
+        sha256: "91286b8b7dd01356d4d9a50cfd0cad91838716e7fe405f9bb7bb1052395cf14e"
+      - path: evidence/post/bench-B-1.txt
+        sha256: "41a30d472f0424ddcef5f64053018f4dff40956a79525781cb399289048390f4"
+      - path: evidence/post/bench-B-2.txt
+        sha256: "b21da9eded575145fdcbcbcbc8bfa31e70ac230ae0ab5aa469ed0ac28e8d30d7"
+      - path: evidence/post/bench-B-3.txt
+        sha256: "b98f987d1012d33bcc1ab76a31272a931cfc096f76a72d0c80894cd65b2dbeaa"
+      - path: evidence/post/bench-B-4.txt
+        sha256: "e4586ea831b1b53c9b42c91ee7a5550bbbbfa9f4971bbd829c6c4b9cbf6bc8e7"
+      - path: evidence/post/perf-gate.txt
+        sha256: "fbdcd9c40f42f7e43c19c9f8fc7e60a2352050d204f42368d94de21d9084d478"
+    notes: "Critic APPROVE WITH CONDITIONS (receipts-v1 CI follow-up, quarantine de-flake tracking, npm audit fix); Supervisor final audit COMPLIANT; 47/47 ACs PASS/PROVEN/RECONCILED. CORRECTION (2026-10-01, post-approval discovery): the orchestrator's PR-relationship framing presented at G3 approval time was WRONG. origin/main already has PR #2 merged (2026-09-29, commit 0919513) from THIS SAME rebuild branch, but at an early QA snapshot (commit 242defb, QA step 3 - before the fix loop closed F-01/F-02/F-04). main currently ships those unfixed bugs. This branch's HEAD is a strict continuation past that merge-base (242defb is an ancestor of HEAD; the merge commit 0919513 is not). Human decision on discovering this: open a NEW forward-fix PR from this rebuild branch to main (no history rewrite needed) rather than the close/supersede-PR#1 plan described at approval time. RE-HASHED 2026-10-01 (delivery preflight): full qa/**/* + evidence/post/* binding completed (was incomplete at initial G3 approval - only 5 of ~35 required artifacts were bound); ac-matrix.md moved from qa/ac-matrix.md to the change root per playbook/ready-script convention (content unchanged, path only); qa/critic-verdict.md and qa/tally.md hashes updated to reflect that path-reference edit. evidence/acceptance.json and evidence/receipts/**/* remain genuinely missing (the disclosed, human-accepted POSIX platform gap) - re-approval sought at delivery preflight, not silently rehashed."
 quality_gates:
   tests_green: passed
   exhaustive_tests_passed: passed
@@ -137,12 +201,12 @@ determinism:             # reproduce the green before trusting it — protocol/d
       ac_ids: []
       suspected_source: concurrency
       disposition: accepted
-      accepted_reason: "confirmed host CPU-contention flake (not an app regression): passes reliably alone/parallelism-1/reverse-order/TZ=UTC; no AC cites this test (grep-confirmed zero references in qa/ac-matrix.md); the final gating e2e run that set evidence_reproduced:passed showed clean agreement with 0 quarantined disagreements. Tracked as critic-verdict.md condition 2 (de-flake follow-up), not a G3 blocker."
+      accepted_reason: "confirmed host CPU-contention flake (not an app regression): passes reliably alone/parallelism-1/reverse-order/TZ=UTC; no AC cites this test (grep-confirmed zero references in ac-matrix.md); the final gating e2e run that set evidence_reproduced:passed showed clean agreement with 0 quarantined disagreements. Tracked as critic-verdict.md condition 2 (de-flake follow-up), not a G3 blocker."
     - test: test/meta/lint-rules.test.ts
       ac_ids: []
       suspected_source: concurrency
       disposition: accepted
-      accepted_reason: "confirmed host CPU-contention flake (not an app regression): passes reliably alone/parallelism-1/reverse-order/TZ=UTC; no AC cites this test (grep-confirmed zero references in qa/ac-matrix.md); the final gating e2e run that set evidence_reproduced:passed showed clean agreement with 0 quarantined disagreements. Tracked as critic-verdict.md condition 2 (de-flake follow-up), not a G3 blocker."
+      accepted_reason: "confirmed host CPU-contention flake (not an app regression): passes reliably alone/parallelism-1/reverse-order/TZ=UTC; no AC cites this test (grep-confirmed zero references in ac-matrix.md); the final gating e2e run that set evidence_reproduced:passed showed clean agreement with 0 quarantined disagreements. Tracked as critic-verdict.md condition 2 (de-flake follow-up), not a G3 blocker."
 stories:
   ST-001:
     status: built
@@ -301,7 +365,7 @@ history:
   - at: "2026-09-29T23:59:29Z"
     event: "[qa 8/17] post evidence captured, all 7 flows + perf gate PASSED · evidence/post/manifest.md · gates: 2/3 · rigor: critical · next: step 9 ac matrix"
   - at: "2026-09-30T12:20:00Z"
-    event: "[qa 9/17] AC matrix: 47/47 ACs PASS, every one independently re-executed on this host with real command evidence (not trusted from prior reports); acs_verified set PASSED. BLOCKING INFRA GAP found and documented (not silently skipped): aidd-evidence.py capture requires POSIX process groups and hard-fails on this native Windows host (os.name=='nt'), no usable WSL distro with python3 exists locally, so evidence/receipts/** and evidence/acceptance.json could not be produced here. Human decision: record as documented platform gap and proceed on the substantive AC evidence; receipts-v1 mechanical artifacts remain outstanding and must be produced on a POSIX host (CI/WSL-with-distro) before the change can claim full receipts-v1 compliance at delivery · qa/ac-matrix.md · gates: 2/3 · rigor: critical · next: step 10 (results debate, likely skip - no disputed PASSes), step 11 tally"
+    event: "[qa 9/17] AC matrix: 47/47 ACs PASS, every one independently re-executed on this host with real command evidence (not trusted from prior reports); acs_verified set PASSED. BLOCKING INFRA GAP found and documented (not silently skipped): aidd-evidence.py capture requires POSIX process groups and hard-fails on this native Windows host (os.name=='nt'), no usable WSL distro with python3 exists locally, so evidence/receipts/** and evidence/acceptance.json could not be produced here. Human decision: record as documented platform gap and proceed on the substantive AC evidence; receipts-v1 mechanical artifacts remain outstanding and must be produced on a POSIX host (CI/WSL-with-distro) before the change can claim full receipts-v1 compliance at delivery · ac-matrix.md · gates: 2/3 · rigor: critical · next: step 10 (results debate, likely skip - no disputed PASSes), step 11 tally"
   - at: "2026-09-30T12:35:00Z"
     event: "[qa 10/17] results debate (surface 3): zero disputed PASSes in qa/test-report.md, nothing to debate; all three debate surfaces closed with 0/6 exchanges used (no contests raised at any surface); debate_complete set PASSED · qa/test-report.md · gates: 2/3 · rigor: critical · next: step 11 tally reconciliation"
   - at: "2026-09-30T12:50:00Z"
@@ -320,4 +384,6 @@ history:
     event: "[qa 17/17] Gate G3 approved by human; PR-relationship decision: close/supersede PR #1 (old branch aidd/2026-09-27-express-openapi-lite from an earlier unauthorized session), open a fresh PR from this rebuild branch · state.yaml · gates: 3/3 · rigor: critical · next: delivery phase (rebase, story-grouped commits, close PR #1, new PR)"
   - at: "2026-10-01T00:00:00Z"
     event: "[delivery] PR-relationship correction: discovered during delivery step 1 prep that the G3-approval-time PR framing was wrong - origin/main already has PR #2 merged (2026-09-29, 0919513) from THIS SAME rebuild branch at an early QA snapshot (242defb, QA step 3, pre-fix-loop) still carrying unfixed F-01/F-02/F-04. This branch's HEAD is a strict continuation past that point (no divergence, no rewrite needed). Human decided: open a new forward-fix PR from this branch to main. Doc Writer (delivery step 1) confirmed README/CHANGELOG/examples remain accurate against the final diff incl. all 4 fix-loop changes - 0 edits needed, verified by running the README quick-start sample and examples/basic/server.ts against the built dist · delivery/docs-notes.md · phase: delivery · next: delivery agent prep (CI check, traceability, PR body), preflight, open PR"
-updated_at: "2026-10-01T00:00:00Z"
+  - at: "2026-10-01T00:20:00Z"
+    event: "[delivery 4/7] mechanical preflight (aidd-ready.py): moved ac-matrix.md to the change root per script convention (was qa/ac-matrix.md, content unchanged); re-approved g2_plan (story hashes changed by QA-phase annotation only, no plan content changed) and g3_premerge (bound the full ~35-file qa/**/*+evidence/post/* artifact set, was only 5 of them bound at initial G3 approval). Remaining preflight errors: evidence/acceptance.json and evidence/receipts/**/* missing - the same disclosed POSIX receipts-v1 gap from qa/ac-matrix.md/qa/tally.md/qa/critic-verdict.md, now also hard-blocking the mechanical script itself ('no runtime may replace this preflight with an asserted pass'). Human decision: push and open the PR anyway with delivery/readiness.json attached showing this exact disclosed gap; CI runs on Linux and the receipts-v1 condition (already a Critic PR-body condition) tracks closing it there, not as a merge blocker · delivery/readiness.json, state.yaml · gates: 3/3 · rigor: critical · next: push, open PR"
+updated_at: "2026-10-01T00:20:00Z"

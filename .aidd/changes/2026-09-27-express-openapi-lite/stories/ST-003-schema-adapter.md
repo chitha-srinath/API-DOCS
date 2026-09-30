@@ -455,5 +455,5 @@ ACs for this story. Full matrix: `audit/interrogation/qa-final-verdict.md`.
 
 Approved by human (let-me-look). Consolidated `qa/test-report.md`: 237+3 exhaustive cases,
 all PASS, 0 open FAILs. Full suite 79/79 files, 644/649 tests (5 legit skips), coverage
-98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `qa/ac-matrix.md` and
+98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `ac-matrix.md` and
 this story's `## Auditor Report` section above for per-AC verdicts.

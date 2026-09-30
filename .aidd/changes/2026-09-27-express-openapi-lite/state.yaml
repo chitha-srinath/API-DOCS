@@ -30,9 +30,9 @@ cost:                    # actual spend against the mode's ceilings — see prot
       phase: qa
       reason: "soft threshold 88% of minutes; human raised budget_minutes 105 -> 300 pre-emptively"
       disposition: raised              # append-only: {at, phase, reason, disposition}
-phase: inception
+phase: delivery
 phase_status: not_started
-step: qa0-gate
+step: delivery0-start
 jira:
   ticket: null
   sync: false
@@ -95,6 +95,22 @@ gates:
       - path: qa/test-report.md
         sha256: "894b5bff3843357a7728d54930d8651c1deb08d5f873291b24e80419ace0bab2"
     notes: "0 open FAILs; 237+3 exhaustive cases PASS; full suite 79/79 files, 644/649 tests (5 legit skips), coverage 98.56/93.35/99.45/99.34%; ## Test Report section appended to all 8 story files"
+  g3_premerge:
+    status: approved
+    approved_by: human
+    at: "2026-09-30T14:20:00Z"
+    artifacts:
+      - path: qa/critic-verdict.md
+        sha256: "c809fc21bf25e0da69b35395fdc18e3a1f3d7a76459d02471cc74c34671f50cc"
+      - path: qa/ac-matrix.md
+        sha256: "ab532d8c7efd90cb5bf41458cfcfa3369886f40489edc0ad2d4ac94adf5b25c1"
+      - path: qa/tally.md
+        sha256: "c384ca85e85e636db7ce8f8f80cb4cca733b7ee0927eee869eaf844b843dfadf"
+      - path: qa/test-report.md
+        sha256: "894b5bff3843357a7728d54930d8651c1deb08d5f873291b24e80419ace0bab2"
+      - path: evidence/post/manifest.md
+        sha256: "816cc83fe683de6d2780c11311bda99d796d9caca47ec3587ede2898af273439"
+    notes: "Critic APPROVE WITH CONDITIONS (receipts-v1 CI follow-up, quarantine de-flake tracking, npm audit fix); Supervisor final audit COMPLIANT; 47/47 ACs PASS/PROVEN/RECONCILED. Human decision: close/supersede PR #1 (on aidd/2026-09-27-express-openapi-lite) and open a fresh PR from this rebuild branch at delivery."
 quality_gates:
   tests_green: passed
   exhaustive_tests_passed: passed
@@ -300,4 +316,6 @@ history:
     event: "[qa 16/17] Critic verdict: APPROVE WITH CONDITIONS. 47/47 ACs proven across 3 independent layers, all findings closed/refuted, full suite green, mutation 84.39%%, security clean. 3 conditions for PR body: (1) produce receipts-v1 artifacts on a POSIX host/CI, does not block merge - no AC depends on them; (2) track 2 quarantined flaky tests to de-quarantine; (3) opportunistic npm audit fix for dev-only qs moderate advisory. critic_approved set PASSED · qa/critic-verdict.md · gates: 2/3 · rigor: critical · next: step 17 supervisor final audit, gate G3"
   - at: "2026-09-30T14:05:00Z"
     event: "[qa 17/17] Supervisor final audit COMPLIANT: full QA-phase audit.log replayed steps 1-16, all required dispatches present+ordered, exit checklist walked line by line, sha256 gate hashes spot-checked; no DISPUTED ACs so no adjudication needed. Explicit review of receipts-v1 gap treatment (COMPLIANT), quarantine citations (0 ACs rest on either quarantined test, grep-confirmed), and step-15 cost correction (COMPLIANT remediation). One non-blocking observation: determinism.quarantined disposition was stale 'pending' despite the final gating run showing 0 quarantined disagreements; cleaned up to 'accepted' with reason, not silently left · supervision/qa-final-report.md · gates: 2/3 · rigor: critical · next: present G3 to human"
-updated_at: "2026-09-30T14:05:00Z"
+  - at: "2026-09-30T14:20:00Z"
+    event: "[qa 17/17] Gate G3 approved by human; PR-relationship decision: close/supersede PR #1 (old branch aidd/2026-09-27-express-openapi-lite from an earlier unauthorized session), open a fresh PR from this rebuild branch · state.yaml · gates: 3/3 · rigor: critical · next: delivery phase (rebase, story-grouped commits, close PR #1, new PR)"
+updated_at: "2026-09-30T14:20:00Z"

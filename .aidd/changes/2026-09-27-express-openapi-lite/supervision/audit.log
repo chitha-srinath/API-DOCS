@@ -194,3 +194,4 @@
 2026-09-30T13:50:00Z | qa | critic | step 16 | returned | APPROVE WITH CONDITIONS (receipts-v1 CI follow-up, quarantine tracking, npm audit fix); critic_approved PASSED
 2026-09-30T14:05:00Z | qa | orchestrator | step 17 dispatch | dispatched | Supervisor final audit over full QA super-context, feeds gate G3
 2026-09-30T14:05:00Z | qa | supervisor | step 17 | returned | COMPLIANT; explicit review of receipts-v1 gap, quarantine citations, step-15 cost correction all COMPLIANT; 1 non-blocking staleness observation fixed
+2026-09-30T14:20:00Z | qa | human | gate | returned | G3 approved (let-me-look); PR decision: close/supersede PR #1, open fresh PR from rebuild branch

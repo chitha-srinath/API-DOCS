@@ -95,7 +95,7 @@ quality_gates:
   mutation_floor_met: passed
   security_clean: passed
   perf_within_budget: passed
-  acs_verified: pending
+  acs_verified: passed
   evidence_captured: passed
   supervision_compliant: passed
   critic_approved: pending
@@ -276,4 +276,6 @@ history:
     event: "[qa 7/17] E2E verification PASSED: tests_green, e2e_verified, mutation_floor_met (84.39%%), evidence_reproduced all set · qa/verification-report.md · gates: 2/3 · rigor: critical · next: step 8 post evidence"
   - at: "2026-09-29T23:59:29Z"
     event: "[qa 8/17] post evidence captured, all 7 flows + perf gate PASSED · evidence/post/manifest.md · gates: 2/3 · rigor: critical · next: step 9 ac matrix"
-updated_at: "2026-09-29T23:59:29Z"
+  - at: "2026-09-30T12:20:00Z"
+    event: "[qa 9/17] AC matrix: 47/47 ACs PASS, every one independently re-executed on this host with real command evidence (not trusted from prior reports); acs_verified set PASSED. BLOCKING INFRA GAP found and documented (not silently skipped): aidd-evidence.py capture requires POSIX process groups and hard-fails on this native Windows host (os.name=='nt'), no usable WSL distro with python3 exists locally, so evidence/receipts/** and evidence/acceptance.json could not be produced here. Human decision: record as documented platform gap and proceed on the substantive AC evidence; receipts-v1 mechanical artifacts remain outstanding and must be produced on a POSIX host (CI/WSL-with-distro) before the change can claim full receipts-v1 compliance at delivery · qa/ac-matrix.md · gates: 2/3 · rigor: critical · next: step 10 (results debate, likely skip - no disputed PASSes), step 11 tally"
+updated_at: "2026-09-30T12:20:00Z"

@@ -143,3 +143,4 @@
 | 2026-09-30T12:50:00Z | qa | tally | tally | step 11 tally reconciliation | not measured | 103957 | 2.4 | 7726201 | 2171.1 | measured |
 | 2026-09-30T13:05:00Z | qa | auditor | auditor | step 12 final audit | not measured | 52710 | 2.1 | 7778911 | 2173.2 | measured |
 | 2026-09-30T13:50:00Z | qa | critic | critic | step 16 critic verdict | not measured | 37305 | 0.8 | 7816216 | 2174.0 | measured |
+| 2026-09-30T14:05:00Z | qa | supervisor | supervisor | step 17 final audit | not measured | 70370 | 1.6 | 7886586 | 2175.6 | measured |

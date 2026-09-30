@@ -192,3 +192,5 @@
 2026-09-30T13:35:00Z | qa | orchestrator | step 15 cost close-out | returned | corrected 2 ledger rows wrongly recorded 0 tokens/min; spent_tokens 7622244->7778911, spent_minutes 2168.7->2173.2; within_cost_budget PASSED (39% tokens, 87% minutes); qa_findings_resolved PASSED
 2026-09-30T13:50:00Z | qa | orchestrator | step 16 dispatch | dispatched | Critic, synthesizes existing evidence, no re-run
 2026-09-30T13:50:00Z | qa | critic | step 16 | returned | APPROVE WITH CONDITIONS (receipts-v1 CI follow-up, quarantine tracking, npm audit fix); critic_approved PASSED
+2026-09-30T14:05:00Z | qa | orchestrator | step 17 dispatch | dispatched | Supervisor final audit over full QA super-context, feeds gate G3
+2026-09-30T14:05:00Z | qa | supervisor | step 17 | returned | COMPLIANT; explicit review of receipts-v1 gap, quarantine citations, step-15 cost correction all COMPLIANT; 1 non-blocking staleness observation fixed

@@ -100,7 +100,7 @@ quality_gates:
   supervision_compliant: passed
   critic_approved: pending
   auditor_approved: pending
-  debate_complete: pending
+  debate_complete: passed
   tally_reconciled: pending
   within_cost_budget: pending
   evidence_reproduced: failed
@@ -278,4 +278,6 @@ history:
     event: "[qa 8/17] post evidence captured, all 7 flows + perf gate PASSED · evidence/post/manifest.md · gates: 2/3 · rigor: critical · next: step 9 ac matrix"
   - at: "2026-09-30T12:20:00Z"
     event: "[qa 9/17] AC matrix: 47/47 ACs PASS, every one independently re-executed on this host with real command evidence (not trusted from prior reports); acs_verified set PASSED. BLOCKING INFRA GAP found and documented (not silently skipped): aidd-evidence.py capture requires POSIX process groups and hard-fails on this native Windows host (os.name=='nt'), no usable WSL distro with python3 exists locally, so evidence/receipts/** and evidence/acceptance.json could not be produced here. Human decision: record as documented platform gap and proceed on the substantive AC evidence; receipts-v1 mechanical artifacts remain outstanding and must be produced on a POSIX host (CI/WSL-with-distro) before the change can claim full receipts-v1 compliance at delivery · qa/ac-matrix.md · gates: 2/3 · rigor: critical · next: step 10 (results debate, likely skip - no disputed PASSes), step 11 tally"
-updated_at: "2026-09-30T12:20:00Z"
+  - at: "2026-09-30T12:35:00Z"
+    event: "[qa 10/17] results debate (surface 3): zero disputed PASSes in qa/test-report.md, nothing to debate; all three debate surfaces closed with 0/6 exchanges used (no contests raised at any surface); debate_complete set PASSED · qa/test-report.md · gates: 2/3 · rigor: critical · next: step 11 tally reconciliation"
+updated_at: "2026-09-30T12:35:00Z"

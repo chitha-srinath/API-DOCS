@@ -12,8 +12,8 @@ rigor:                   # how much verification runs — see protocol/rigor-mod
 cost:                    # actual spend against the mode's ceilings — see protocol/cost-governance.md
   budget_tokens: 20000000 # standard default (derived, not measured); tunable in constitution.md
   budget_minutes: 2500
-  spent_tokens: 7622244        # derived from cost/ledger.md — never asserted
-  spent_minutes: 2168.7
+  spent_tokens: 7778911        # derived from cost/ledger.md — never asserted
+  spent_minutes: 2173.2
   by_phase:
     inception:
       tokens: 2694542
@@ -22,8 +22,8 @@ cost:                    # actual spend against the mode's ceilings — see prot
       tokens: 2718693
       minutes: 525.9           # phase -> {tokens, minutes}; sums to spent_*
     qa:
-      tokens: 329270
-      minutes: 142.6           # NOTE: pre-existing gap — prior qa dispatches (steps 1-6) were never folded into by_phase.qa despite spent_* already reflecting them (872.2 > inception+construction); flagging for supervisor, not silently backfilled
+      tokens: 2365676
+      minutes: 1545.3           # NOTE: pre-existing gap — prior qa dispatches (steps 1-6) were never folded into by_phase.qa despite spent_* already reflecting them; flagging for supervisor, not silently backfilled. Recomputed 2026-09-30 as spent_* minus inception+construction after steps 9/11/12 ledger rows added.
   projection_tokens: null
   stops:
     - at: "2026-09-27T12:59:42Z"
@@ -98,7 +98,7 @@ gates:
 quality_gates:
   tests_green: passed
   exhaustive_tests_passed: passed
-  qa_findings_resolved: pending
+  qa_findings_resolved: passed
   e2e_verified: passed
   mutation_floor_met: passed
   security_clean: passed
@@ -110,7 +110,7 @@ quality_gates:
   auditor_approved: passed
   debate_complete: passed
   tally_reconciled: passed
-  within_cost_budget: pending
+  within_cost_budget: passed
   evidence_reproduced: passed
 determinism:             # reproduce the green before trusting it — protocol/determinism.md
   repeats_required: 2    # critical: full suite twice + canonical set twice
@@ -294,4 +294,6 @@ history:
     event: "[qa 12/17] auditor final audit: 47/47 ACs PROVEN, 0 DISPUTED, settled in round 1 (2-round critical budget, round 2 unused); independent re-execution corroborated ac-matrix.md rather than contradicting it; auditor_approved set PASSED · audit/interrogation/qa-final-verdict.md · gates: 2/3 · rigor: critical · next: step 13 negotiation (skipped, no DISPUTED ACs), step 14 test report approval. Also caught+fixed a stale gate: evidence_reproduced was left 'failed' from the RED e2e cycle despite history recording it PASSED alongside tests_green/e2e_verified/mutation_floor_met at the final green e2e dispatch (2026-09-29T23:50:20Z) - corrected to passed, not silently carried forward"
   - at: "2026-09-30T13:20:00Z"
     event: "[qa 14/17] step 13 negotiation skipped (no DISPUTED ACs from step 12); g_test_report approved by human (let-me-look gate) · qa/test-report.md, stories/ · gates: 2/3 · next: step 15 cost close-out, step 16 critic verdict"
-updated_at: "2026-09-30T13:20:00Z"
+  - at: "2026-09-30T13:35:00Z"
+    event: "[qa 15/17] cost close-out: corrected 2 ledger rows (tally/auditor dispatches) that were wrongly recorded 0 tokens/0 min despite real usage being available (103957tok/2.4min, 52710tok/2.1min) - not silently left wrong; recomputed spent_tokens 7622244->7778911, spent_minutes 2168.7->2173.2, by_phase.qa backfilled to 2365676tok/1545.3min; within_cost_budget PASSED (39% tokens, 87% minutes, no pending stops); qa_findings_resolved PASSED (all findings closed: F-01/02/04/22 fixed+verified, F-03 refuted, F-21 advisory-only) · cost/ledger.md · gates: 2/3 · rigor: critical · next: step 16 critic verdict"
+updated_at: "2026-09-30T13:35:00Z"

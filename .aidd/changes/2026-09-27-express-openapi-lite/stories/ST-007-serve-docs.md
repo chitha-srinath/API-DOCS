@@ -642,3 +642,10 @@ independently re-run this round given the direct code read confirming the wiring
 
 **Verdict: all of this story's claimed ACs — PROVEN.** No DISPUTED ACs.
 Full matrix: `audit/interrogation/qa-final-verdict.md`.
+
+## Test Report (QA step 14 — g_test_report approved 2026-09-30)
+
+Approved by human (let-me-look). Consolidated `qa/test-report.md`: 237+3 exhaustive cases,
+all PASS, 0 open FAILs. Full suite 79/79 files, 644/649 tests (5 legit skips), coverage
+98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `qa/ac-matrix.md` and
+this story's `## Auditor Report` section above for per-AC verdicts.

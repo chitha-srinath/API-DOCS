@@ -87,6 +87,14 @@ gates:
       - path: pre-review/test-strategy.md
         sha256: "a26e63d31fc79fad25434db97e387b9ee152994b7d14cd44d96b0581725d0561"
     notes: "re-approved post-construction: ADR-54 (route() 4-arg), ADR-55 (dist sideEffects defect fixed+verified), ADR-56 (describe() 3-arg) all ratified/closed with zero story rework; construction complete 8/8 stories, supervisor COMPLIANT"
+  g_test_report:
+    status: approved
+    approved_by: human
+    at: "2026-09-30T13:20:00Z"
+    artifacts:
+      - path: qa/test-report.md
+        sha256: "894b5bff3843357a7728d54930d8651c1deb08d5f873291b24e80419ace0bab2"
+    notes: "0 open FAILs; 237+3 exhaustive cases PASS; full suite 79/79 files, 644/649 tests (5 legit skips), coverage 98.56/93.35/99.45/99.34%; ## Test Report section appended to all 8 story files"
 quality_gates:
   tests_green: passed
   exhaustive_tests_passed: passed
@@ -284,4 +292,6 @@ history:
     event: "[qa 11/17] tally reconciliation: 47/47 ACs RECONCILED (0 GAP, 0 orphans), 1 routed note (receipts-v1 env gap, already documented, no AC verdict affected); tally_reconciled set PASSED · qa/tally.md · gates: 2/3 · rigor: critical · next: step 12 auditor final audit"
   - at: "2026-09-30T13:05:00Z"
     event: "[qa 12/17] auditor final audit: 47/47 ACs PROVEN, 0 DISPUTED, settled in round 1 (2-round critical budget, round 2 unused); independent re-execution corroborated ac-matrix.md rather than contradicting it; auditor_approved set PASSED · audit/interrogation/qa-final-verdict.md · gates: 2/3 · rigor: critical · next: step 13 negotiation (skipped, no DISPUTED ACs), step 14 test report approval. Also caught+fixed a stale gate: evidence_reproduced was left 'failed' from the RED e2e cycle despite history recording it PASSED alongside tests_green/e2e_verified/mutation_floor_met at the final green e2e dispatch (2026-09-29T23:50:20Z) - corrected to passed, not silently carried forward"
-updated_at: "2026-09-30T13:05:00Z"
+  - at: "2026-09-30T13:20:00Z"
+    event: "[qa 14/17] step 13 negotiation skipped (no DISPUTED ACs from step 12); g_test_report approved by human (let-me-look gate) · qa/test-report.md, stories/ · gates: 2/3 · next: step 15 cost close-out, step 16 critic verdict"
+updated_at: "2026-09-30T13:20:00Z"

@@ -718,9 +718,10 @@ export function App() {
     }
     return [...byTag.entries()];
   }, [visible]);
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  // Groups start collapsed; this set holds the ones the user has opened.
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   function toggleGroup(tag: string) {
-    setCollapsed((prev) => {
+    setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(tag)) next.delete(tag);
       else next.add(tag);
@@ -785,7 +786,7 @@ export function App() {
               <ScrollArea className="h-[60vh] pr-3">
                 <div className="space-y-3">
                   {groups.map(([tag, groupOps]) => {
-                    const isOpen = !collapsed.has(tag);
+                    const isOpen = expanded.has(tag);
                     return (
                       <section key={tag}>
                         <button

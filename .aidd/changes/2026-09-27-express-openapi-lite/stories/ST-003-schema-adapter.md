@@ -37,8 +37,8 @@ Greenfield repo (context pack: "the repo is greenfield"). S-01 has already produ
 `package.json` (zod as an **optional peer `^4.2.0`** and a zod devDependency `^4.6.5`, ADR-47;
 vitest 5.0.2 with `--typecheck`), `tsconfig*.json`, `eslint.config.js` (zod import allowed only in
 `src/adapter/zod.ts`), `src/core/types.ts` (including the ADR-49 constants
-`BRAND = Symbol.for('express-api-docs.v1.brand')` (instance key) and
-`BRAND_KEY = Symbol.for('express-api-docs.v1.brandKey')` (class key)), the `test/fixtures/` directory, and the
+`BRAND = Symbol.for('express-api-contract.v1.brand')` (instance key) and
+`BRAND_KEY = Symbol.for('express-api-contract.v1.brandKey')` (class key)), the `test/fixtures/` directory, and the
 CI `peer-floor` job that installs `zod@4.2.0` and runs `test/adapter/standard-floor.test.ts`.
 
 You may READ `src/core/types.ts` but must not edit it. You may NOT edit `package.json`,
@@ -58,7 +58,7 @@ So export `standardSchemaAdapter` from `src/adapter/standard.ts`, `zodAdapter` f
 
 ### Architecture C2 (verbatim, architecture.md)
 
-> | C2 | `adapter/types.ts`, `adapter/standard.ts`, `adapter/standard-types.ts`, `adapter/memo.ts`, `adapter/zod.ts`, `zod.ts` (subpath entry) | `SchemaAdapter<S> { name; isSchema(x): x is S; validate(s, input): {ok:true,data}\|{ok:false,issues:{path,message}[]}; toJSONSchema(s, io:'input'\|'output'); }` plus a type-level `Infer<S>` hook. **Core default:** `standardSchemaAdapter` via `~standard.validate` / `~standard.jsonSchema` with types vendored in `standard-types.ts` (ADR-21; edge behaviour ADR-31). **Subpath only:** `zodAdapter` (`adapter/zod.ts`, exposed through `src/zod.ts` → `express-api-docs/zod`) uses `safeParse` and `z.toJSONSchema(s, { target: 'draft-2020-12', io, unrepresentable: 'any' })`; it is the only file allowed to import `zod`. `memo.ts` wraps any adapter with `WeakMap<schema, JSONSchema>` memoization. **[was: ... SUPERSEDED by ADR-21]** | 005, 006, 016, 035 | ... | S-03 adapter |
+> | C2 | `adapter/types.ts`, `adapter/standard.ts`, `adapter/standard-types.ts`, `adapter/memo.ts`, `adapter/zod.ts`, `zod.ts` (subpath entry) | `SchemaAdapter<S> { name; isSchema(x): x is S; validate(s, input): {ok:true,data}\|{ok:false,issues:{path,message}[]}; toJSONSchema(s, io:'input'\|'output'); }` plus a type-level `Infer<S>` hook. **Core default:** `standardSchemaAdapter` via `~standard.validate` / `~standard.jsonSchema` with types vendored in `standard-types.ts` (ADR-21; edge behaviour ADR-31). **Subpath only:** `zodAdapter` (`adapter/zod.ts`, exposed through `src/zod.ts` → `express-api-contract/zod`) uses `safeParse` and `z.toJSONSchema(s, { target: 'draft-2020-12', io, unrepresentable: 'any' })`; it is the only file allowed to import `zod`. `memo.ts` wraps any adapter with `WeakMap<schema, JSONSchema>` memoization. **[was: ... SUPERSEDED by ADR-21]** | 005, 006, 016, 035 | ... | S-03 adapter |
 
 C2 lists `zod.ts` (subpath entry), but the epic gives `src/zod.ts` to S-07. Follow the epic.
 
@@ -67,7 +67,7 @@ C2 lists `zod.ts` (subpath entry), but the epic gives `src/zod.ts` to S-07. Foll
 > **[zod peer floor SUPERSEDED by ADR-47 → `^4.2.0`.]** ...
 > • **Default adapter:** the core ships `standardSchemaAdapter` (`src/adapter/standard.ts`, S-03). It validates via `schema['~standard'].validate` and converts via `schema['~standard'].jsonSchema.{input,output}({ target: 'draft-2020-12' })`. The Standard Schema type definitions are vendored as types only, in `src/adapter/standard-types.ts`, so there is no runtime dependency.
 > • **Result:** zero-options `createApiDocs()` accepts Zod v4 schemas (AC-035) with no zod import in core.
-> • **Zod subpath:** `zodAdapter` lives **only** at the subpath export `express-api-docs/zod` (`src/zod.ts` → `adapter/zod.ts`). It adds Zod-specific handling: `unrepresentable: 'any'` and typed `z.infer`.
+> • **Zod subpath:** `zodAdapter` lives **only** at the subpath export `express-api-contract/zod` (`src/zod.ts` → `adapter/zod.ts`). It adds Zod-specific handling: `unrepresentable: 'any'` and typed `z.infer`.
 
 The `^4.0.0` peer range in ADR-21's body is superseded; the effective floor is `^4.2.0`.
 
@@ -104,7 +104,7 @@ ADR-42's `x[BRAND] === this.name` comparison is superseded (it fails under minif
 
 ### ADR-49 (verbatim excerpt)
 
-> **Brand:** the brand is a **stable string code per class**, never `this.name`. `core/types.ts` exports `BRAND = Symbol.for('express-api-docs.v1.brand')` (the instance key) and `BRAND_KEY = Symbol.for('express-api-docs.v1.brandKey')` (the class key). Each class declares `static readonly [BRAND_KEY] = 'express-api-docs.v1.ApiDocsConfigError'` (respectively `…ApiDocsSchemaError`).
+> **Brand:** the brand is a **stable string code per class**, never `this.name`. `core/types.ts` exports `BRAND = Symbol.for('express-api-contract.v1.brand')` (the instance key) and `BRAND_KEY = Symbol.for('express-api-contract.v1.brandKey')` (the class key). Each class declares `static readonly [BRAND_KEY] = 'express-api-contract.v1.ApiDocsConfigError'` (respectively `…ApiDocsSchemaError`).
 > **Construction:** the constructor stores the **set of codes along its class chain**: `this[BRAND] = collectBrands(new.target)`, which walks `Object.getPrototypeOf` over constructors and gathers each own `[BRAND_KEY]`.
 > **`instanceof`:** `static [Symbol.hasInstance](x) { const k = Object.prototype.hasOwnProperty.call(this, BRAND_KEY) ? this[BRAND_KEY] : undefined; return k !== undefined && Array.isArray(x?.[BRAND]) && x[BRAND].includes(k); }`. When a user subclass declares no brand, it falls back to `Function.prototype[Symbol.hasInstance].call(this, x)` (a normal prototype check).
 > **Tests:** S-02 and S-03 unit tests cover a subclass, a renamed class and a foreign object with a wrong brand (false).
@@ -126,7 +126,7 @@ ADR-42's `x[BRAND] === this.name` comparison is superseded (it fails under minif
 
 - `types.ts`: `SchemaAdapter<S>` (pinned C2 contract, unchanged), `ValidationResult<T>`, `JSONSchema`, `SchemaIO = 'input' | 'output'`, the type-level `Infer<S>` hook. The `SchemaAdapter` interface carries a JSDoc comment containing the line `@remarks AC-047 "parse" = validate, "toJsonSchema" = toJSONSchema` (ADR-53); do not rename or alias members.
 - `standard-types.ts`: vendored Standard Schema V1 types only (no runtime code, no imports), including `~standard.jsonSchema.{input,output}`.
-- `errors.ts` (ADR-49): `class ApiDocsSchemaError extends Error`, `name = 'ApiDocsSchemaError'`, `readonly code: 'EAD_ASYNC_SCHEMA'`, `vendor: string`, `route?: string`; `static readonly [BRAND_KEY] = 'express-api-docs.v1.ApiDocsSchemaError'`; constructor sets `this[BRAND] = collectBrands(new.target)` (array of own `[BRAND_KEY]` codes along the constructor chain via `Object.getPrototypeOf`); `static [Symbol.hasInstance](x)` exactly as in ADR-49, falling back to `Function.prototype[Symbol.hasInstance].call(this, x)` when `this` has no own `[BRAND_KEY]`. `BRAND`, `BRAND_KEY` imported from `src/core/types.ts`. Export code constants `EAD_ASYNC_SCHEMA`, `EAD_SCHEMA_NO_JSONSCHEMA`. No zod import.
+- `errors.ts` (ADR-49): `class ApiDocsSchemaError extends Error`, `name = 'ApiDocsSchemaError'`, `readonly code: 'EAD_ASYNC_SCHEMA'`, `vendor: string`, `route?: string`; `static readonly [BRAND_KEY] = 'express-api-contract.v1.ApiDocsSchemaError'`; constructor sets `this[BRAND] = collectBrands(new.target)` (array of own `[BRAND_KEY]` codes along the constructor chain via `Object.getPrototypeOf`); `static [Symbol.hasInstance](x)` exactly as in ADR-49, falling back to `Function.prototype[Symbol.hasInstance].call(this, x)` when `this` has no own `[BRAND_KEY]`. `BRAND`, `BRAND_KEY` imported from `src/core/types.ts`. Export code constants `EAD_ASYNC_SCHEMA`, `EAD_SCHEMA_NO_JSONSCHEMA`. No zod import.
 - `standard.ts`: `standardSchemaAdapter`, `name: 'standard'`. `isSchema` true only if `~standard.validate` is a function. `validate` maps `{value}` → `{ok:true,data}`, `{issues}` → `{ok:false,issues}` with paths joined by `.` (segments may be `PropertyKey` or `{key}`). Thenable result → `result.catch(() => {})` then throw `ApiDocsSchemaError` (vendor from `~standard.vendor`); never `{ok:false}`. `toJSONSchema` calls `jsonSchema[io]({ target: 'draft-2020-12' })`; if absent or throwing, returns an exported frozen sentinel `NO_JSON_SCHEMA` (no logging). No zod import.
 - `zod.ts`: `zodAdapter`, `name: 'zod'`, `safeParse`, paths joined by `.`, `z.toJSONSchema(s, { target: 'draft-2020-12', io, unrepresentable: 'any' })`. Only `src/**` file importing `zod`.
 - `memo.ts`: `memoizeAdapter(adapter, logger?)`: `WeakMap` cache per schema and per `io`; `validate`/`isSchema`/`name` pass through (async throw propagates); on the sentinel, `logger.warn` with `EAD_SCHEMA_NO_JSONSCHEMA` exactly once per schema identity (`WeakSet`), caching a fresh `{}`.
@@ -172,9 +172,9 @@ writing any `src/adapter` code or the fixture (expected: module-not-found). The 
 6. `test/adapter/zod-jsonschema.test.ts` (AC-016, R-7): draft 2020-12 `$schema`, `type: 'object'`, `required: ['id']`; `.default('x')` optional in input, required in output; `transform`/`z.custom()` → `{}` without throwing.
 7. `test/adapter/infer.test-d.ts` (AC-006 hook): `expectTypeOf<Infer<typeof schema>>()` equals `{ id: string }` for Standard, Zod and stub paths; a `// @ts-expect-error` assigning `{ id: 1 }` is present. Use only shared types (ADR-36).
 8. `test/adapter/errors.test.ts` (ADR-41, ADR-49):
-   - `err.name === 'ApiDocsSchemaError'`, `err.code === 'EAD_ASYNC_SCHEMA'`, `ApiDocsSchemaError[BRAND_KEY] === 'express-api-docs.v1.ApiDocsSchemaError'`, and `err[BRAND]` is an array containing that code.
+   - `err.name === 'ApiDocsSchemaError'`, `err.code === 'EAD_ASYNC_SCHEMA'`, `ApiDocsSchemaError[BRAND_KEY] === 'express-api-contract.v1.ApiDocsSchemaError'`, and `err[BRAND]` is an array containing that code.
    - `err instanceof ApiDocsSchemaError` and `err instanceof Error`.
-   - Plain object `{ [BRAND]: ['express-api-docs.v1.ApiDocsSchemaError'] }` is `instanceof ApiDocsSchemaError`; `{ [BRAND]: ['express-api-docs.v1.ApiDocsConfigError'] }` (wrong brand), `{ [BRAND]: 'express-api-docs.v1.ApiDocsSchemaError' }` (non-array), `null`, `undefined` and `new Error()` are not.
+   - Plain object `{ [BRAND]: ['express-api-contract.v1.ApiDocsSchemaError'] }` is `instanceof ApiDocsSchemaError`; `{ [BRAND]: ['express-api-contract.v1.ApiDocsConfigError'] }` (wrong brand), `{ [BRAND]: 'express-api-contract.v1.ApiDocsSchemaError' }` (non-array), `null`, `undefined` and `new Error()` are not.
    - Subclass without own brand: `class MyErr extends ApiDocsSchemaError {}`; `new MyErr(...)` is `instanceof ApiDocsSchemaError` and `instanceof MyErr` (prototype fallback); a plain `ApiDocsSchemaError` is NOT `instanceof MyErr`; a branded plain object is NOT `instanceof MyErr`.
    - Subclass with own brand: `class Branded extends ApiDocsSchemaError { static readonly [BRAND_KEY] = 'x.Branded' }`; its instance's `[BRAND]` contains both codes, and it is `instanceof` both classes.
    - Renamed class: `Object.defineProperty(ApiDocsSchemaError, 'name', …)`-style rename (or a copy via `const Renamed = ApiDocsSchemaError` bound under a different name) does not change the `instanceof` result (no dependence on `this.name`).

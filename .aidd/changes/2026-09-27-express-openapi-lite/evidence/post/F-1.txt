@@ -1,6 +1,6 @@
 $ npm run build
 
-> express-api-docs@0.1.0 build
+> express-api-contract@0.1.0 build
 > tsup
 
 [34mCLI[39m Building entry: {"index":"src/index.ts","manual":"src/manual.ts","zod":"src/zod.ts","auto-record":"src/auto-record.ts"}
@@ -37,7 +37,7 @@ EXIT:0
 
 $ npm pack --dry-run
 npm notice
-npm notice package: express-api-docs@0.1.0
+npm notice package: express-api-contract@0.1.0
 npm notice Tarball Contents
 npm notice 1.1kB LICENSE
 npm notice 15.5kB README.md
@@ -61,14 +61,14 @@ npm notice 241B dist/zod.d.ts
 npm notice 2.1kB dist/zod.js
 npm notice 2.7kB package.json
 npm notice Tarball Details
-npm notice name: express-api-docs
+npm notice name: express-api-contract
 npm notice version: 0.1.0
-npm notice filename: express-api-docs-0.1.0.tgz
+npm notice filename: express-api-contract-0.1.0.tgz
 npm notice package size: 64.8 kB
 npm notice unpacked size: 251.3 kB
 npm notice shasum: 0bc4ed5722ba77caae8205379d3882ef466fa5fe
 npm notice integrity: sha512-lufC9QpprrARM[...]VInfKCtXL00Gg==
 npm notice total files: 21
 npm notice
-express-api-docs-0.1.0.tgz
+express-api-contract-0.1.0.tgz
 EXIT:0

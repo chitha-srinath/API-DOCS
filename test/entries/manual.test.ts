@@ -10,7 +10,7 @@ describe('entries/manual', () => {
   it('does not install the recorder until installRecorder() is called', () => {
     const manualPath = join(root, 'dist/manual.cjs').replace(/\\/g, '/');
     const script = `
-      const RECORDER = Symbol.for('express-api-docs.v1.recorder');
+      const RECORDER = Symbol.for('express-api-contract.v1.recorder');
       function installed(instance) {
         let proto = instance;
         while (proto) {

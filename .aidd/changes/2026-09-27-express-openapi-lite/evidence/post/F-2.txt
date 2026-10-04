@@ -1,6 +1,6 @@
 $ npm test
 
-> express-api-docs@0.1.0 test
+> express-api-contract@0.1.0 test
 > vitest run --coverage --typecheck
 
 Testing types with tsc and vue-tsc is an experimental feature.
@@ -10,7 +10,7 @@ Breaking changes might not follow SemVer, please pin Vitest's version when using
       Coverage enabled with v8
 
 
-> express-api-docs@0.1.0 build
+> express-api-contract@0.1.0 build
 > tsup
 
 [34mCLI[39m Building entry: {"index":"src/index.ts","manual":"src/manual.ts","zod":"src/zod.ts","auto-record":"src/auto-record.ts"}

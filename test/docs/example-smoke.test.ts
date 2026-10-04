@@ -36,9 +36,9 @@ describe('examples/basic smoke test (AC-029)', () => {
     expect(plainRouteBlock).not.toMatch(/\.\.\.route\(/);
   });
 
-  it('imports express-api-docs before creating a Router or calling app.use', () => {
-    const importIdx = appSource.search(/from\s+['"]express-api-docs['"]/);
-    expect(importIdx, 'app.ts must import express-api-docs').toBeGreaterThanOrEqual(0);
+  it('imports express-api-contract before creating a Router or calling app.use', () => {
+    const importIdx = appSource.search(/from\s+['"]express-api-contract['"]/);
+    expect(importIdx, 'app.ts must import express-api-contract').toBeGreaterThanOrEqual(0);
 
     const routerIdx = appSource.search(/Router\s*\(/);
     const useIdx = appSource.search(/\.use\(/);

@@ -51,7 +51,7 @@ describe.each(majors)('recorder ($alias)', ({ express }) => {
 
   it('a v2 recorder guard does not prevent v1 installation', () => {
     const owner = routerOwnerOf(express);
-    const v2 = Symbol.for('express-api-docs.v2.recorder');
+    const v2 = Symbol.for('express-api-contract.v2.recorder');
     (owner as Record<PropertyKey, unknown>)[v2] = { protocol: 2, packageVersion: '9.9.9' };
     installRecorder(express);
     expect(owner[RECORDER]).toBeDefined();
@@ -96,9 +96,9 @@ describe.each(majors)('recorder ($alias)', ({ express }) => {
   });
 
   it('mount and child identities equal the imported versioned Symbol.for values', () => {
-    expect(MOUNT).toBe(Symbol.for('express-api-docs.v1.mount'));
-    expect(CHILD).toBe(Symbol.for('express-api-docs.v1.child'));
-    expect(RECORDER).toBe(Symbol.for('express-api-docs.v1.recorder'));
+    expect(MOUNT).toBe(Symbol.for('express-api-contract.v1.mount'));
+    expect(CHILD).toBe(Symbol.for('express-api-contract.v1.child'));
+    expect(RECORDER).toBe(Symbol.for('express-api-contract.v1.recorder'));
   });
 
   it('throws if the express module has no prototype that owns `use`', () => {

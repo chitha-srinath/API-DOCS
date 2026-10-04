@@ -1,4 +1,4 @@
-// ST-007 (S-07): `express-api-docs/manual` — the opt-out entry. Re-exports the
+// ST-007 (S-07): `express-api-contract/manual` — the opt-out entry. Re-exports the
 // identical public API as `.` (ADR-24) WITHOUT the `./auto-record` side
 // effect, so callers must call `installRecorder(express)` themselves.
 

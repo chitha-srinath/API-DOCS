@@ -6,7 +6,7 @@ Breaking changes might not follow SemVer, please pin Vitest's version when using
  RUN  v5.0.2 C:/sai/code practice/Package/API-DOCS
 
 
-> express-api-docs@0.1.0 build
+> express-api-contract@0.1.0 build
 > tsup
 
 [34mCLI[39m Building entry: {"index":"src/index.ts","manual":"src/manual.ts","zod":"src/zod.ts","auto-record":"src/auto-record.ts"}
@@ -40,7 +40,7 @@ Breaking changes might not follow SemVer, please pin Vitest's version when using
 [32mDTS[39m [1mdist\manual.d.cts         [22m[32m716.00 B[39m
 [32mDTS[39m [1mdist\types-BKNLo49R.d.cts [22m[32m4.31 KB[39m
 
-> express-api-docs@0.1.0 build
+> express-api-contract@0.1.0 build
 > tsup
 
 [34mCLI[39m Building entry: {"index":"src/index.ts","manual":"src/manual.ts","zod":"src/zod.ts","auto-record":"src/auto-record.ts"}

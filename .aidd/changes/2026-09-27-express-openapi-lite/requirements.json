@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "requirements": [
-    {"id": "AC-001", "description": "Given the package is built, When `package.json` is inspected, Then `name` is `express-api-docs`, `license` is `MIT`, a LICENSE file with copyright chitha_srinath exists, and the string `express-openapi-lite` appears in no file outside `.aidd/`."},
+    {"id": "AC-001", "description": "Given the package is built, When `package.json` is inspected, Then `name` is `express-api-contract`, `license` is `MIT`, a LICENSE file with copyright chitha_srinath exists, and the string `express-openapi-lite` appears in no file outside `.aidd/`."},
     {"id": "AC-002", "description": "Given `npm run build`, When it finishes, Then it exits 0 and emits ESM (`.js`/`.mjs`), CJS (`.cjs`) and `.d.ts` outputs, and `exports` maps `import`, `require` and `types` to those files."},
     {"id": "AC-003", "description": "Given the built package, When a test loads it with both `import` (ESM) and `require` (CJS), Then both expose the same named exports."},
     {"id": "AC-004", "description": "Given `package.json`, When it is inspected, Then `peerDependencies` contains `express` `^4.21.0 || ^5.0.0` and `zod` `^4.2.0`, `peerDependenciesMeta.zod.optional` is `true`, `engines.node` is `>=22`, and the package has no runtime dependency on any UI asset package. `exports` has a `./zod` subpath that exports the Zod adapter, and the main entry does not export it. Given a project without `zod` installed, When the main entry is loaded with `import` (ESM) and with `require` (CJS), Then both loads succeed."},

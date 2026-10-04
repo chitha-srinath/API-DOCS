@@ -4,7 +4,7 @@
 
 > Build express-openapi-lite (working name): a TypeScript-first npm package that generates OpenAPI 3.1 docs for Express from route definitions with near-zero config. Zod schemas go through a pluggable SchemaAdapter interface (Zod adapter ships first; other schema libraries additive later without breaking changes). Required: typed route helper that validates requests and infers handler types; automatic path/query/body/response/params docs; security schemes (bearer, apiKey, oauth2) declared once; a docs UI endpoint (docs UI or docs UI via CDN, no bundled assets); a JSON spec endpoint; incremental adoption on existing routers; ESM+CJS dual build with .d.ts; tests with >=90% coverage; README, examples, CHANGELOG, CI, and npm publish config.
 
-> Note: per Q1 the package name is **`express-api-docs`**. The working name "express-openapi-lite" is kept only in the quote above (verbatim) and in the change id.
+> Note: per Q1 the package name is **`express-api-contract`**. The working name "express-openapi-lite" is kept only in the quote above (verbatim) and in the change id.
 
 ## Clarifying questions
 
@@ -14,7 +14,7 @@
 |---|---|---|---|---|---|
 | Q0a | Greenfield build or extend existing code? | Sets scaffolding scope | Greenfield in this repo | human | no — resolved |
 | Q0b | Which schema library first, and how is it extended? | Core API shape | Zod first, behind a pluggable `SchemaAdapter`; other libraries added later without breaking changes | human | no — resolved |
-| Q1 | Final npm package name? | Publishing is public and irreversible | `express-api-docs` (unscoped). Working name renamed everywhere. | human | resolved |
+| Q1 | Final npm package name? | Publishing is public and irreversible | `express-api-contract` (unscoped). Working name renamed everywhere. | human | resolved |
 | Q2 | Should CI publish to npm? | External credential; irreversible external write | No auto-publish. CI builds and tests; the release workflow is manual-dispatch only; nothing is published in this run. | human | resolved |
 | Q3 | Zod v3, v4, or both? | Drives the adapter implementation and the peer range | Zod v4 only (`zod@^4` peer), using native `z.toJSONSchema` | human (approved default) | resolved |
 | Q4 | Express 4, Express 5, or both? | Path syntax and async error forwarding differ | Both (`express@^4.21 \|\| ^5`), tested in a CI matrix | human (approved default) | resolved |
@@ -45,7 +45,7 @@ Open BLOCKING: 0. Open non-blocking: 0.
   - AC-004: `engines.node` is `>=22`.
   - AC-027: CI runs on Node 22 and 24, against Express 4 and 5.
 - **Pre-review amendment #2 (pre-review finding PF-2, Source: coordinator):** users of other schema libraries must be able to import the package without zod installed.
-  - AC-004: `zod` is an optional peer (`peerDependenciesMeta.zod.optional: true`), and the Zod adapter is exported only from the subpath `express-api-docs/zod`, not from the main entry.
+  - AC-004: `zod` is an optional peer (`peerDependenciesMeta.zod.optional: true`), and the Zod adapter is exported only from the subpath `express-api-contract/zod`, not from the main entry.
 - **Rebuild amendment (from pre-review re-run) #1 (Source: coordinator, architecture.md ADR-47):** AC-004's zod peer range changes from `^4.0.0` to `^4.2.0`. A probe showed that `~standard.jsonSchema` is absent in zod 4.0.0 to 4.1.13 and present from 4.2.0.
 - **Rebuild amendment (from pre-review re-run) #2 (Source: coordinator, architecture.md ADR-38):** new AC-047 covers a global `schemaAdapter` option (documented default: the Standard Schema adapter) and a per-route `meta.adapter` override. No existing config AC (AC-035 to AC-046) covered it.
 - Neither G1 revision raises a BLOCKING question: all details are reversible and non-destructive, and none needs credentials. The defaults are recorded below as assumptions for the human to confirm at G1.

@@ -2,7 +2,7 @@
 
 ## Problem & goal
 
-Express has no typed, low-config way to validate requests and produce accurate OpenAPI 3.1 docs from the same route definitions. The goal is to build `express-api-docs`, a TypeScript-first npm package in this greenfield repo. It provides:
+Express has no typed, low-config way to validate requests and produce accurate OpenAPI 3.1 docs from the same route definitions. The goal is to build `express-api-contract`, a TypeScript-first npm package in this greenfield repo. It provides:
 
 - a typed route helper that validates requests and infers handler types;
 - Zod schemas behind a pluggable `SchemaAdapter`;
@@ -16,7 +16,7 @@ It ships as a dual ESM+CJS build with `.d.ts` files, at least 90% test coverage,
 
 | AC id | Criterion | Source |
 |---|---|---|
-| AC-001 | Given the package is built, When `package.json` is inspected, Then `name` is `express-api-docs`, `license` is `MIT`, a LICENSE file with copyright chitha_srinath exists, and the string `express-openapi-lite` appears in no file outside `.aidd/`. | Q1, Q10 |
+| AC-001 | Given the package is built, When `package.json` is inspected, Then `name` is `express-api-contract`, `license` is `MIT`, a LICENSE file with copyright chitha_srinath exists, and the string `express-openapi-lite` appears in no file outside `.aidd/`. | Q1, Q10 |
 | AC-002 | Given `npm run build`, When it finishes, Then it exits 0 and emits ESM (`.js`/`.mjs`), CJS (`.cjs`) and `.d.ts` outputs, and `exports` maps `import`, `require` and `types` to those files. | intent |
 | AC-003 | Given the built package, When a test loads it with both `import` (ESM) and `require` (CJS), Then both expose the same named exports. | intent |
 | AC-004 | Given `package.json`, When it is inspected, Then `peerDependencies` contains `express` `^4.21.0 \|\| ^5.0.0` and `zod` `^4.2.0`, `peerDependenciesMeta.zod.optional` is `true`, `engines.node` is `>=22`, and the package has no runtime dependency on any UI asset package. `exports` has a `./zod` subpath that exports the Zod adapter, and the main entry does not export it. Given a project without `zod` installed, When the main entry is loaded with `import` (ESM) and with `require` (CJS), Then both loads succeed. | Q3, Q4, Q5, Q6, pre-review (human Node floor, PF-2), rebuild (ADR-47) |

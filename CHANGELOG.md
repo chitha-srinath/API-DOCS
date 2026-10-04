@@ -29,10 +29,10 @@ Initial release.
 - `standardSchemaAdapter` (the core default, works with any
   [Standard Schema](https://standardschema.dev) library) and the global
   `schemaAdapter` option / per-route `meta.adapter` resolution order.
-- `express-api-docs/zod` subpath export: `zodAdapter`, for typed `z.infer` and
+- `express-api-contract/zod` subpath export: `zodAdapter`, for typed `z.infer` and
   `unrepresentable: 'any'` JSON Schema conversion. `zod` is an **optional
   peer**, `^4.2.0` (Node >= 22).
-- `express-api-docs/manual` subpath export: the identical public API without
+- `express-api-contract/manual` subpath export: the identical public API without
   the import-time Express patch, for callers who need to control exactly when
   `installRecorder()` runs.
 - `installRecorder(express)` for patching a second copy of Express (pnpm,
@@ -46,4 +46,4 @@ Initial release.
 - `examples/basic`, a runnable example app covered by an automated smoke test.
 - Node.js **>= 22** required (CI matrix: Node {22, 24} x Express {4, 5}).
 
-[0.1.0]: https://github.com/example/express-api-docs/releases/tag/v0.1.0
+[0.1.0]: https://github.com/example/express-api-contract/releases/tag/v0.1.0

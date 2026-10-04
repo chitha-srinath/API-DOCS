@@ -50,7 +50,7 @@ Components: C3 and C12. Wave 3, solo. Epic: "It implements the RouteRegistry con
 
 The repo is greenfield (context pack `.aidd/context/snapshot.md`), so the owned files do not exist yet. By Wave 3 the following exist from earlier stories. Import them; do not edit them.
 
-- `src/core/types.ts` (S-01, C0): `HttpMethod`, `OperationMeta`, `DetectedOperation`, `Logger`, the `META` symbol, the `BRAND` constant and the pinned `RouteRegistry` contract (ADR-27c). Per ADR-43 the keys are protocol-versioned: "`express-api-docs.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder` and `.v1.error`".
+- `src/core/types.ts` (S-01, C0): `HttpMethod`, `OperationMeta`, `DetectedOperation`, `Logger`, the `META` symbol, the `BRAND` constant and the pinned `RouteRegistry` contract (ADR-27c). Per ADR-43 the keys are protocol-versioned: "`express-api-contract.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder` and `.v1.error`".
 - `src/config/**` (S-02, C1): `mergeOptions(defaults, global, route)` ("plain objects recurse; arrays, functions and primitives replace"), deep-frozen `DEFAULT_OPTIONS`, `validateOptions()`, the `schemaAdapter` option row (default `null`, ADR-38).
 - `src/adapter/**` (S-03, C2): the `SchemaAdapter<S>` port (`name; isSchema; validate(s, input): {ok:true,data}|{ok:false,issues:{path,message}[]}; toJSONSchema(s, io)`), `standardSchemaAdapter` (`src/adapter/standard.ts`), and `ApiDocsSchemaError` (`src/adapter/errors.ts`, code `EAD_ASYNC_SCHEMA`, branded per ADR-42). Route code uses the port and must **not** import `zod` (ESLint rule, ADR-21). Tests may import `zod`.
 - `test/fixtures/majors.ts` and `test/fixtures/fresh-express.ts` (S-01, ADR-39) and `test/fixtures/stub-adapter.ts` (S-03, ADR-38). Import only.

@@ -188,7 +188,7 @@ function hoistSchemaDefs(schema: JsonSchemaWithDefs, defs: DefsCollector): JsonO
         const newNorm = JSON.stringify(stripAdditionalProperties(rewritten));
         if (existingNorm !== newNorm) {
           throw new Error(
-            `express-api-docs: two different schemas both use the name "${name}" ` +
+            `express-api-contract: two different schemas both use the name "${name}" ` +
               `(via .meta({ id: '${name}' }) or an equivalent named/reused schema). ` +
               `Named schemas must be unique per name across the whole app - rename one ` +
               'of them, or reuse the exact same schema instance/definition.',

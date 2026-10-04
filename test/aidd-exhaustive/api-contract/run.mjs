@@ -580,7 +580,7 @@ async function main() {
         process.execPath,
         [
           '-e',
-          "require('./dist/index.cjs'); const express=require('express'); console.log(Object.prototype.hasOwnProperty.call(express.application, Symbol.for('express-api-docs.v1.recorder')));",
+          "require('./dist/index.cjs'); const express=require('express'); console.log(Object.prototype.hasOwnProperty.call(express.application, Symbol.for('express-api-contract.v1.recorder')));",
         ],
         { cwd: pkgRoot, encoding: 'utf8' },
       ).trim();
@@ -593,7 +593,7 @@ async function main() {
       'TC-CONTRACT-025',
       ok ? 'PASS' : 'FAIL',
       ok
-        ? "dist/auto-record.{js,cjs} contain the recorder install side effect AND a fresh child process confirms express.application[Symbol.for('express-api-docs.v1.recorder')] === true (ADR-55 fix present in this build)"
+        ? "dist/auto-record.{js,cjs} contain the recorder install side effect AND a fresh child process confirms express.application[Symbol.for('express-api-contract.v1.recorder')] === true (ADR-55 fix present in this build)"
         : `dist/auto-record.cjs looks empty/unwired or the runtime probe failed (cjsEmpty=${cjsEmpty}, looksWired=${looksWired}, runtimeInstalled=${runtimeInstalled}) — matches ADR-55's described defect`,
       `dist/auto-record.cjs length=${cjsSrc.length} chars; child-process Symbol.for probe result = ${runtimeInstalled}`,
     );

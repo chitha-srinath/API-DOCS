@@ -15,7 +15,7 @@ const consoleWarnLogger: Logger = {
     /* auto-record install is not chatty at debug level */
   },
   warn(code: string, ...args: unknown[]): void {
-    console.warn(`[express-api-docs] ${code}`, ...args);
+    console.warn(`[express-api-contract] ${code}`, ...args);
   },
 };
 

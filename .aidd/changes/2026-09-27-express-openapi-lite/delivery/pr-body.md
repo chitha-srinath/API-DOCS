@@ -2,7 +2,7 @@
 
 ## Intent
 
-Build `express-api-docs` (working name express-openapi-lite): a TypeScript-first npm
+Build `express-api-contract` (working name express-openapi-lite): a TypeScript-first npm
 package that generates OpenAPI 3.1 docs for Express from route definitions with
 near-zero config. Zod schemas go through a pluggable `SchemaAdapter` interface (Zod
 adapter ships first; other schema libraries additive later without breaking changes).
@@ -33,7 +33,7 @@ fully QA-passed, G3-approved state.
 - **ST-002 — config**: `ApiDocsOptions` with defaults + full override surface, config
   validation.
 - **ST-003 — schema adapter**: `SchemaAdapter` port, Standard Schema zero-config default,
-  optional Zod adapter via `express-api-docs/zod` subpath.
+  optional Zod adapter via `express-api-contract/zod` subpath.
 - **ST-004 — typed route**: `route()` helper — request validation (params/query/body),
   response validation, RFC 9457 `problem+json` errors, async handler support, incremental
   adoption alongside existing Express routes.

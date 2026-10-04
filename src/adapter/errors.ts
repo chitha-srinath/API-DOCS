@@ -18,7 +18,7 @@ function collectBrands(ctor: unknown): string[] {
 // ADR-31(1) + ADR-49: branded error thrown when a schema's `validate` returns a
 // Promise (async schemas are not supported by the sync SchemaAdapter contract).
 export class ApiDocsSchemaError extends Error {
-  static readonly [BRAND_KEY]: string = 'express-api-docs.v1.ApiDocsSchemaError';
+  static readonly [BRAND_KEY]: string = 'express-api-contract.v1.ApiDocsSchemaError';
 
   readonly code: typeof EAD_ASYNC_SCHEMA = EAD_ASYNC_SCHEMA;
   readonly vendor: string;

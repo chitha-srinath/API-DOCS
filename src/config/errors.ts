@@ -20,7 +20,7 @@ function collectBrands(ctor: unknown): string[] {
 }
 
 export class ApiDocsConfigError extends Error {
-  static readonly [BRAND_KEY]: string = 'express-api-docs.v1.ApiDocsConfigError';
+  static readonly [BRAND_KEY]: string = 'express-api-contract.v1.ApiDocsConfigError';
 
   override readonly name = 'ApiDocsConfigError';
   readonly code = 'API_DOCS_CONFIG_ERROR';

@@ -70,27 +70,27 @@ The README SchemaAdapter section names the methods `validate` and `toJSONSchema`
 **Zod subpath and peer (ADR-21, peer floor amended by ADR-47, README wording per ADR-52):**
 > `zod` becomes an **optional peer** [...] The core (`.` entry) **never imports `zod`**.
 > **Default adapter:** the core ships `standardSchemaAdapter` [...] zero-options `createApiDocs()` accepts Zod v4 schemas (AC-035) with no zod import in core.
-> `zodAdapter` lives **only** at the subpath export `express-api-docs/zod` [...] It adds Zod-specific handling: `unrepresentable: 'any'` and typed `z.infer`.
+> `zodAdapter` lives **only** at the subpath export `express-api-contract/zod` [...] It adds Zod-specific handling: `unrepresentable: 'any'` and typed `z.infer`.
 
 ADR-47 sets the peer to **`^4.2.0`** (optional). Its README sentence about zod below 4.2 is **SUPERSEDED by ADR-52**:
-> The README states only: "**Requires zod >= 4.2** (peer `^4.2.0`, optional; only needed when you use Zod schemas)". The earlier advice that "zod versions below 4.2 need `express-api-docs/zod`" is **dropped**. The `./zod` subpath has **the same** `^4.2.0` floor [...] `test/docs/readme.test.ts` (S-08) asserts that the README contains `zod >= 4.2` and does not contain `below 4.2` or `< 4.2`.
+> The README states only: "**Requires zod >= 4.2** (peer `^4.2.0`, optional; only needed when you use Zod schemas)". The earlier advice that "zod versions below 4.2 need `express-api-contract/zod`" is **dropped**. The `./zod` subpath has **the same** `^4.2.0` floor [...] `test/docs/readme.test.ts` (S-08) asserts that the README contains `zod >= 4.2` and does not contain `below 4.2` or `< 4.2`.
 
-Document the peer as `^4.2.0` optional, never `^4.0.0`, and say nothing about zod versions below 4.2 (no `<4.2` / `./zod` fallback advice). R-9: the README recommends `express-api-docs/zod` for Zod users (for `unrepresentable: 'any'` and typed `z.infer`, not as a version workaround). Never document `import { zodAdapter } from 'express-api-docs'`.
+Document the peer as `^4.2.0` optional, never `^4.0.0`, and say nothing about zod versions below 4.2 (no `<4.2` / `./zod` fallback advice). R-9: the README recommends `express-api-contract/zod` for Zod users (for `unrepresentable: 'any'` and typed `z.infer`, not as a version workaround). Never document `import { zodAdapter } from 'express-api-contract'`.
 
 **Errors (ADR-31, ADR-42, brand per ADR-49):**
 > Both error classes carry a brand. [...] Stable `name` (`'ApiDocsConfigError'` / `'ApiDocsSchemaError'`) and `code` properties are kept. The README documents matching on `err.code` as the most portable form.
 
-ADR-49 (supersedes ADR-42's brand comparison): the brand is a stable per-class string code under `Symbol.for('express-api-docs.v1.brand')`, and `Symbol.hasInstance` checks it, so `instanceof ApiDocsConfigError` / `instanceof ApiDocsSchemaError` works **across ESM/CJS copies, separate bundles and minified builds (mangled class names)**, and for user subclasses. `name` and `code` stay for README guidance.
+ADR-49 (supersedes ADR-42's brand comparison): the brand is a stable per-class string code under `Symbol.for('express-api-contract.v1.brand')`, and `Symbol.hasInstance` checks it, so `instanceof ApiDocsConfigError` / `instanceof ApiDocsSchemaError` works **across ESM/CJS copies, separate bundles and minified builds (mangled class names)**, and for user subclasses. `name` and `code` stay for README guidance.
 
 The README error-matching guidance: match on `err.code` (e.g. `err.code === 'EAD_ASYNC_SCHEMA'`; ADR-31: async `validate` throws `ApiDocsSchemaError`, client gets 500) as the most portable form, **or** use `instanceof`, which works across builds and minification. Do not recommend matching on `err.name` or `constructor.name` (mangled under minification).
 
 **Internals protocol (ADR-43, supersedes ADR-20 key names):**
-> All `Symbol.for` keys are **protocol-versioned**: `express-api-docs.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder` and `.v1.error`. The value stored under `RECORDER` is `{ protocol: 1, packageVersion }`. [...] Any change to a payload shape **must** bump the protocol number, and this is recorded in the README "Internals" note.
+> All `Symbol.for` keys are **protocol-versioned**: `express-api-contract.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder` and `.v1.error`. The value stored under `RECORDER` is `{ protocol: 1, packageVersion }`. [...] Any change to a payload shape **must** bump the protocol number, and this is recorded in the README "Internals" note.
 
-Also note: same protocol reuses the recorder; a newer protocol coexists; the walker reads only its own protocol's keys. Never document the unversioned `express-api-docs.meta` names.
+Also note: same protocol reuses the recorder; a newer protocol coexists; the walker reads only its own protocol's keys. Never document the unversioned `express-api-contract.meta` names.
 
 **Import order (ADR-18):**
-> The README must document "import express-api-docs before mounting routers".
+> The README must document "import express-api-contract before mounting routers".
 > Express 4 falls back to `layer.regexp` for mounts made before the import. Express 5 mounts made before the import get the local path and a `warn`.
 
 **`installRecorder` and second copies (ADR-23, ADR-34):**
@@ -99,7 +99,7 @@ Also note: same protocol reuses the recorder; a newer protocol coexists; the wal
 > **Sub-apps on an unpatched copy:** the child app has no `[CHILD]` link and cannot be reached, so its routes are **dropped** with one `warn` `EAD_SUBAPP_UNRECORDED` per `mounted_app` layer.
 
 **`/manual` opt-out (ADR-24):**
-> the entry `express-api-docs/manual` (`src/manual.ts`) re-exports the identical public API **without** that import. Users who import from `/manual` get no global patch until they call `installRecorder()` themselves. This suits hot-reload, many-instances and APM-ordering-sensitive setups.
+> the entry `express-api-contract/manual` (`src/manual.ts`) re-exports the identical public API **without** that import. Users who import from `/manual` get no global patch until they call `installRecorder()` themselves. This suits hot-reload, many-instances and APM-ordering-sensitive setups.
 
 **APM result (ADR-29, CR-3):**
 > `test/introspect/apm-order.test.ts` applies a third-party-style wrapper [...] **before and after** `installRecorder`. It asserts that prefixes survive in both orders, and the result is documented in the README. If "after" fails, it must emit `warn` `EAD_LAYER_UNRECOGNISED`, not fail silently.
@@ -116,7 +116,7 @@ Read the actual outcome from ST-005's Builder Report and the test before writing
 
 **Warn codes (ADR-19, ADR-29, ADR-31, ADR-34):** logged at `warn` with `EAD_*` codes, e.g. `EAD_RECORDER_NOT_INSTALLED`, `EAD_LAYER_UNRECOGNISED`, `EAD_MOUNTED_IN_SUBAPP`, `EAD_SUBAPP_UNRECORDED`, `EAD_SCHEMA_NO_JSONSCHEMA`.
 
-**Package name.** The published name is `express-api-docs`. S-01's manifest test greps that the old working name (the change-slug suffix) appears in no file outside `.aidd/` — never write it in README, CHANGELOG, examples or tests except as the negative assertion built from string parts.
+**Package name.** The published name is `express-api-contract`. S-01's manifest test greps that the old working name (the change-slug suffix) appears in no file outside `.aidd/` — never write it in README, CHANGELOG, examples or tests except as the negative assertion built from string parts.
 
 **Default `info` (ADR-08):** "The default is the static `{ title: 'API', version: '0.0.0' }`."
 
@@ -124,13 +124,13 @@ Read the actual outcome from ST-005's Builder Report and the test before writing
 
 **Zero-config defaults (AC-035):** `GET /openapi.json`, `GET /docs` docs UI UI, invalid typed request → 400 problem+json, responses not validated by default; docs UI via `ui: 'docs-ui'`; `cdnUrl` override; `autoDetect` (default on) with `autoDetect: false` opt-out and `exclude` globs.
 
-The example in `examples/basic` must import `express-api-docs` before creating/mounting routers.
+The example in `examples/basic` must import `express-api-contract` before creating/mounting routers.
 
 ## Acceptance criteria (from PRD)
 
 - **AC-029** — Given the repo, When it is inspected, Then `README.md` documents install, quick start, SchemaAdapter, security, docs UI, response validation, the error shape, incremental adoption, route auto-detection (including the opt-out) and configuration. The configuration section contains a defaults table with one row for every key of `DEFAULT_OPTIONS`, giving the key, its default and its description; a test fails if a key is missing from the table. `CHANGELOG.md` has an entry for the first version, and an `examples/` directory contains at least one runnable example that starts and serves `/openapi.json` with status 200.
 
-Additional story obligations (ADR-18, ADR-21, ADR-22, ADR-23, ADR-24, ADR-29 CR-3, ADR-38, ADR-42/ADR-49, ADR-43, ADR-47/ADR-52, ADR-50, ADR-53, epic refresh): README sections for import order, `installRecorder` and second copies, the `/manual` opt-out, the APM result, the `express-api-docs/zod` subpath and optional peer `^4.2.0` stated only as "Requires zod >= 4.2" (no below-4.2 advice), SchemaAdapter selection (`schemaAdapter` option, `meta.adapter`, methods `isSchema`/`validate`/`toJSONSchema`), error matching by `err.code` or `instanceof` (works across builds and minification), the Internals protocol note, Node >=22, and the new commands including scoped and nightly mutation runs; the CHANGELOG entry reflects them.
+Additional story obligations (ADR-18, ADR-21, ADR-22, ADR-23, ADR-24, ADR-29 CR-3, ADR-38, ADR-42/ADR-49, ADR-43, ADR-47/ADR-52, ADR-50, ADR-53, epic refresh): README sections for import order, `installRecorder` and second copies, the `/manual` opt-out, the APM result, the `express-api-contract/zod` subpath and optional peer `^4.2.0` stated only as "Requires zod >= 4.2" (no below-4.2 advice), SchemaAdapter selection (`schemaAdapter` option, `meta.adapter`, methods `isSchema`/`validate`/`toJSONSchema`), error matching by `err.code` or `instanceof` (works across builds and minification), the Internals protocol note, Node >=22, and the new commands including scoped and nightly mutation runs; the CHANGELOG entry reflects them.
 
 ## Test plan
 
@@ -147,13 +147,13 @@ Write these FIRST; run `npm test` and capture the red output before writing docs
    - Auto-detection section mentions `autoDetect: false`.
    - Import-order rule: `/import .*before mounting/i`.
    - `installRecorder(` present, with second-copy wording (`/second copy|pnpm|monorepo/i`) and `EAD_RECORDER_NOT_INSTALLED`.
-   - `express-api-docs/manual` present.
+   - `express-api-contract/manual` present.
    - APM section present (`/APM/`), stating the before/after result.
-   - `express-api-docs/zod` present; `zod` described as optional peer with `^4.2.0`; README does not contain `import { zodAdapter } from 'express-api-docs'` and does not contain `^4.0.0` for zod.
+   - `express-api-contract/zod` present; `zod` described as optional peer with `^4.2.0`; README does not contain `import { zodAdapter } from 'express-api-contract'` and does not contain `^4.0.0` for zod.
    - ADR-52: README contains `zod >= 4.2` (the "Requires zod >= 4.2" sentence) and does **not** contain `below 4.2` or `< 4.2` (nor `<4.2`).
    - SchemaAdapter section mentions `schemaAdapter`, `meta.adapter`, `isSchema`, `validate`, `toJSONSchema` (ADR-53: C2 names; section does not name `toJsonSchema`).
    - Error section mentions `err.code` and `EAD_ASYNC_SCHEMA`, both `ApiDocsConfigError` and `ApiDocsSchemaError`, and `instanceof` with wording that it works across builds/copies and minification (`/minif/i`).
-   - Internals note contains `express-api-docs.v1.` and the word `protocol`; README contains no unversioned `Symbol.for('express-api-docs.meta')`-style key.
+   - Internals note contains `express-api-contract.v1.` and the word `protocol`; README contains no unversioned `Symbol.for('express-api-contract.meta')`-style key.
    - Node floor: `/Node(\.js)?\s*(>=|≥)\s*22/`.
    - Commands `npm run check:pack`, `npm run mutation`, `npm run perf`, `npm audit` present; contributor notes contain the scoped form `--mutate` with `--incremental` and mention the nightly full run (`/nightly/i`) (ADR-50).
    - `CHANGELOG.md` has an entry for `package.json` `version` (e.g. `## [0.1.0]`) mentioning `installRecorder`, `/manual`, `/zod`, `schemaAdapter` and Node 22.
@@ -161,7 +161,7 @@ Write these FIRST; run `npm test` and capture the red output before writing docs
    - Red: missing files.
 3. `test/docs/example-smoke.test.ts`
    - Import `createApp()` from `examples/basic/app.ts` (`server.ts` only calls `listen`); `supertest(app).get('/openapi.json')` → 200, `openapi` starts with `3.1.`, `@readme/openapi-parser` `validate()` passes.
-   - Assert the example's source imports `express-api-docs` (or local build) before any `Router()`/`use(` call.
+   - Assert the example's source imports `express-api-contract` (or local build) before any `Router()`/`use(` call.
    - Red: module-not-found.
 
 ## Verification commands
@@ -204,7 +204,7 @@ actual `src/` files, not the stale text, per the dispatch instruction:
   I re-derived it from source directly to be safe.
 - **`DEFAULT_OPTIONS`** is confirmed a public export of `.` (`src/config/defaults.ts` built from `OPTION_SPEC`,
   deep-frozen), matching ADR-04/C1 as the story states.
-- **Error brand mechanism**: confirmed ADR-49's `Symbol.for('express-api-docs.v1.brand')` /
+- **Error brand mechanism**: confirmed ADR-49's `Symbol.for('express-api-contract.v1.brand')` /
   `Symbol.hasInstance` implementation in `src/adapter/errors.ts` and `src/config/errors.ts` — the README's
   Error shape section documents `err.code` and `instanceof` exactly as these files implement them, with no
   mention of `err.name`/`constructor.name` matching.
@@ -265,7 +265,7 @@ Type Errors  no errors
 ```
 
 One intermediate red→green iteration: my first draft of the README's zod section contained the literal string
-`import { zodAdapter } from 'express-api-docs'` as a documented anti-example, which tripped my own
+`import { zodAdapter } from 'express-api-contract'` as a documented anti-example, which tripped my own
 `readme-sections.test.ts` negative assertion (the test forbids that exact string, to stop anyone ever
 documenting it as valid). Rewrote the sentence to describe the constraint without using the literal import
 statement; re-ran and it went green (see full-suite run below).
@@ -351,7 +351,7 @@ stage.) No file outside `README.md`, `CHANGELOG.md`, `examples/**`, `test/docs/*
 None required. No `package.json` script/devDependency addition was needed: `@readme/openapi-parser` and
 `supertest` (used by `test/docs/example-smoke.test.ts`) are already present in `devDependencies`
 (S-01-owned `package.json`), and `examples/basic` imports the package under its own published name
-(`express-api-docs`), resolved via the package's own `exports` self-reference against the `dist/` the test
+(`express-api-contract`), resolved via the package's own `exports` self-reference against the `dist/` the test
 suite's `globalSetup` already builds — no new script was required.
 
 ### Status
@@ -379,9 +379,9 @@ command: 3/3 tests passed.
 `instanceof` mechanism (ADR-49) already discussed conceptually in the Error section. Tightened
 `test/docs/readme-sections.test.ts`'s `'Internals note documents the versioned protocol keys'`
 test (renamed to `'... documents all 6 versioned protocol keys'`) to assert each of the 6 full
-key strings individually rather than only checking for the `express-api-docs.v1.` prefix and
+key strings individually rather than only checking for the `express-api-contract.v1.` prefix and
 the word "protocol" generically — the prior assertion could not distinguish 4 keys from 6. Then
-added `express-api-docs.v1.brand` and `express-api-docs.v1.brandKey` to README's Internals list,
+added `express-api-contract.v1.brand` and `express-api-contract.v1.brandKey` to README's Internals list,
 with a sentence noting they back ADR-49's `instanceof` mechanism used by `ApiDocsConfigError`
 and `ApiDocsSchemaError`.
 
@@ -444,7 +444,7 @@ independently reproduced).
 - **AC-029 — PROVEN.** Re-ran `npx vitest run test/docs --no-coverage` myself: 4 files / 57
   tests passed, matching the Builder Report exactly. Read README.md and CHANGELOG.md
   directly and confirmed all required sections, the err.code/instanceof error guidance, the
-  zod `>= 4.2` wording with no below-4.2 advice, the versioned `express-api-docs.v1.*`
+  zod `>= 4.2` wording with no below-4.2 advice, the versioned `express-api-contract.v1.*`
   Internals keys, and the CHANGELOG `## [0.1.0]` entry. Independently confirmed the README
   defaults table parity test (`test/docs/readme-table.test.ts`) drives its assertions off
   `Object.keys(OPTION_SPEC)` read live from `src/config/spec-table.ts` — not a hardcoded or

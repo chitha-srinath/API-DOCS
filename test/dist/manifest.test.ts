@@ -10,7 +10,7 @@ const OLD_NAME = ['express', 'openapi', 'lite'].join('-');
 
 describe('manifest', () => {
   it('has the correct name and license', () => {
-    expect(pkg.name).toBe('express-api-docs');
+    expect(pkg.name).toBe('express-api-contract');
     expect(pkg.license).toBe('MIT');
     expect(license).toContain('MIT License');
     expect(license).toMatch(/Copyright \(c\) \d{4} chitha_srinath/);

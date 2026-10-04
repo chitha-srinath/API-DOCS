@@ -46,7 +46,7 @@ Any story may import these files, but only the owner may edit them. S-01 creates
 
 | Item | ADR | Owner | File |
 |---|---|---|---|
-| The five versioned `Symbol.for` keys (`express-api-docs.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder`, `.v1.error`) and the `BRAND` constant | 20, 43 | S-01 | `src/core/types.ts` |
+| The five versioned `Symbol.for` keys (`express-api-contract.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder`, `.v1.error`) and the `BRAND` constant | 20, 43 | S-01 | `src/core/types.ts` |
 | `RECORDER` value `{protocol: 1, packageVersion}`; the coexistence rules | 43 | S-05 | `src/introspect/recorder.ts` |
 | ESLint `no-restricted-syntax` rule banning local `Symbol()` | 20 | S-01 | `eslint.config.js` |
 | ESLint rule flagging `require('express4')` outside `test/fixtures/**` | 39 | S-01 | `eslint.config.js` |
@@ -54,7 +54,7 @@ Any story may import these files, but only the owner may edit them. S-01 creates
 | Zod as an optional peer (`^4.2.0`), the `./zod` exports map, and zod `^4.6.5` as a devDependency | 21, 47 | S-01 | `package.json` |
 | `./package.json` export | 48 | S-01 | `package.json` |
 | Asserts the `./package.json` export is present | 48 | S-01 | `test/dist/manifest.test.ts` |
-| Asserts `require('express-api-docs/package.json')` resolves | 48 | S-01 | `test/dist/pack.test.ts` |
+| Asserts `require('express-api-contract/package.json')` resolves | 48 | S-01 | `test/dist/pack.test.ts` |
 | ESLint rule: zod is imported only in `src/adapter/zod.ts` | 21 | S-01 | `eslint.config.js` |
 | Grep that `dist/index.{js,cjs}` contains no `zod` | 21 | S-01 | `test/dist/pack.test.ts` |
 | Load the main entry with `zod` unresolvable | 21 | S-07 | `test/entries/no-zod-load.test.ts` |
@@ -282,7 +282,7 @@ Moved or added ACs:
     - the `exports` targets exist in the pack;
     - `sideEffects` is exactly `["./dist/auto-record.js","./dist/auto-record.cjs"]`;
     - `dist/index.{js,cjs}` contains no `zod`;
-    - `require('express-api-docs/package.json')` resolves from the extracted tarball.
+    - `require('express-api-contract/package.json')` resolves from the extracted tarball.
   - `test/dist/build-shape.test.ts` (ADR-40, static half only) checks:
     - there is no `dist/chunk-*` file;
     - `auto-record` is kept external: `dist/index.js` contains `import "./auto-record.js"` and `dist/index.cjs` contains `require("./auto-record.cjs")`;
@@ -357,7 +357,7 @@ Moved or added ACs:
     - `installRecorder` and second copies of Express;
     - the `/manual` opt-out;
     - import order and the APM result (CR-3);
-    - the `express-api-docs/zod` subpath and the zod `<4.2` note (ADR-47);
+    - the `express-api-contract/zod` subpath and the zod `<4.2` note (ADR-47);
     - matching errors on `err.code` (ADR-42);
     - the "Internals" protocol-version note (ADR-43);
     - Node ≥22.

@@ -71,7 +71,7 @@ describe('pack contents', () => {
     const tarInfo = JSON.parse(tarOut);
     const tarballName: string = tarInfo[0].filename;
     const tmp = mkdtempSync(join(tmpdir(), 'eaod-pack-'));
-    const nodeModules = join(tmp, 'node_modules', 'express-api-docs');
+    const nodeModules = join(tmp, 'node_modules', 'express-api-contract');
     mkdirSync(nodeModules, { recursive: true });
     const tarballPath = join(root, tarballName);
     const toPosix = (p: string): string => p.replace(/\\/g, '/');
@@ -79,9 +79,9 @@ describe('pack contents', () => {
     rmSync(tarballPath);
 
     const req = createRequire(join(tmp, 'x.cjs'));
-    const resolved = req.resolve('express-api-docs/package.json');
+    const resolved = req.resolve('express-api-contract/package.json');
     expect(resolved).toBeTruthy();
     const loaded = req(resolved);
-    expect(loaded.name).toBe('express-api-docs');
+    expect(loaded.name).toBe('express-api-contract');
   }, 60000);
 });

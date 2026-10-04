@@ -19,7 +19,7 @@ against the story's required shape: `src/core/types.ts`, `package.json`, `tsup.c
 
 - `src/core/types.ts` matches ADR-27c's `RegistryEntry`/`RouteRegistry` verbatim, and exports
   exactly the six ADR-43/ADR-49 symbols as `unique symbol` with the correct `v1.*` keys
-  (`express-api-docs.v1.meta/.mount/.child/.recorder/.brand/.brandKey`). This is checkable
+  (`express-api-contract.v1.meta/.mount/.child/.recorder/.brand/.brandKey`). This is checkable
   independently of the report's prose — the file itself is the evidence, and it is correct.
 - `package.json` matches the story's "Required shape" almost exactly: `name`, `license`,
   `type`, `main`, `types`, no `module` field, `exports` for `.`/`./manual`/`./zod`/

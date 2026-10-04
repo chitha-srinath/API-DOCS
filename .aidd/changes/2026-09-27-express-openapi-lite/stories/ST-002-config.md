@@ -39,8 +39,8 @@ file_scope:
 
 The repo is greenfield (`.aidd/context/snapshot.md`; no re-crawl). ST-001 (Wave 1) supplies
 `package.json`, tsconfig, vitest, eslint, stryker and `src/core/types.ts` (including the `BRAND`
-instance key `Symbol.for('express-api-docs.v1.brand')` and the `BRAND_KEY` class key
-`Symbol.for('express-api-docs.v1.brandKey')`, per ADR-49, which supersedes ADR-43/ADR-42's brand
+instance key `Symbol.for('express-api-contract.v1.brand')` and the `BRAND_KEY` class key
+`Symbol.for('express-api-contract.v1.brandKey')`, per ADR-49, which supersedes ADR-43/ADR-42's brand
 comparison). Do **not** edit any of those
 (epic: "Other stories that need changes to these files send requests through their story report.
 They do not edit the files."). ST-003 runs in parallel and owns `src/adapter/**`, `test/adapter/**`
@@ -73,7 +73,7 @@ of the port from `src/core/types.ts` if S-01 defines it there) — never a value
 
 **ADR-49 (verbatim excerpt, owner S-02 for `config/errors.ts`):**
 
-> **Brand:** the brand is a **stable string code per class**, never `this.name`. `core/types.ts` exports `BRAND = Symbol.for('express-api-docs.v1.brand')` (the instance key) and `BRAND_KEY = Symbol.for('express-api-docs.v1.brandKey')` (the class key). Each class declares `static readonly [BRAND_KEY] = 'express-api-docs.v1.ApiDocsConfigError'` (respectively `…ApiDocsSchemaError`).
+> **Brand:** the brand is a **stable string code per class**, never `this.name`. `core/types.ts` exports `BRAND = Symbol.for('express-api-contract.v1.brand')` (the instance key) and `BRAND_KEY = Symbol.for('express-api-contract.v1.brandKey')` (the class key). Each class declares `static readonly [BRAND_KEY] = 'express-api-contract.v1.ApiDocsConfigError'` (respectively `…ApiDocsSchemaError`).
 > **Construction:** the constructor stores the **set of codes along its class chain**: `this[BRAND] = collectBrands(new.target)`, which walks `Object.getPrototypeOf` over constructors and gathers each own `[BRAND_KEY]`.
 > **`instanceof`:** `static [Symbol.hasInstance](x) { const k = Object.prototype.hasOwnProperty.call(this, BRAND_KEY) ? this[BRAND_KEY] : undefined; return k !== undefined && Array.isArray(x?.[BRAND]) && x[BRAND].includes(k); }`. When a user subclass declares no brand, it falls back to `Function.prototype[Symbol.hasInstance].call(this, x)` (a normal prototype check).
 > **Unchanged:** `name` and `code` properties stay for messages and for README guidance.
@@ -153,10 +153,10 @@ Epic S-02 obligations: the existing `validate`, `merge`, `defaults`, `options.te
    - `DEFAULT_OPTIONS.schemaAdapter === null` (ADR-38, AC-047).
    - `DEFAULT_OPTIONS passes validateOptions()`.
 4. `test/config/errors.test.ts` (ADR-49; supersedes the ADR-42 `this.name` brand)
-   - `class brand code`: `ApiDocsConfigError[BRAND_KEY] === 'express-api-docs.v1.ApiDocsConfigError'` (own static property; `BRAND_KEY` from `src/core/types.ts`, equal to `Symbol.for('express-api-docs.v1.brandKey')`).
-   - `instance carries class-chain brand set`: `Array.isArray(err[BRAND])` and `err[BRAND]` includes `'express-api-docs.v1.ApiDocsConfigError'` (`BRAND` = `Symbol.for('express-api-docs.v1.brand')`); it never contains `err.name`.
-   - `Symbol.hasInstance` (brand path): a plain object `{ [BRAND]: ['express-api-docs.v1.ApiDocsConfigError'] }` is `instanceof ApiDocsConfigError`; a foreign object with a wrong brand (`{ [BRAND]: ['express-api-docs.v1.ApiDocsSchemaError'] }`), a non-array brand (`{ [BRAND]: 'express-api-docs.v1.ApiDocsConfigError' }`), `null`, `undefined` and `new Error()` are not.
-   - `subclass with its own brand`: `class Sub extends ApiDocsConfigError { static readonly [BRAND_KEY] = 'test.Sub' }` → `new Sub(...)[BRAND]` contains both `'test.Sub'` and `'express-api-docs.v1.ApiDocsConfigError'`; the instance is `instanceof Sub` and `instanceof ApiDocsConfigError`.
+   - `class brand code`: `ApiDocsConfigError[BRAND_KEY] === 'express-api-contract.v1.ApiDocsConfigError'` (own static property; `BRAND_KEY` from `src/core/types.ts`, equal to `Symbol.for('express-api-contract.v1.brandKey')`).
+   - `instance carries class-chain brand set`: `Array.isArray(err[BRAND])` and `err[BRAND]` includes `'express-api-contract.v1.ApiDocsConfigError'` (`BRAND` = `Symbol.for('express-api-contract.v1.brand')`); it never contains `err.name`.
+   - `Symbol.hasInstance` (brand path): a plain object `{ [BRAND]: ['express-api-contract.v1.ApiDocsConfigError'] }` is `instanceof ApiDocsConfigError`; a foreign object with a wrong brand (`{ [BRAND]: ['express-api-contract.v1.ApiDocsSchemaError'] }`), a non-array brand (`{ [BRAND]: 'express-api-contract.v1.ApiDocsConfigError' }`), `null`, `undefined` and `new Error()` are not.
+   - `subclass with its own brand`: `class Sub extends ApiDocsConfigError { static readonly [BRAND_KEY] = 'test.Sub' }` → `new Sub(...)[BRAND]` contains both `'test.Sub'` and `'express-api-contract.v1.ApiDocsConfigError'`; the instance is `instanceof Sub` and `instanceof ApiDocsConfigError`.
    - `subclass without a brand (prototype fallback)`: `class Plain extends ApiDocsConfigError {}` → `new Plain(...)` is `instanceof Plain` and `instanceof ApiDocsConfigError`; a bare `new ApiDocsConfigError(...)` and a branded plain object are **not** `instanceof Plain` (fallback is `Function.prototype[Symbol.hasInstance]`).
    - `renamed class`: a class obtained via `const Renamed = ApiDocsConfigError` / a subclass whose `name` is redefined via `Object.defineProperty(C, 'name', { value: 'x' })` still passes `instanceof ApiDocsConfigError` (no dependence on function names).
    - `name === 'ApiDocsConfigError'`; stable `code` property present and a string; `instanceof Error` for a real instance; `path` and `expected` exposed.
@@ -218,7 +218,7 @@ or written.
   sub-keys against dotted `OPTION_SPEC` rows; every other key is checked directly. Unknown
   keys and failed `row.check()` both throw `ApiDocsConfigError(path, allowed ?? description)`
   synchronously. The A-9 cross-field rule is checked last, after per-key validation.
-- `ApiDocsConfigError` (ADR-49): brand is the **string code** `express-api-docs.v1.ApiDocsConfigError`
+- `ApiDocsConfigError` (ADR-49): brand is the **string code** `express-api-contract.v1.ApiDocsConfigError`
   on `static readonly [BRAND_KEY]` (typed `: string`, not left as a literal type, so a
   subclass may declare its own differently-valued `[BRAND_KEY]` without a `tsc` variance
   error). The constructor sets `this[BRAND] = collectBrands(new.target)` (walks the

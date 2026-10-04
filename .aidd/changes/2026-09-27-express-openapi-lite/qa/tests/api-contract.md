@@ -10,7 +10,7 @@ Coverage (all PASS except the two expected F-01 confirmations): exact ADR-41 exp
 
 ## Failures (both expected — re-confirm F-01, do not raise new findings)
 
-**TC-CONTRACT-019:** `.meta({id})`-tagged, reused Zod schema via the **opt-in `zodAdapter`** (`express-api-docs/zod`) produces a spec that fails `OpenApiParser.validate()`. Matches F-01 exactly.
+**TC-CONTRACT-019:** `.meta({id})`-tagged, reused Zod schema via the **opt-in `zodAdapter`** (`express-api-contract/zod`) produces a spec that fails `OpenApiParser.validate()`. Matches F-01 exactly.
 
 **TC-CONTRACT-020:** the identical failure reproduces through the **default `standardSchemaAdapter`** with no explicit adapter override — independently reconfirms the adversarial verifier's scope-widening (F-01 is reachable through the most common consumer path, not only the opt-in subpath). This is the third independent confirmation of the default-path reachability (after the adversarial verifier and before this report), from the api-contract lens specifically — exactly where AC-015/016 falsification belongs.
 

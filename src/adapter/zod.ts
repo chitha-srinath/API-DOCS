@@ -5,7 +5,7 @@ function pathToString(path: readonly PropertyKey[] | undefined): string {
   return (path ?? []).map(String).join('.');
 }
 
-// Subpath-only adapter (`express-api-docs/zod`). This is the only `src/**` file allowed
+// Subpath-only adapter (`express-api-contract/zod`). This is the only `src/**` file allowed
 // to import `zod` (ADR-04, enforced by eslint.config.js).
 export const zodAdapter: SchemaAdapter<z.ZodType> = {
   name: 'zod',

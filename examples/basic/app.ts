@@ -1,10 +1,10 @@
 // examples/basic — the runnable example referenced by README's Quick start
 // section and covered by test/docs/example-smoke.test.ts (AC-029).
 //
-// ADR-18: express-api-docs must be imported before any router is created or
+// ADR-18: express-api-contract must be imported before any router is created or
 // mounted, so its recorder can patch Express's Router/Layer prototypes before
 // the app's own routes exist.
-import { createApiDocs } from 'express-api-docs';
+import { createApiDocs } from 'express-api-contract';
 
 import { STATUS_CODES } from 'node:http';
 
@@ -255,7 +255,7 @@ export function createApp() {
 
   // A plain Express route with no typed helper and no describe() call, to
   // demonstrate zero-config route auto-detection (ADR-?): the recorder picks
-  // this up on its own because express-api-docs was imported before any
+  // this up on its own because express-api-contract was imported before any
   // router was created.
   app.get('/widgets-plain', (_req, res) => {
     res.json([]);

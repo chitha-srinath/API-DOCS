@@ -1,4 +1,4 @@
-# express-api-docs
+# express-api-contract
 
 Zero-config OpenAPI 3.1 documentation for Express 4 and 5. Typed routes validate
 requests (and optionally responses) against your schemas; every route you
@@ -8,25 +8,25 @@ into a spec served at `/openapi.json`.
 ## Install
 
 ```sh
-npm install express-api-docs
+npm install express-api-contract
 ```
 
 Peer requirements: `express` `^4.21.0 || ^5.0.0`. Node.js **>= 22**.
 
 `zod` is an **optional peer** (`^4.2.0`) — only needed if you use Zod schemas
-with the `express-api-docs/zod` adapter. Requires zod >= 4.2. The core
-(`express-api-docs`) never imports `zod`; zero-options `createApiDocs()`
+with the `express-api-contract/zod` adapter. Requires zod >= 4.2. The core
+(`express-api-contract`) never imports `zod`; zero-options `createApiDocs()`
 already accepts Zod v4 schemas out of the box via the built-in
 `standardSchemaAdapter` (any [Standard Schema](https://standardschema.dev)
 library works the same way).
 
-**Import order matters:** `express-api-docs` must be imported before you
+**Import order matters:** `express-api-contract` must be imported before you
 create or mount any router. On import, it patches Express's Router/Layer
 prototypes so it can recover mount prefixes for routes registered anywhere in
 your app tree:
 
 ```ts
-import { createApiDocs } from 'express-api-docs'; // import before mounting routers
+import { createApiDocs } from 'express-api-contract'; // import before mounting routers
 import express from 'express';
 
 const app = express();
@@ -39,7 +39,7 @@ to the router's local path only, and a `warn` is emitted.
 ## Quick start
 
 ```ts
-import { createApiDocs } from 'express-api-docs'; // import before mounting routers
+import { createApiDocs } from 'express-api-contract'; // import before mounting routers
 import express from 'express';
 import { z } from 'zod';
 
@@ -95,9 +95,9 @@ Only `standardSchemaAdapter` and `zodAdapter` (see below) are shipped, but you
 can write your own adapter and pass it as `meta.adapter` or
 `options.schemaAdapter`.
 
-### The `express-api-docs/zod` subpath
+### The `express-api-contract/zod` subpath
 
-`zodAdapter`, from `express-api-docs/zod`, is a Zod-specific adapter with two
+`zodAdapter`, from `express-api-contract/zod`, is a Zod-specific adapter with two
 advantages over the generic `standardSchemaAdapter`:
 
 - typed `z.infer` end to end;
@@ -105,26 +105,26 @@ advantages over the generic `standardSchemaAdapter`:
   custom types degrade to `{}` instead of throwing.
 
 ```ts
-import { zodAdapter } from 'express-api-docs/zod';
+import { zodAdapter } from 'express-api-contract/zod';
 
 const apiDocs = createApiDocs({ schemaAdapter: zodAdapter });
 ```
 
 `zod` is an **optional peer**, `^4.2.0`. Requires zod >= 4.2 — the `./zod`
 subpath has the same floor as the core's peer range. `zodAdapter` is only
-exported from the `express-api-docs/zod` subpath; the main entry does not
+exported from the `express-api-contract/zod` subpath; the main entry does not
 export it.
 
 ## Security
 
 - `securitySchemes` and `security` (global) and per-route `meta.security`
   (via `OperationMeta`) map directly onto the OpenAPI `securitySchemes` and
-  `security` keywords — express-api-docs does not enforce authentication or
+  `security` keywords — express-api-contract does not enforce authentication or
   authorization itself, it only documents the shapes you declare.
 - The recorder patches Express's Router/Layer *prototypes*, not your request
   pipeline; it has no runtime effect on how requests are routed or answered.
 - Response validation is disabled by default (see below) so introducing
-  express-api-docs into an existing service cannot change response bodies
+  express-api-contract into an existing service cannot change response bodies
   unless you opt in.
 
 ## Response validation
@@ -183,7 +183,7 @@ Request-validation failures (typed routes only) are sent to the client as
 
 ## Incremental adoption
 
-You can adopt express-api-docs one route at a time:
+You can adopt express-api-contract one route at a time:
 
 - **Typed routes** — `route('get', '/x', meta, handler)` validates requests
   (and optionally responses) and documents the route from `meta`.
@@ -197,7 +197,7 @@ You can adopt express-api-docs one route at a time:
 
 ## Route auto-detection
 
-By default (`autoDetect: true`), express-api-docs walks the Express app's
+By default (`autoDetect: true`), express-api-contract walks the Express app's
 router tree at spec-build time and documents every route it finds that was
 not already registered via `route()`/`describe()`, inferring path parameters
 from the Express path syntax (`:id`, `{id}`) and RegExp/wildcard segments
@@ -206,14 +206,14 @@ where possible.
 - `autoDetect: false` disables detection entirely — only `route()`/`describe()`
   routes appear in the spec.
 - `autoDetect: { include?: string[], exclude?: string[] }` scopes detection to
-  matching globs; `express-api-docs`'s own `specPath` route is always
+  matching globs; `express-api-contract`'s own `specPath` route is always
   excluded.
 - `detectedDefaultResponse` overrides the synthesized default response for
   auto-detected operations.
 
 ### `installRecorder` and second copies of Express
 
-Importing `express-api-docs` (or `express-api-docs/manual` plus a call to
+Importing `express-api-contract` (or `express-api-contract/manual` plus a call to
 `installRecorder()`) patches the Router/Layer prototypes of **one** resolved
 copy of Express. If your app has a second copy of Express — a common outcome
 of pnpm's strict node_modules layout, certain monorepo setups, or a bundler
@@ -224,7 +224,7 @@ Call `installRecorder(require('express'))` (or the ESM equivalent) yourself,
 passing your own copy of Express, to patch it too:
 
 ```ts
-import { installRecorder } from 'express-api-docs/manual';
+import { installRecorder } from 'express-api-contract/manual';
 import express from 'express'; // a second copy, e.g. inside a workspace package
 
 installRecorder(express);
@@ -236,16 +236,16 @@ exactly one `warn` with code `EAD_RECORDER_NOT_INSTALLED`, naming the fix
 have no way to be linked back to the parent app; their routes are dropped from
 the spec, with one `warn` `EAD_SUBAPP_UNRECORDED` per mount.
 
-### `express-api-docs/manual` (opt-out entry)
+### `express-api-contract/manual` (opt-out entry)
 
-`express-api-docs/manual` re-exports the identical public API as the main
+`express-api-contract/manual` re-exports the identical public API as the main
 entry, **without** patching Express on import. Use it when you need control
 over exactly when (or whether) the recorder installs — hot-reload workflows,
 tests that create many app instances, or setups sensitive to APM
 instrumentation order:
 
 ```ts
-import { createApiDocs, installRecorder } from 'express-api-docs/manual';
+import { createApiDocs, installRecorder } from 'express-api-contract/manual';
 import express from 'express';
 
 installRecorder(express); // install explicitly, at a time you choose
@@ -292,12 +292,12 @@ The default `info` is the static `{ title: 'API', version: '0.0.0' }` when
 
 ## Internals
 
-express-api-docs coordinates across module copies (recorder installed by
+express-api-contract coordinates across module copies (recorder installed by
 `.`/`./manual`, walked by whichever copy builds the spec) using a small set of
-`Symbol.for` keys, all **protocol-versioned**: `express-api-docs.v1.meta`,
-`express-api-docs.v1.mount`, `express-api-docs.v1.child`,
-`express-api-docs.v1.recorder`, `express-api-docs.v1.brand` and
-`express-api-docs.v1.brandKey`. The brand and brand-key keys back the
+`Symbol.for` keys, all **protocol-versioned**: `express-api-contract.v1.meta`,
+`express-api-contract.v1.mount`, `express-api-contract.v1.child`,
+`express-api-contract.v1.recorder`, `express-api-contract.v1.brand` and
+`express-api-contract.v1.brandKey`. The brand and brand-key keys back the
 cross-build/minification-safe `instanceof` mechanism (ADR-49) used by
 `ApiDocsConfigError` and `ApiDocsSchemaError`. The value stored under the recorder key is
 `{ protocol: 1, packageVersion }`. A walker only ever reads keys for its own
@@ -343,7 +343,7 @@ Two different mutation runs exist:
 ## Examples
 
 `examples/basic` is a complete, runnable Express app using
-`express-api-docs`, exercised by `test/docs/example-smoke.test.ts`:
+`express-api-contract`, exercised by `test/docs/example-smoke.test.ts`:
 
 ```sh
 npx tsx examples/basic/server.ts

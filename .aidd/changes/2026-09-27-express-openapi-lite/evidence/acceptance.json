@@ -6,7 +6,7 @@
   "requirements": [
     {
       "id": "AC-001",
-      "description": "Given the package is built, When `package.json` is inspected, Then `name` is `express-api-docs`, `license` is `MIT`, a LICENSE file with copyright chitha_srinath exists, and the string `express-openapi-lite` appears in no file outside `.aidd/`.",
+      "description": "Given the package is built, When `package.json` is inspected, Then `name` is `express-api-contract`, `license` is `MIT`, a LICENSE file with copyright chitha_srinath exists, and the string `express-openapi-lite` appears in no file outside `.aidd/`.",
       "receipts": [
         "evidence/receipts/suite/receipt.json"
       ]

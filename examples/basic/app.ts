@@ -61,6 +61,37 @@ export function createApp() {
     ),
   );
 
+  // Every field type the docs form supports, in one body: formats, lengths, number ranges, enums and a textarea.
+  app.post(
+    '/events',
+    ...route(
+      'post',
+      '/events',
+      {
+        summary: 'Create an event',
+        tags: ['events'],
+        body: z.object({
+          id: z.uuid(),
+          title: z.string().min(3).max(80),
+          description: z.string().min(10).max(1000).optional(),
+          startDate: z.iso.date(),
+          startTime: z.iso.time().meta({ format: 'time' }),
+          startsAt: z.iso.datetime().optional(),
+          capacity: z.number().int().min(1).max(500),
+          price: z.number().min(0).max(10000).optional(),
+          contactEmail: z.email(),
+          visibility: z.enum(['public', 'private', 'unlisted']),
+          isOnline: z.boolean().optional(),
+        }),
+        response: z.object({ id: z.string(), title: z.string() }),
+        responses: { 201: { description: 'Event created' } },
+      },
+      (req, res) => {
+        res.status(201).json({ id: req.body.id, title: req.body.title });
+      },
+    ),
+  );
+
   // Query parameters: a text search, a number limit and an enum sort.
   app.get(
     '/widgets',

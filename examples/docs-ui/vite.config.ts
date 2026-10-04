@@ -5,8 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 // The example API (examples/basic) runs on API_TARGET. These paths are proxied so the page
 // can read the spec and call endpoints from the same origin.
-const API_TARGET = process.env.API_TARGET ?? 'http://localhost:3111';
-const API_PATHS = ['/openapi.json', '/health', '/widgets', '/widgets-plain', '/dummy', '/secure', '/uploads'];
+const API_TARGET = process.env.API_TARGET ?? 'http://localhost:3000';
+const API_PATHS = ['/openapi.json', '/health', '/widgets', '/widgets-plain', '/events', '/dummy', '/secure', '/uploads'];
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],

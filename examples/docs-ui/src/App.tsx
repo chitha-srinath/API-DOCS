@@ -372,7 +372,7 @@ function FieldControl({
     control = (
       <Input
         id={id}
-        type={s.format === 'date' ? 'date' : 'text'}
+        type={s.format === 'date' ? 'date' : s.format === 'time' ? 'time' : 'text'}
         value={value}
         aria-invalid={invalid || undefined}
         onChange={(e) => onChange(e.target.value)}

@@ -150,6 +150,10 @@ const FORMAT_CHECKS: Record<string, { label: string; test: (s: string) => boolea
       return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
     },
   },
+  time: {
+    label: 'a time (HH:MM or HH:MM:SS)',
+    test: (s) => /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d(\.\d+)?)?$/.test(s),
+  },
   'date-time': {
     label: 'an ISO 8601 date-time',
     test: (s) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) && !Number.isNaN(Date.parse(s)),
@@ -169,7 +173,7 @@ function textError(raw: string, schema: JsonSchema): string | null {
   if (check && !check.test(raw)) return `Must be ${check.label}`;
   if (schema.pattern) {
     try {
-      if (!new RegExp(schema.pattern, 'u').test(raw)) return `Must match ${schema.pattern}`;
+      if (!new RegExp(schema.pattern, 'u').test(raw)) return 'Does not match the required format';
     } catch {
       // A pattern this browser cannot compile is left to the server to check.
     }

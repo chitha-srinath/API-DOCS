@@ -80,6 +80,11 @@ function fieldOf(name: string, required: boolean, prop: JsonSchema | undefined, 
   return { name, required, description: schema.description ?? prop?.description, kind: kindOf(schema), schema };
 }
 
+/** Required fields first, then optional ones. Each group keeps the order the spec gives. */
+function requiredFirst(fields: Field[]): Field[] {
+  return [...fields.filter((f) => f.required), ...fields.filter((f) => !f.required)];
+}
+
 /** Builds the sections a "Try it" form shows: path params, query params, then the body. */
 export function buildSections(
   parameters: Parameter[],
@@ -91,7 +96,7 @@ export function buildSections(
     const fields = parameters
       .filter((p) => p.in === key)
       .map((p) => fieldOf(p.name, key === 'path' || p.required === true, p.schema, components));
-    if (fields.length > 0) sections.push({ key, fields, rawBody: false });
+    if (fields.length > 0) sections.push({ key, fields: requiredFirst(fields), rawBody: false });
   }
 
   const bodySchema = resolveSchema(requestBody?.content?.['application/json']?.schema, components);
@@ -100,7 +105,7 @@ export function buildSections(
     const fields = Object.entries(bodySchema.properties).map(([name, prop]) =>
       fieldOf(name, required.has(name), prop, components),
     );
-    sections.push({ key: 'body', fields, rawBody: false });
+    sections.push({ key: 'body', fields: requiredFirst(fields), rawBody: false });
   } else if (bodySchema) {
     const field = fieldOf('body', requestBody?.required === true, bodySchema, components);
     sections.push({ key: 'body', fields: [field], rawBody: true });

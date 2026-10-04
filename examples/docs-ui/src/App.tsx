@@ -9,6 +9,10 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format, isValid, parse } from 'date-fns';
 import {
   bodyEditorText,
   buildRequest,
@@ -338,6 +342,40 @@ const SECTION_TITLE: Record<Section['key'], string> = {
   body: 'Request body',
 };
 
+/** Date field: a shadcn popover holding a calendar. Stores YYYY-MM-DD text, the form the validation expects. */
+function DateControl({ id, value, invalid, onChange }: { id: string; value: string; invalid: boolean; onChange: (next: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const parsed = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined;
+  const selected = parsed && isValid(parsed) ? parsed : undefined;
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        id={id}
+        aria-invalid={invalid || undefined}
+        className={`flex h-8 w-full items-center rounded-lg border border-input bg-transparent px-2.5 text-left text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive dark:bg-input/30 ${
+          value ? '' : 'text-muted-foreground'
+        }`}
+      >
+        {value || 'Pick a date'}
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={selected}
+          defaultMonth={selected}
+          onSelect={(day) => {
+            onChange(day ? format(day, 'yyyy-MM-dd') : '');
+            setOpen(false);
+          }}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+/** Sentinel for "not set" in the dropdown, since an empty string cannot be a select item value. */
+const UNSET = '__unset__';
+
 /** One form control per schema field: number, text, long text, enum/boolean select, or a JSON editor. */
 function FieldControl({
   id,
@@ -371,11 +409,13 @@ function FieldControl({
         onChange={(e) => onChange(e.target.value)}
       />
     );
+  } else if (field.kind === 'text' && s.format === 'date') {
+    control = <DateControl id={id} value={value} invalid={invalid} onChange={onChange} />;
   } else if (field.kind === 'text') {
     control = (
       <Input
         id={id}
-        type={s.format === 'date' ? 'date' : s.format === 'time' ? 'time' : 'text'}
+        type={s.format === 'time' ? 'time' : 'text'}
         value={value}
         aria-invalid={invalid || undefined}
         onChange={(e) => onChange(e.target.value)}
@@ -405,20 +445,22 @@ function FieldControl({
     );
   } else {
     control = (
-      <select
-        id={id}
-        value={value}
-        aria-invalid={invalid || undefined}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive dark:bg-input/30"
+      <Select
+        value={value === '' ? null : value}
+        onValueChange={(next) => onChange(next === UNSET || next === null ? '' : next)}
       >
-        <option value="">{field.required ? 'Choose…' : 'Not set'}</option>
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger id={id} aria-invalid={invalid || undefined} className="w-full">
+          <SelectValue placeholder={field.required ? 'Choose…' : 'Not set'} />
+        </SelectTrigger>
+        <SelectContent>
+          {!field.required && <SelectItem value={UNSET}>Not set</SelectItem>}
+          {options.map((o) => (
+            <SelectItem key={o} value={o}>
+              {o}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     );
   }
 
@@ -427,8 +469,13 @@ function FieldControl({
       <div className="flex flex-wrap items-center gap-2">
         <label htmlFor={id} className="font-mono text-sm font-medium">
           {field.name}
+          {field.required ? (
+            <span className="ml-0.5 text-destructive" aria-label="required">
+              *
+            </span>
+          ) : null}
         </label>
-        <Badge variant={field.required ? 'default' : 'outline'}>{field.required ? 'required' : 'optional'}</Badge>
+        {!field.required && <Badge variant="outline">optional</Badge>}
         <span className="text-xs text-muted-foreground">{hintFor(field)}</span>
       </div>
       {field.description && <p className="text-xs text-muted-foreground">{field.description}</p>}

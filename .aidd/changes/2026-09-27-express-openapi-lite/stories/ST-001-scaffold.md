@@ -133,8 +133,8 @@ Required shape:
 - `"exports"`: `.`, `./manual`, `./zod`, each `{"import": {"types": "./dist/<e>.d.ts", "default": "./dist/<e>.js"}, "require": {"types": "./dist/<e>.d.cts", "default": "./dist/<e>.cjs"}}`, plus `"./package.json": "./package.json"`.
 - `"files": ["dist", "LICENSE", "README.md"]`, `"engines": {"node": ">=22"}`, `"sideEffects"` as above.
 - `"peerDependencies": {"express": "^4.21.0 || ^5.0.0", "zod": "^4.2.0", "@types/express": "^4.17.21 || ^5.0.0"}`, `"peerDependenciesMeta": {"zod": {"optional": true}, "@types/express": {"optional": true}}`. No `dependencies` (ADR-10: zero runtime deps).
-- Pre-declared devDependencies (S-01 is the only `package.json` owner): `typescript ~5.9.3` (ADR-12), `tsup 8.5.1`, `publint 0.3.24`, `@arethetypeswrong/cli 0.18.5` (ADR-11), `vitest 5.0.2`, `@vitest/coverage-v8 5.0.2`, `supertest 7.3.0` (ADR-15), `vite ^8.3.1`, `@types/node ~22.20.4` (ADR-22), `@types/supertest 7.2.1`, `@types/express 5.0.6`, `express ^5.2.1`, `express4: npm:express@^4.22.3` (ADR-13), `zod ^4.6.5` (ADR-47), `@apidevtools/swagger-parser 13.1.0` (ADR-14), `eslint 10.11.0`, `typescript-eslint 8.70.1`, `prettier 3.9.9` (ADR-16), `@stryker-mutator/core 10.0.0`, `esbuild ~0.27.7` (ADR-45), `yaml` (workflow test). **`@stryker-mutator/vitest-runner` is NOT a dependency (ADR-35).** The v4 `@types` packages are NOT devDependencies; they are installed `--no-save` in the Express 4 CI cells only (ADR-51).
-- `@scalar/api-reference` and `swagger-ui-dist` are CDN pins only and must NOT appear in any dependency field (AC-004, AC-020).
+- Pre-declared devDependencies (S-01 is the only `package.json` owner): `typescript ~5.9.3` (ADR-12), `tsup 8.5.1`, `publint 0.3.24`, `@arethetypeswrong/cli 0.18.5` (ADR-11), `vitest 5.0.2`, `@vitest/coverage-v8 5.0.2`, `supertest 7.3.0` (ADR-15), `vite ^8.3.1`, `@types/node ~22.20.4` (ADR-22), `@types/supertest 7.2.1`, `@types/express 5.0.6`, `express ^5.2.1`, `express4: npm:express@^4.22.3` (ADR-13), `zod ^4.6.5` (ADR-47), `@readme/openapi-parser 13.1.0` (ADR-14), `eslint 10.11.0`, `typescript-eslint 8.70.1`, `prettier 3.9.9` (ADR-16), `@stryker-mutator/core 10.0.0`, `esbuild ~0.27.7` (ADR-45), `yaml` (workflow test). **`@stryker-mutator/vitest-runner` is NOT a dependency (ADR-35).** The v4 `@types` packages are NOT devDependencies; they are installed `--no-save` in the Express 4 CI cells only (ADR-51).
+- `docs-ui-package` and `docs-ui-dist` are CDN pins only and must NOT appear in any dependency field (AC-004, AC-020).
 - Scripts exactly as in Verification commands: `build`, `test`, `test:v4`, `typecheck:v4`, `lint`, `check:pack`, `mutation`, `perf`, `audit`.
 
 ### ADR-40: tsup build shape (`tsup.config.ts`)
@@ -241,13 +241,13 @@ Write these tests FIRST. Run `npm test` and capture the red output before writin
    - `Object.keys(exports)` deep-equals `['.', './manual', './zod', './package.json']` (order-insensitive); each of the first three has `import` and `require`, each with `types` and `default`; `exports['./package.json'] === './package.json'`.
    - `pkg.types === './dist/index.d.cts'` and `'module' in pkg === false`.
    - `devDependencies.esbuild` matches `/^~0\.27\./`; `devDependencies.zod === '^4.6.5'`; `'@stryker-mutator/vitest-runner' in devDependencies === false`.
-   - `dependencies` is absent or empty; no key in `dependencies` or `peerDependencies` matches `/scalar|swagger-ui|redoc/i`.
+   - `dependencies` is absent or empty; no key in `dependencies` or `peerDependencies` matches `/single-value|docs-ui|redoc/i`.
    - A recursive walk of the repo root (skipping `.aidd/`, `.git/`, `node_modules/`, `dist/`, `coverage/`, `reports/`, `.stryker-tmp/`) finds no file containing the old name, built with `join`.
    *Red:* `package.json` and `LICENSE` missing.
 3. **`test/dist/pack.test.ts`** (AC-002, AC-020, ADR-21, ADR-24, ADR-48). Parse `files[].path` from `npm pack --dry-run --json`.
    - The list contains `dist/{index,manual,zod,auto-record}.{js,cjs}` and `dist/{index,manual,zod}.{d.ts,d.cts}`.
    - Every `exports` target is in the pack list.
-   - No path matches `/\.css$/` or `/(scalar|swagger-ui|redoc)/i`; no `.js`/`.cjs` outside `dist/`.
+   - No path matches `/\.css$/` or `/(single-value|docs-ui|redoc)/i`; no `.js`/`.cjs` outside `dist/`.
    - `pkg.sideEffects` deep-equals `["./dist/auto-record.js","./dist/auto-record.cjs"]`.
    - `dist/index.js` and `dist/index.cjs` do not match `/\bzod\b/`.
    - `npm pack` to a temp dir, extract the tarball into `<tmp>/node_modules/express-api-docs`, and assert `createRequire(<tmp>/x.cjs).resolve('express-api-docs/package.json')` resolves and `require(...)` returns `name === 'express-api-docs'`.
@@ -448,7 +448,7 @@ Done in 6 seconds.                # incremental ~9.3s wall clock
 | AC-001 | met | `test/dist/manifest.test.ts` (name/license/LICENSE/old-name-walk) passes; `npm test` green. |
 | AC-002 | met | `npm run build` exits 0, emits `.js`/`.cjs`/`.d.ts`/`.d.cts` for all 4 entries; `test/dist/pack.test.ts` and `build-shape.test.ts` pass; exports map verified by `manifest.test.ts`. |
 | AC-004 | met | `peerDependencies`/`peerDependenciesMeta`/`engines`/`./zod` subpath asserted by `manifest.test.ts`; ESM+CJS load of the main entry without zod verified indirectly (index has no zod import; `pack.test.ts` asserts `dist/index.{js,cjs}` don't match `/\bzod\b/`) and directly by `npm run build` + `node -e "require('./dist/index.cjs')"`-style pack round-trip test. |
-| AC-020 | met | `pack.test.ts` asserts no `.css` or scalar/swagger-ui/redoc paths in `npm pack --dry-run --json`. |
+| AC-020 | met | `pack.test.ts` asserts no `.css` or single-value/docs-ui/redoc paths in `npm pack --dry-run --json`. |
 | AC-025 | met | `npm test` → 52/52 passing, coverage 100/100/100/100 (≥90 threshold). |
 | AC-026 | met | `npm run lint` exit 0; `npx tsc --noEmit` exit 0. |
 | AC-027 | met | `test/meta/workflows.test.ts` asserts matrix `{node:[22,24], express:[4,5]}`, typecheck in every cell (v4 via `test:v4`, v5 via `npm test`+`tsc --noEmit`), `peer-floor`, `mutation-scoped`, `mutation-full`, perf job, caching. Manually ran the v4 and v5 command paths locally (see Green evidence) since GitHub Actions itself does not execute in this sandbox. |

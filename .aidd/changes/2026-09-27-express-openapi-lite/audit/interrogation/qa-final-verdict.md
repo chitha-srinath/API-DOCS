@@ -20,7 +20,7 @@ exit 0
 
 ```
 $ node test/aidd-exhaustive/api-contract/run.mjs
-... TC-CONTRACT-020: requestBody schema via default adapter = {"$ref":"#/components/schemas/NamedThing2", ...}; SwaggerParser.validate threw: false
+... TC-CONTRACT-020: requestBody schema via default adapter = {"$ref":"#/components/schemas/NamedThing2", ...}; OpenApiParser.validate threw: false
 --- TALLY ---
 {"PASS":28}
 exit 0

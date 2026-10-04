@@ -138,7 +138,7 @@ ADR-42's `x[BRAND] === this.name` comparison is superseded (it fails under minif
 - **AC-005** — Given a `SchemaAdapter` interface exported from the package, When a test implements it with a non-Zod stub adapter, Then routes defined with the stub validate requests and appear in the generated spec without any change to core code. *(This story delivers the port, the contract suite and the stub fixture.)*
 - **AC-006** — Given a route defined with the typed helper and Zod schemas for params, query, body and response, When the handler is type-checked, Then `req.params`, `req.query` and `req.body` have the inferred types, and assigning a wrong type fails `tsc --noEmit` (verified by a type test with `@ts-expect-error`). *(This story delivers only the `Infer` hook.)*
 - **AC-016** — Given a route `/users/:id` with params, query, body and response schemas, When the spec is generated, Then the path appears as `/users/{id}` with a `path` parameter `id` (required), query parameters, a `requestBody` and response schemas derived from the Zod schemas. *(This story delivers only schema conversion.)*
-- **AC-035** — Given an Express app set up with `createApiDocs()` and no options, plus one typed route, When the app is started, Then `GET /openapi.json` returns 200 with a valid OpenAPI 3.1 spec (as in AC-015), `GET /docs` returns 200 HTML loading Scalar, an invalid request to the typed route returns 400 problem+json, and responses are not validated. *(This story delivers only the default `standardSchemaAdapter` accepting Zod v4 schemas; the e2e test belongs to S-07.)*
+- **AC-035** — Given an Express app set up with `createApiDocs()` and no options, plus one typed route, When the app is started, Then `GET /openapi.json` returns 200 with a valid OpenAPI 3.1 spec (as in AC-015), `GET /docs` returns 200 HTML loading docs UI, an invalid request to the typed route returns 400 problem+json, and responses are not validated. *(This story delivers only the default `standardSchemaAdapter` accepting Zod v4 schemas; the e2e test belongs to S-07.)*
 - **AC-047** — Given `schemaAdapter: stubAdapter` globally or per-route, When requests are validated and the spec is generated, Then the stub adapter's parse and toJsonSchema are used, and per-route overrides global. *(This story delivers only `test/fixtures/stub-adapter.ts`; route/spec/wiring tests belong to S-04, S-06, S-07. Per ADR-53, "parse" = `validate` and "toJsonSchema" = `toJSONSchema`.)*
 
 ## Test plan
@@ -445,7 +445,7 @@ Interrogated AC-004, AC-005, AC-006, AC-016, AC-035, AC-047 (this story's share)
 Independently reproduced the F-01 fix this story's `src/adapter/zod.ts` output feeds:
 `npx vitest run test/spec/build.test.ts` → 16/16 passed; `node
 test/aidd-exhaustive/api-contract/run.mjs` → 28/28 PASS, including TC-CONTRACT-020's
-`SwaggerParser.validate threw: false` for a `.meta({id})`-tagged schema via the default
+`OpenApiParser.validate threw: false` for a `.meta({id})`-tagged schema via the default
 adapter.
 
 **Verdict: AC-004, AC-005, AC-006, AC-016, AC-035, AC-047 — all PROVEN.** No DISPUTED

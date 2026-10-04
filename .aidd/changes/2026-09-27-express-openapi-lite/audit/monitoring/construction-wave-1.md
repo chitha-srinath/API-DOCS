@@ -26,7 +26,7 @@ against the story's required shape: `src/core/types.ts`, `package.json`, `tsup.c
   `./package.json` each with import/require/types/default, `sideEffects` array exactly as
   ADR-24 requires, peers and peerDependenciesMeta exactly as ADR-21/29/47 require, `engines`,
   and the nine scripts named in the story (`build`, `test`, `test:v4`, `typecheck:v4`, `lint`,
-  `check:pack`, `mutation`, `perf`, `audit`). No `dependencies` field, no scalar/swagger-ui
+  `check:pack`, `mutation`, `perf`, `audit`). No `dependencies` field, no single-value/docs-ui
   keys anywhere — AC-004/AC-020 claims hold up on direct inspection.
 - `tsup.config.ts` implements ADR-40 precisely: `splitting: false`, `shims: true`,
   `treeshake: false`, and the `keepAutoRecordExternal` esbuild plugin resolves

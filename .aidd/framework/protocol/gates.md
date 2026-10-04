@@ -110,18 +110,18 @@ defines them. `core/schemas/change-state.schema.json` enforces exactly this.
 
 ```yaml
 quality_gates:
-  tests_green: passed              # scalar form — a gate with no reason to record
+  tests_green: passed              # single-value form — a gate with no reason to record
   mutation_floor_met:              # object form — a gate that must explain itself
     status: na
     reason: "rigor:fast"
 ```
 
-- **Scalar form** — the bare status (`pending` | `passed` | `failed` | `na`). Valid for any
+- **docs UI form** — the bare status (`pending` | `passed` | `failed` | `na`). Valid for any
   gate that has nothing to explain.
 - **Object form** — `{status, reason}`, closed: `status` is required and takes the same four
   values, `reason` is a string, and no other key is accepted. **A gate skipped by rigor mode
   is written in the object form**, `{status: na, reason: rigor:<mode>}`. There is no third
-  encoding: a sibling `reason` key next to a scalar status is rejected by the schema, which
+  encoding: a sibling `reason` key next to a single-value status is rejected by the schema, which
   is what stops the reason from drifting away from the gate it belongs to.
 
 ## Rigor modes and `na`
@@ -129,7 +129,7 @@ quality_gates:
 The active rigor mode (`rigor-modes.md`) decides how much verification runs, so a gate whose
 step that mode does not run is **not applicable**, not skipped: it records the object form
 above (e.g. `mutation_floor_met: {status: na, reason: rigor:fast}`). A silently absent gate
-is a supervision VIOLATION; an `na` written in the scalar form, with its reason nowhere, is
+is a supervision VIOLATION; an `na` written in the single-value form, with its reason nowhere, is
 the same violation. An automatic escalation voids every `na` earned under the outgone mode —
 those gates flip back to `pending` and must be earned in the new mode.
 

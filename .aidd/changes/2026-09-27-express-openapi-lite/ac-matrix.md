@@ -106,7 +106,7 @@ $ npx vitest run test/spec/ac023.test.ts test/introspect/walk.test.ts → 14/14 
 | AC-012 | PASS | ST-004 | `test/route/response-validation.test.ts`; `TC-NEG-039` | route suite passed; exhaustive suite passed |
 | AC-013 | PASS | ST-004 | `test/route/response-validation.test.ts`; `TC-NEG-038` | route suite passed; exhaustive suite passed |
 | AC-014 | PASS | ST-004 | `test/route/response-validation.test.ts`, `test/route/send-delegation.test.ts`; `TC-NEG-037`; `TC-CONTRACT-027` | route suite passed; exhaustive suite passed; api-contract script PASS |
-| AC-015 | PASS | ST-006 | `test/spec/build.test.ts`; `TC-CONTRACT-012/013/018` | spec suite passed (in the 205/205 batch); api-contract script PASS (swagger-parser validates 3.1 doc) |
+| AC-015 | PASS | ST-006 | `test/spec/build.test.ts`; `TC-CONTRACT-012/013/018` | spec suite passed (in the 205/205 batch); api-contract script PASS (openapi-parser validates 3.1 doc) |
 | AC-016 | PASS | ST-003, ST-006 | `test/adapter/zod-jsonschema.test.ts`, `test/spec/build.test.ts` | adapter suite passed; spec suite passed |
 | AC-017 | PASS | ST-006 | `test/spec/build.test.ts` | spec suite passed (in 205/205 batch) |
 | AC-018 | PASS | ST-007 | `test/docs-ui/render.test.ts` | docs-ui suite passed (in 205/205 batch) |
@@ -114,7 +114,7 @@ $ npx vitest run test/spec/ac023.test.ts test/introspect/walk.test.ts → 14/14 
 | AC-020 | PASS | ST-001, ST-007 | `test/docs-ui/render.test.ts`, `test/dist/pack.test.ts` | docs-ui + dist suites both passed |
 | AC-021 | PASS | ST-004 | `test/route/incremental.test.ts`; `TC-HAPPY-018` | route suite passed; happy-path passed |
 | AC-022 | PASS | ST-005 | `test/describe/describe.test.ts`; `TC-HAPPY-019` | describe suite passed (in 205/205 batch); happy-path passed |
-| AC-023 | PASS | ST-005, ST-006 | `test/introspect/walk.test.ts` (both `walk (express)` and `walk (express4)`), `test/spec/ac023.test.ts` (both majors) | `npx vitest run test/spec/ac023.test.ts test/introspect/walk.test.ts` → 14/14 passed. Read both files: both assert path `/api/users/{id}`, exactly `['get','post']`, non-empty `operationId`, required path param `id` with `schema:{type:'string'}`, `200` response present, `tags:['api']` — matches the full AC-023 Given/When/Then, and `ac023.test.ts` additionally validates the doc with `SwaggerParser.validate`. |
+| AC-023 | PASS | ST-005, ST-006 | `test/introspect/walk.test.ts` (both `walk (express)` and `walk (express4)`), `test/spec/ac023.test.ts` (both majors) | `npx vitest run test/spec/ac023.test.ts test/introspect/walk.test.ts` → 14/14 passed. Read both files: both assert path `/api/users/{id}`, exactly `['get','post']`, non-empty `operationId`, required path param `id` with `schema:{type:'string'}`, `200` response present, `tags:['api']` — matches the full AC-023 Given/When/Then, and `ac023.test.ts` additionally validates the doc with `OpenApiParser.validate`. |
 | AC-024 | PASS | ST-004 | `test/route/async.test.ts`; `TC-NEG-040/041`, `TC-HAPPY-024` | route suite passed; exhaustive suite passed |
 | AC-025 | PASS | ST-001 (gate) | `npm test` coverage output | Statements 98.56%, Branches 93.35%, Functions 99.45%, Lines 99.34% — all ≥ 90%; `Test Files 78 passed`, `Tests 637 passed \| 5 skipped`, exit 0 |
 | AC-026 | PASS | ST-001 (gate) | `npm run lint`, `npx tsc --noEmit` | both exit 0, no output/errors |

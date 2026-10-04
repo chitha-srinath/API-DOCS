@@ -38,7 +38,7 @@ file_scope:
 
 ## Context
 
-Epic id mapping: epic row **S-06** is story id **ST-006** (the schema requires `ST-NNN`). Wave 5. Depends on S-02 (ST-002, config), S-03 (ST-003, adapter and `test/fixtures/stub-adapter.ts`) and S-05 (ST-005, introspection); S-05 itself depends on S-01 and S-04 (ADR-27b), so the S-01 `RouteRegistry` contract, `test/fixtures/majors.ts`, and the S-04 implementation are all on disk when this story starts. Risk (epic, verbatim): "medium | Byte determinism; dedupe; swagger-parser validity".
+Epic id mapping: epic row **S-06** is story id **ST-006** (the schema requires `ST-NNN`). Wave 5. Depends on S-02 (ST-002, config), S-03 (ST-003, adapter and `test/fixtures/stub-adapter.ts`) and S-05 (ST-005, introspection); S-05 itself depends on S-01 and S-04 (ADR-27b), so the S-01 `RouteRegistry` contract, `test/fixtures/majors.ts`, and the S-04 implementation are all on disk when this story starts. Risk (epic, verbatim): "medium | Byte determinism; dedupe; openapi-parser validity".
 
 Epic story-table row (verbatim): "S-06 | ST-006-spec-builder.md | Spec builder: dedupe, glob, naming, canonical sort and fingerprint cache | 5 | S-02, S-03, S-05 | AC-005 (the stub schema appears in the spec), AC-011, AC-015, AC-016, AC-017, AC-023 (spec half, ADR-32), AC-030, AC-031, AC-032, AC-033, AC-034 (byte identity), AC-038, AC-039, AC-041, AC-042, AC-047 (spec test) | Yes (5)".
 
@@ -102,7 +102,7 @@ Five source files total (`build.ts`, `naming.ts`, `glob.ts`, `canonical.ts`, `ca
 ### Relevant decisions (architecture.md, verbatim excerpts)
 
 - ADR-32 (owner S-06): "S-06 owns the spec-side half of AC-023, in `test/spec/ac023.test.ts`. For each entry of `majors` (ADR-39) it builds the nested fixture `app.use('/api', router)` with plain `router.get('/users/:id')` and `router.post('/users/:id')` from `test/fixtures/apps.ts`, then runs the full pipeline (walk, then `buildSpec`). It asserts the **whole Then-clause**: exactly path `/api/users/{id}`; exactly one `get` and one `post`; each with an `operationId`; a required `path` param `id` with schema `{type:'string'}`; a generic `200` response; tag `api`. That last check derives the tag from the **mounted** path, never the router-local path."
-- ADR-38: "Resolution order is `meta.adapter ?? options.schemaAdapter ?? standardSchemaAdapter`. The last is injected by the S-07 composition root [...] **Fixture:** `test/fixtures/stub-adapter.ts` (S-03) is a non-Zod adapter over plain `{kind:'str'|'obj',…}` descriptors. [...] S-06 `test/spec/stub-adapter.test.ts`: the spec contains the stub's converted schema in `requestBody` and passes swagger-parser." Consequence for `buildSpec`: a typed operation whose `meta.adapter` is set is converted with that adapter; otherwise the `adapter` parameter is used.
+- ADR-38: "Resolution order is `meta.adapter ?? options.schemaAdapter ?? standardSchemaAdapter`. The last is injected by the S-07 composition root [...] **Fixture:** `test/fixtures/stub-adapter.ts` (S-03) is a non-Zod adapter over plain `{kind:'str'|'obj',…}` descriptors. [...] S-06 `test/spec/stub-adapter.test.ts`: the spec contains the stub's converted schema in `requestBody` and passes openapi-parser." Consequence for `buildSpec`: a typed operation whose `meta.adapter` is set is converted with that adapter; otherwise the `adapter` parameter is used.
 - ADR-39: "S-04, S-05, S-06 and S-07 **import** `majors.ts`. Local copies or parameterizers are forbidden, and a lint `no-restricted-syntax` rule flags `require('express4')` outside `test/fixtures/**`."
 - ADR-27(c): "The `RouteRegistry` interface is **pinned in `src/core/types.ts` (S-01)**. S-04 implements it in `src/registry/registry.ts`, and S-05 and S-06 consume it".
 - ADR-27(d): "The Stryker `mutate` scope from ADR-05 is widened to [...] `src/spec/**` [...]. `thresholds.break` stays at 70." Write tests that kill mutants (assert exact values).
@@ -112,7 +112,7 @@ Five source files total (`build.ts`, `naming.ts`, `glob.ts`, `canonical.ts`, `ca
 - ADR-02: "The nested fingerprint still misses a layer replaced in place with equal counts".
 - ADR-03 (rejected): "the ETag/304 layer, the per-operation fragment cache, structural-hash component hoisting [...] hash hoisting endangers AC-016 output shape and AC-034 byte identity."
 - ADR-10: "**Glob matcher is in-house**, supporting `*` and `**` only [...] There is no `picomatch`."
-- ADR-14: "every spec-producing test calls `@apidevtools/swagger-parser` 13.1.0 `validate()`."
+- ADR-14: "every spec-producing test calls `@readme/openapi-parser` 13.1.0 `validate()`."
 - ADR-17: "A registry entry that the walk cannot locate is still emitted with its local path, plus one `warn` (ADR-19). `getSpec()` before any request returns the registry at local paths."
 - ADR-19: "Only the AC-034 skips stay at `debug`".
 - ADR-08: "The default is the static `{ title: 'API', version: '0.0.0' }`."
@@ -139,7 +139,7 @@ Five source files total (`build.ts`, `naming.ts`, `glob.ts`, `canonical.ts`, `ca
 |---|---|
 | AC-005 | Given a `SchemaAdapter` interface exported from the package, When a test implements it with a non-Zod stub adapter, Then routes defined with the stub validate requests and appear in the generated spec without any change to core code. (S-06 scope: appear in the spec.) |
 | AC-011 | Given any typed route with a request schema, When the spec is generated, Then that operation includes a `400` response that references the problem-details schema with media type `application/problem+json`. |
-| AC-015 | Given registered routes, When `GET` is called on the spec endpoint (default `/openapi.json`), Then the response is 200 JSON with `openapi` starting `3.1.` and passes validation by `@apidevtools/swagger-parser` (or an equivalent OpenAPI 3.1 validator). |
+| AC-015 | Given registered routes, When `GET` is called on the spec endpoint (default `/openapi.json`), Then the response is 200 JSON with `openapi` starting `3.1.` and passes validation by `@readme/openapi-parser` (or an equivalent OpenAPI 3.1 validator). |
 | AC-016 | Given a route `/users/:id` with params, query, body and response schemas, When the spec is generated, Then the path appears as `/users/{id}` with a `path` parameter `id` (required), query parameters, a `requestBody` and response schemas derived from the Zod schemas. |
 | AC-017 | Given bearer, apiKey and oauth2 security schemes declared once in the config, and a route that references one, When the spec is generated, Then `components.securitySchemes` contains all three and that operation's `security` lists the referenced scheme. |
 | AC-023 | Given plain routes registered without the typed helper or `describe()`, on Express 4 and on Express 5 (tested separately), including a nested router mounted with `app.use('/api', router)` that has `router.get('/users/:id')` and `router.post('/users/:id')`, When the spec is generated, Then auto-detection walks the router stack and the spec contains path `/api/users/{id}` with exactly one `get` and one `post` operation. Each has an `operationId`, a required `path` parameter `id` with schema `type: string`, a generic `200` response, and the tag `api`. (S-06 scope: spec half, ADR-32.) |
@@ -156,7 +156,7 @@ Five source files total (`build.ts`, `naming.ts`, `glob.ts`, `canonical.ts`, `ca
 
 ## Test plan
 
-Write these tests FIRST and capture the failing (red) run before any `src/spec/**` code. Every spec-producing test calls `await SwaggerParser.validate(structuredClone(spec))` and asserts it resolves (ADR-14). Unit tests feed `buildSpec` hand-built `DetectedOperation[]` plus an adapter; registry-backed cases use an object typed as `RouteRegistry` from `src/core/types.ts`. Integration cases import `majors` from `test/fixtures/majors.ts` (S-01; no local copies, ADR-39), `test/fixtures/apps.ts` and `test/fixtures/logger.ts` (S-05), and `test/fixtures/stub-adapter.ts` (S-03).
+Write these tests FIRST and capture the failing (red) run before any `src/spec/**` code. Every spec-producing test calls `await OpenApiParser.validate(structuredClone(spec))` and asserts it resolves (ADR-14). Unit tests feed `buildSpec` hand-built `DetectedOperation[]` plus an adapter; registry-backed cases use an object typed as `RouteRegistry` from `src/core/types.ts`. Integration cases import `majors` from `test/fixtures/majors.ts` (S-01; no local copies, ADR-39), `test/fixtures/apps.ts` and `test/fixtures/logger.ts` (S-05), and `test/fixtures/stub-adapter.ts` (S-03).
 
 Expected red: module-resolution errors (`Cannot find module '../../src/spec/build'` etc.) because `src/spec/` does not exist yet.
 
@@ -319,7 +319,7 @@ underlying cause was a local piping artifact, not a real stale sandbox.
 |---|---|---|
 | AC-005 | stub-adapter.test.ts: stub schema appears in requestBody | ✅ |
 | AC-011 | build.test.ts: auto-400 ProblemDetails $ref present with a request schema, absent without one | ✅ |
-| AC-015 | build.test.ts + ac023.test.ts: openapi `3.1.0`, swagger-parser validates every spec-producing test | ✅ |
+| AC-015 | build.test.ts + ac023.test.ts: openapi `3.1.0`, openapi-parser validates every spec-producing test | ✅ |
 | AC-016 | build.test.ts: `/users/{id}` path param, query param, requestBody, response schemas from adapter | ✅ |
 | AC-017 | build.test.ts: bearer/apiKey/oauth2 schemes present; op security references one | ✅ |
 | AC-023 | ac023.test.ts (both majors): `/api/users/{id}` get+post, operationId, path param, 200, tag `api` | ✅ |
@@ -376,11 +376,11 @@ Two CONFIRMED findings from QA (`qa/verdicts.md`), both owned by this story (`sr
 
 ### Defect 1 — F-01 (CRITICAL): dangling `$ref` for named/reused schemas
 
-`src/spec/build.ts:107-131` (`pathParameters`, `queryParameters`): when a schema's `toJSONSchema()` output includes a `$defs` bag (produced whenever a Zod schema carries `.meta({id})` — an ordinary, spec-sanctioned pattern for naming/reusing schemas), only `schema.properties[name]` is extracted and the sibling `$defs` bag is dropped, leaving a dangling, unresolvable `$ref`. Confirmed reachable through BOTH the opt-in `zodAdapter` and the DEFAULT `standardSchemaAdapter` (ADR-21's zero-config default) — this is not an opt-in-only defect. Reproduced end-to-end: `SwaggerParser.validate()` throws `Missing $ref pointer` on the generated `/openapi.json`, falsifying AC-015/AC-016.
+`src/spec/build.ts:107-131` (`pathParameters`, `queryParameters`): when a schema's `toJSONSchema()` output includes a `$defs` bag (produced whenever a Zod schema carries `.meta({id})` — an ordinary, spec-sanctioned pattern for naming/reusing schemas), only `schema.properties[name]` is extracted and the sibling `$defs` bag is dropped, leaving a dangling, unresolvable `$ref`. Confirmed reachable through BOTH the opt-in `zodAdapter` and the DEFAULT `standardSchemaAdapter` (ADR-21's zero-config default) — this is not an opt-in-only defect. Reproduced end-to-end: `OpenApiParser.validate()` throws `Missing $ref pointer` on the generated `/openapi.json`, falsifying AC-015/AC-016.
 
 **Fix requirement:** whenever `adapter.toJSONSchema(...)` returns a `$defs` bag alongside the extracted property schema, that `$defs` bag must be hoisted into `components.schemas` (with appropriate naming/collision handling, consistent with the existing `dedupe`/canonicalization logic) so the `$ref` resolves. This applies to `pathParameters` and `queryParameters` specifically — `requestBodyOf`/`responsesOf` already pass the whole adapter output through untouched and are NOT affected.
 
-**Required regression test:** a route with a `.meta({id})`-tagged Zod schema (or an equivalent Standard-Schema-compatible schema) used in `params`/`query`, spec generated, and the result validated with `@apidevtools/swagger-parser`'s `validate()` — must pass. Test both the default adapter path and the `./zod` subpath explicitly, since both were confirmed broken.
+**Required regression test:** a route with a `.meta({id})`-tagged Zod schema (or an equivalent Standard-Schema-compatible schema) used in `params`/`query`, spec generated, and the result validated with `@readme/openapi-parser`'s `validate()` — must pass. Test both the default adapter path and the `./zod` subpath explicitly, since both were confirmed broken.
 
 ### Defect 2 — F-02 (HIGH, widened scope): glob escaping shared-state bug, including a crash path
 
@@ -406,7 +406,7 @@ first for each.
 **Root cause:** `pathParameters`/`queryParameters` in `src/spec/build.ts` extracted only
 `schema.properties[name]` from `adapter.toJSONSchema(...)` output and silently dropped any
 sibling `$defs` bag (produced whenever a schema carries `.meta({id})`), leaving a dangling
-`#/$defs/...` `$ref` that `SwaggerParser.validate()` cannot resolve. Confirmed via both the
+`#/$defs/...` `$ref` that `OpenApiParser.validate()` cannot resolve. Confirmed via both the
 default `standardSchemaAdapter` and the opt-in `zodAdapter` subpath.
 
 **Fix:** added `hoistSchemaDefs()` + `rewriteDefsRefs()` in `src/spec/build.ts`. Both
@@ -430,7 +430,7 @@ $ npx vitest run test/spec/defs-hoist.test.ts test/spec/glob.test.ts
      AssertionError: expected undefined to be defined   (components.schemas.UserIdZod)
  Test Files  1 failed | (defs-hoist.test.ts)
 ```
-Matches the finding: no hoisted def, dangling `$ref`, `SwaggerParser.validate()` would throw
+Matches the finding: no hoisted def, dangling `$ref`, `OpenApiParser.validate()` would throw
 "Missing $ref pointer" (the test fails before even reaching the `validates()` assertion,
 which is the stronger/prior failure).
 
@@ -442,7 +442,7 @@ $ npx vitest run test/spec/defs-hoist.test.ts
 ```
 All three tests — default adapter + params, default adapter + query, opt-in `zodAdapter` +
 params — assert the def lands in `components.schemas`, no `#/$defs/` ref remains anywhere in
-the parameter schema, and `SwaggerParser.validate()` resolves.
+the parameter schema, and `OpenApiParser.validate()` resolves.
 
 ### F-02 (HIGH, widened): glob `escapeChar` shared-`lastIndex` bug — fixed
 

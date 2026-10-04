@@ -73,7 +73,7 @@ Context pack note: the repo was greenfield at snapshot time; excerpts below are 
 
 **Components (architecture.md):**
 
-> C8 | `docs/render.ts`, `docs/cdn.ts` | Scalar and Swagger UI HTML templates. `cdn.ts` holds the pinned version constants (`@scalar/api-reference@1.72.1`, `swagger-ui-dist@5.33.0` at probe time), and a test asserts the pins. The spec URL is JSON-encoded and HTML-escaped. `docs.specUrl` overrides the spec URL.
+> C8 | `docs/render.ts`, `docs/cdn.ts` | the docs UI HTML templates. `cdn.ts` holds the pinned version constants (`docs-ui-package@1.72.1`, `docs-ui-dist@5.33.0` at probe time), and a test asserts the pins. The spec URL is JSON-encoded and HTML-escaped. `docs.specUrl` overrides the spec URL.
 
 > C9 | ... The composition root. `createApiDocs(opts)` validates synchronously **before** building anything, then builds the Router (spec and docs GETs, gated by `serveSpec`/`serveDocs`), resolves the app through `req.app` on the first request, and wires the cache. `index.ts` starts with a bare `import './auto-record'`; `manual.ts` re-exports the same API without it. ... **[SUPERSEDED by ADR-41 → adds `ApiDocsSchemaError`; adapter wiring per ADR-38.]** `zodAdapter` is exported **only** from `./zod` (C2).
 
@@ -123,14 +123,14 @@ Gotchas:
   - S-07 scope: entry barrels, main entry does not export the Zod adapter, main entry loads without zod.
 - **AC-005** — Given a `SchemaAdapter` interface exported from the package, When a test implements it with a non-Zod stub adapter, Then routes defined with the stub validate requests and appear in the generated spec without any change to core code.
   - S-07 scope: `schemaAdapter` wiring in the composition root.
-- **AC-018** — Given the docs endpoint (default `/docs`) with no UI option, When it is requested, Then the HTML loads Scalar from a version-pinned CDN URL and points it at the spec endpoint.
-- **AC-019** — Given `ui: 'swagger-ui'`, When the docs endpoint is requested, Then the HTML loads Swagger UI from a version-pinned CDN URL. Given a custom CDN URL option, Then that URL is used instead.
+- **AC-018** — Given the docs endpoint (default `/docs`) with no UI option, When it is requested, Then the HTML loads docs UI from a version-pinned CDN URL and points it at the spec endpoint.
+- **AC-019** — Given `ui: 'docs-ui'`, When the docs endpoint is requested, Then the HTML loads docs UI from a version-pinned CDN URL. Given a custom CDN URL option, Then that URL is used instead.
 - **AC-020** — Given the published file list (`npm pack --dry-run`), When it is inspected, Then it contains no bundled UI JS/CSS assets.
   - S-07 scope: CDN only; no UI asset files in owned paths.
-- **AC-035** — Given an Express app set up with `createApiDocs()` and no options, plus one typed route, When the app is started, Then `GET /openapi.json` returns 200 with a valid OpenAPI 3.1 spec (as in AC-015), `GET /docs` returns 200 HTML loading Scalar, an invalid request to the typed route returns 400 problem+json, and responses are not validated.
+- **AC-035** — Given an Express app set up with `createApiDocs()` and no options, plus one typed route, When the app is started, Then `GET /openapi.json` returns 200 with a valid OpenAPI 3.1 spec (as in AC-015), `GET /docs` returns 200 HTML loading docs UI, an invalid request to the typed route returns 400 problem+json, and responses are not validated.
 - **AC-036** — Given the package exports, When `DEFAULT_OPTIONS` is imported, Then it is a deep-frozen object whose values deep-equal the resolved config of `createApiDocs()` with no options. It contains a default for every option listed in AC-037 to AC-042.
   - S-07 scope: resolved config equals `DEFAULT_OPTIONS` (including `schemaAdapter: null`).
-- **AC-037** — Given `specPath: '/spec.json'`, `docsPath: '/reference'`, `ui: 'swagger-ui'` and a custom `cdnUrl`, When the app is started, Then the spec is served at `/spec.json`, the docs at `/reference` using Swagger UI from the custom URL and pointing at `/spec.json`, and the default paths return 404.
+- **AC-037** — Given `specPath: '/spec.json'`, `docsPath: '/reference'`, `ui: 'docs-ui'` and a custom `cdnUrl`, When the app is started, Then the spec is served at `/spec.json`, the docs at `/reference` using docs UI from the custom URL and pointing at `/spec.json`, and the default paths return 404.
 - **AC-043** — Given `serveDocs: false`, When the app is started, Then the docs path returns 404 and the spec is still served. Given `serveSpec: false` and `serveDocs: false`, When the app is started, Then the spec path returns 404 and the spec is still available programmatically (e.g. `apiDocs.getSpec()`). Given `serveSpec: false`, `serveDocs: true` and no `docs.specUrl`, When setup runs, Then it throws `ApiDocsConfigError` synchronously, naming `serveSpec` and `docs.specUrl`. Given `serveSpec: false`, `serveDocs: true` and `docs.specUrl: 'https://example.com/openapi.json'`, When the docs path is requested, Then it returns 200 HTML pointing at that URL, and the spec path returns 404.
 - **AC-045** — Given `createApiDocs()` called with an unknown key (e.g. `specPth`) or an invalid value (e.g. `ui: 'redoc'`, `validateResponses: 'maybe'`, `specPath: 'no-slash'`), When setup runs, Then it throws synchronously, before mounting any route, an exported `ApiDocsConfigError` whose message contains the offending option path and the allowed values or type.
   - S-07 scope: synchronous throw before mount.
@@ -142,19 +142,19 @@ Gotchas:
 Write ALL tests FIRST and capture the red run before any `src/` change. Expected red reason: `src/docs/*`, `src/serve/*` do not exist and the stub entries export nothing (missing export / resolve failure). `test/entries/**` runs against the built `dist/` (S-01's suite-wide globalSetup builds it).
 
 1. `test/docs-ui/render.test.ts` (AC-018, AC-019, AC-020)
-   - `default ui is scalar with pinned url` — contains `@scalar/api-reference@1.72.1`; spec URL is `/openapi.json`.
-   - `swagger-ui loads with pin` — contains `swagger-ui-dist@5.33.0` JS and CSS.
+   - `default ui is single-value with pinned url` — contains `docs-ui-package@1.72.1`; spec URL is `/openapi.json`.
+   - `docs-ui loads with pin` — contains `docs-ui-dist@5.33.0` JS and CSS.
    - `custom cdnUrl is used` — contains the custom URL, not the default pin.
    - `spec url is escaped` — a specUrl with `</script>"'&<` is JSON-encoded and HTML-escaped (no raw `</script>`).
    - `pins match cdn.ts` — exported constants equal the pins.
 2. `test/serve/zero-config.test.ts` (AC-035, AC-036) — per entry of `majors`, supertest, Zod schemas via the injected default `standardSchemaAdapter`:
-   - `GET /openapi.json` → 200, `openapi` starts `3.1.`, passes `swagger-parser.validate()`.
-   - `GET /docs` → 200 `text/html` loading Scalar.
+   - `GET /openapi.json` → 200, `openapi` starts `3.1.`, passes `openapi-parser.validate()`.
+   - `GET /docs` → 200 `text/html` loading docs UI.
    - invalid request → 400 `application/problem+json`.
    - schema-violating response body → still 200.
    - resolved config deep-equals `DEFAULT_OPTIONS` (including `schemaAdapter === null`); `DEFAULT_OPTIONS` is deep-frozen.
 3. `test/serve/schema-adapter.test.ts` (AC-005, AC-047, ADR-38) — using `test/fixtures/stub-adapter.ts` (S-03):
-   - `options.schemaAdapter: stubAdapter` → invalid body 400, valid body reaches handler parsed; spec `requestBody` has the stub's converted schema, passes swagger-parser.
+   - `options.schemaAdapter: stubAdapter` → invalid body 400, valid body reaches handler parsed; spec `requestBody` has the stub's converted schema, passes openapi-parser.
    - no option → `standardSchemaAdapter` is used (Zod schema validates).
    - `meta.adapter` on one route overrides both the global option and the default (a second spy adapter proves which `validate`/`toJSONSchema` ran).
 4. `test/serve/paths.test.ts` (AC-037) — custom paths/ui/cdnUrl; docs point at `/spec.json`; `/openapi.json` and `/docs` → 404.
@@ -333,10 +333,10 @@ not passed off as a real regression.
 | AC-003 | ✅ | `test/entries/parity.test.ts` — ESM+CJS `.`/`./manual` exact export sets. |
 | AC-004 | ✅ | `test/entries/no-zod-load.test.ts`, `test/entries/zod-subpath.test.ts`, `test/entries/manual.test.ts`. `peerDependencies`/`exports` shape is S-01-owned and unedited by me; verified still passing via `test/dist/manifest.test.ts`. |
 | AC-005 | ✅ | `test/serve/schema-adapter.test.ts` — stub adapter validates and appears in the spec, no core code change. |
-| AC-018 | ✅ | `test/docs-ui/render.test.ts` "default ui is scalar with pinned url". |
-| AC-019 | ✅ | `test/docs-ui/render.test.ts` "swagger-ui loads with pin", "custom cdnUrl is used". |
+| AC-018 | ✅ | `test/docs-ui/render.test.ts` "default ui is single-value with pinned url". |
+| AC-019 | ✅ | `test/docs-ui/render.test.ts` "docs-ui loads with pin", "custom cdnUrl is used". |
 | AC-020 | ✅ | No UI package in `package.json` (unedited by me, still present per `test/dist/pack.test.ts`'s passing "no bundled UI assets" check); `src/docs/**` renders via CDN string constants only. |
-| AC-035 | ✅ | `test/serve/zero-config.test.ts` — 200 spec valid via swagger-parser, 200 docs html, 400 problem+json on bad request, 200 on schema-violating response. |
+| AC-035 | ✅ | `test/serve/zero-config.test.ts` — 200 spec valid via openapi-parser, 200 docs html, 400 problem+json on bad request, 200 on schema-violating response. |
 | AC-036 | ✅ | `test/serve/zero-config.test.ts` "resolved config deep-equals DEFAULT_OPTIONS...deep-frozen", including `schemaAdapter: null`. |
 | AC-037 | ✅ | `test/serve/paths.test.ts`. |
 | AC-043 | ✅ | `test/serve/toggles.test.ts` — all four cases including sync throw naming `serveSpec`/`docs.specUrl`, and `apiDocs.getSpec()` fallback. |

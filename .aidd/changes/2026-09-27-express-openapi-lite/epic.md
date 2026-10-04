@@ -194,7 +194,7 @@ S-01 keeps only the tests it can make green on its own scaffold with stub entrie
 | S-03 | medium | New Standard Schema path (ADR-21); `~standard.jsonSchema` conformance and the Zod floor `^4.2.0` (ADR-47) |
 | S-04 | medium | `res.json`/`send` delegation, exact-once error forwarding on both majors |
 | S-05 | **high** | R-1 and R-8: Express private internals; patches the `use` prototype at import; APM ordering; module identity across copies; gate G-S05 |
-| S-06 | medium | Byte determinism; dedupe; swagger-parser validity |
+| S-06 | medium | Byte determinism; dedupe; openapi-parser validity |
 | S-07 | medium-high | The three entries must re-export the same API; it owns the dual-package hazard tests (dual-load, bundle, parity, no-zod-load, recorder-install) and the perf gate |
 | S-08 | low | Documentation and parity tests |
 
@@ -334,9 +334,9 @@ Moved or added ACs:
   - `sniff.test.ts` covers ADR-27a.
   - `describe-meta.test.ts` covers ADR-44.
   - `test/describe/describe.test.ts` covers AC-022.
-- **S-06.** The existing tests stay: `build`, `canonical`, `cache` and `glob`, all checked with swagger-parser.
+- **S-06.** The existing tests stay: `build`, `canonical`, `cache` and `glob`, all checked with openapi-parser.
   - `test/spec/ac023.test.ts` asserts the whole AC-023 Then-clause on every entry of `majors`, including the tag `api` taken from the mounted path (ADR-32).
-  - `test/spec/stub-adapter.test.ts` checks that the stub's converted schema appears in `requestBody` and passes swagger-parser (ADR-38, AC-047).
+  - `test/spec/stub-adapter.test.ts` checks that the stub's converted schema appears in `requestBody` and passes openapi-parser (ADR-38, AC-047).
   - The builder reads registry entries only through the `RouteRegistry` interface from `core/types.ts`.
 - **S-07.** Every test here is written failing-first against the built `dist/` (the suite-wide globalSetup from S-01 builds it).
   - `test/docs-ui/render.test.ts` covers AC-018 and AC-019.

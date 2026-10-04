@@ -40,7 +40,7 @@ Conclusion: the ADR-50 mutation claim is genuine — the self-disclosed process 
 |---|---|---|
 | AC-005 | PROVEN | `stub-adapter.test.ts` line 19 test, re-run green; stub schema asserted in `requestBody` via `toEqual`. |
 | AC-011 | PROVEN | `build.test.ts` AC-011 test; `build.ts` `responsesOf` gates 400 on `source==='typed' && hasRequestSchema`, read directly. |
-| AC-015 | PROVEN | Every spec-producing test calls `SwaggerParser.validate`; re-run confirms all pass; `build.ts` sets `openapi: '3.1.0'`. |
+| AC-015 | PROVEN | Every spec-producing test calls `OpenApiParser.validate`; re-run confirms all pass; `build.ts` sets `openapi: '3.1.0'`. |
 | AC-016 | PROVEN | `build.test.ts` AC-016 test asserts path/param/query/requestBody/response shape via `toEqual` against adapter output; re-run green. |
 | AC-017 | PROVEN | `build.test.ts` AC-017 test asserts all three schemes present and op security reference. |
 | AC-023 | PROVEN | `ac023.test.ts` read in full: asserts exact path, get+post, operationId, path param shape, 200, and `tags === ['api']` (mounted-path tag per ADR-32), across `majors` (Express 4 and 5). |

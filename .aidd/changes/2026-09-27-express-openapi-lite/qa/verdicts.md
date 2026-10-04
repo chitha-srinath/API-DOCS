@@ -8,7 +8,7 @@ One Adversarial Verifier per CRITICAL/HIGH finding from `qa/findings.md` (4 find
 
 Traced `src/spec/build.ts`'s `pathParameters`/`queryParameters` (lines 107-131): both extract only `schema?.properties?.[name]` and drop any sibling `$defs`. Root cause confirmed at the adapter level: Zod v4's `z.toJSONSchema` and its Standard Schema `~standard.jsonSchema` implementation both lift `.meta({id})`-tagged subschemas into a `$defs` bag with a `$ref` in their place.
 
-**Critical addition:** the reviewer's finding characterized this as reachable via the opt-in `express-api-docs/zod` subpath. The verifier proved it is also reachable through the **default** `standardSchemaAdapter` path (ADR-21's zero-config default, `src/serve/router.ts:52`) — no opt-in required. End-to-end reproduction (built dist, real HTTP `GET /openapi.json`, `SwaggerParser.validate()`) failed identically for both `{ schemaAdapter: zodAdapter }` and `{}` (default):
+**Critical addition:** the reviewer's finding characterized this as reachable via the opt-in `express-api-docs/zod` subpath. The verifier proved it is also reachable through the **default** `standardSchemaAdapter` path (ADR-21's zero-config default, `src/serve/router.ts:52`) — no opt-in required. End-to-end reproduction (built dist, real HTTP `GET /openapi.json`, `OpenApiParser.validate()`) failed identically for both `{ schemaAdapter: zodAdapter }` and `{}` (default):
 ```
 VALIDATION FAILED: Missing $ref pointer "#/$defs/UserId". Token "$defs" does not exist.
 ```

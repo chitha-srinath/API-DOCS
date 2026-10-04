@@ -55,10 +55,10 @@ as the controlling evidence: 67/67 files green, no regressions attributable to S
 |---|---|---|
 | AC-001 | PROVEN | `parity.test.ts` (reproduced, passing) checks no owned file contains the old package name; `package.json` read directly confirms `name: express-api-docs`, `license: MIT` (S-01-owned, unedited, `test/dist/manifest.test.ts` reproduced green in the full-suite run). |
 | AC-003 | PROVEN | `test/entries/parity.test.ts` reproduced passing inside the 14-file/56-test scoped run; asserts exact ESM+CJS export-set equality for `.`/`./manual`. |
-| AC-018 | PROVEN | `test/docs-ui/render.test.ts` reproduced passing; "default ui is scalar with pinned url" case present and green. |
-| AC-019 | PROVEN | Same file, "swagger-ui loads with pin" and "custom cdnUrl is used" cases reproduced passing. |
+| AC-018 | PROVEN | `test/docs-ui/render.test.ts` reproduced passing; "default ui is single-value with pinned url" case present and green. |
+| AC-019 | PROVEN | Same file, "docs-ui loads with pin" and "custom cdnUrl is used" cases reproduced passing. |
 | AC-020 | PROVEN | `src/docs/render.ts`/`src/docs/cdn.ts` read: CDN-constant-only rendering, no bundled UI asset import; `test/dist/pack.test.ts` (S-01-owned, corrected, reproduced passing) still asserts no bundled UI JS/CSS in the pack list. |
-| AC-035 | PROVEN | `test/serve/zero-config.test.ts` reproduced passing (part of the 56/56); covers 200 spec (swagger-parser valid), 200 docs HTML, 400 problem+json, response-not-validated 200. |
+| AC-035 | PROVEN | `test/serve/zero-config.test.ts` reproduced passing (part of the 56/56); covers 200 spec (openapi-parser valid), 200 docs HTML, 400 problem+json, response-not-validated 200. |
 | AC-036 | PROVEN | Same file's "resolved config deep-equals DEFAULT_OPTIONS...deep-frozen" case reproduced passing, including `schemaAdapter: null`. |
 | AC-037 | PROVEN | `test/serve/paths.test.ts` reproduced passing — custom paths/ui/cdnUrl plus 404 on defaults. |
 | AC-043 | PROVEN | `test/serve/toggles.test.ts` reproduced passing — all four cases including the synchronous `ApiDocsConfigError` naming `serveSpec`/`docs.specUrl`, and `getSpec()` fallback. |

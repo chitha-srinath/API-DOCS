@@ -53,7 +53,7 @@
 | 010 | ST-004 global hook | Yes |
 | 011 | ST-004 t10 problem schema + ST-006 auto-400 | Yes |
 | 012–014 | ST-004 t3 + t4 send-delegation | Yes |
-| 015 | ST-006 build (swagger-parser) | Yes |
+| 015 | ST-006 build (openapi-parser) | Yes |
 | 016 | ST-006 typed `/users/:id` + ST-003 conversion | Yes |
 | 017 | ST-006 build | Yes |
 | 018–019 | ST-007 renderers | Yes |

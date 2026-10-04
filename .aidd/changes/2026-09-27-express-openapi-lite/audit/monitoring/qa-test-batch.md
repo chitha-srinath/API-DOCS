@@ -32,7 +32,7 @@ concealed.
    real executed assertion that would fail loudly (not silently pass) if `toRegExp` threw —
    the case genuinely exercises the crash path, it does not merely document intent.
 3. **api-contract TC-CONTRACT-019/020**: report explicitly ties both to F-01's exact
-   `SwaggerParser.validate()` failure signature (matches `qa/verdicts.md`'s F-01 reproduction
+   `OpenApiParser.validate()` failure signature (matches `qa/verdicts.md`'s F-01 reproduction
    string almost verbatim: dangling `$defs` `$ref`). TC-CONTRACT-020 additionally exercises
    the *default* adapter path with no override — this is a distinct code path from
    TC-CONTRACT-019's opt-in `zodAdapter`, so it is not a duplicate assertion dressed up as two

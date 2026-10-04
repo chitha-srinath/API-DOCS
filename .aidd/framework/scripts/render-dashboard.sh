@@ -48,8 +48,9 @@ def progress(change):
 template = os.path.join(here, '..', 'templates', 'dashboard.html')
 with open(template, encoding='utf-8') as fh:
     html = fh.read()
-html = html.replace('__AIDD_STATE_JSON__',
-                    json.dumps({'global': g, 'change': c, 'progress': progress(c)}))
+# "<" is escaped so state text such as "</script>" cannot close the inline script tag.
+payload = json.dumps({'global': g, 'change': c, 'progress': progress(c)}).replace('<', '\\u003c')
+html = html.replace('__AIDD_STATE_JSON__', payload)
 os.makedirs(os.path.dirname(out) or '.', exist_ok=True)
 with open(out, 'w', encoding='utf-8') as fh:
     fh.write(html)

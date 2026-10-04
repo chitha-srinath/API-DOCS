@@ -104,7 +104,7 @@
     },
     {
       "id": "AC-015",
-      "description": "Given registered routes, When `GET` is called on the spec endpoint (default `/openapi.json`), Then the response is 200 JSON with `openapi` starting `3.1.` and passes validation by `@apidevtools/swagger-parser` (or an equivalent OpenAPI 3.1 validator).",
+      "description": "Given registered routes, When `GET` is called on the spec endpoint (default `/openapi.json`), Then the response is 200 JSON with `openapi` starting `3.1.` and passes validation by `@readme/openapi-parser` (or an equivalent OpenAPI 3.1 validator).",
       "receipts": [
         "evidence/receipts/suite/receipt.json"
       ]
@@ -125,14 +125,14 @@
     },
     {
       "id": "AC-018",
-      "description": "Given the docs endpoint (default `/docs`) with no UI option, When it is requested, Then the HTML loads Scalar from a version-pinned CDN URL and points it at the spec endpoint.",
+      "description": "Given the docs endpoint (default `/docs`) with no UI option, When it is requested, Then the HTML loads docs UI from a version-pinned CDN URL and points it at the spec endpoint.",
       "receipts": [
         "evidence/receipts/suite/receipt.json"
       ]
     },
     {
       "id": "AC-019",
-      "description": "Given `ui: 'swagger-ui'`, When the docs endpoint is requested, Then the HTML loads Swagger UI from a version-pinned CDN URL. Given a custom CDN URL option, Then that URL is used instead.",
+      "description": "Given `ui: 'docs-ui'`, When the docs endpoint is requested, Then the HTML loads docs UI from a version-pinned CDN URL. Given a custom CDN URL option, Then that URL is used instead.",
       "receipts": [
         "evidence/receipts/suite/receipt.json"
       ]
@@ -244,7 +244,7 @@
     },
     {
       "id": "AC-035",
-      "description": "Given an Express app set up with `createApiDocs()` and no options, plus one typed route, When the app is started, Then `GET /openapi.json` returns 200 with a valid OpenAPI 3.1 spec (as in AC-015), `GET /docs` returns 200 HTML loading Scalar, an invalid request to the typed route returns 400 problem+json, and responses are not validated.",
+      "description": "Given an Express app set up with `createApiDocs()` and no options, plus one typed route, When the app is started, Then `GET /openapi.json` returns 200 with a valid OpenAPI 3.1 spec (as in AC-015), `GET /docs` returns 200 HTML loading docs UI, an invalid request to the typed route returns 400 problem+json, and responses are not validated.",
       "receipts": [
         "evidence/receipts/suite/receipt.json"
       ]
@@ -258,7 +258,7 @@
     },
     {
       "id": "AC-037",
-      "description": "Given `specPath: '/spec.json'`, `docsPath: '/reference'`, `ui: 'swagger-ui'` and a custom `cdnUrl`, When the app is started, Then the spec is served at `/spec.json`, the docs at `/reference` using Swagger UI from the custom URL and pointing at `/spec.json`, and the default paths return 404.",
+      "description": "Given `specPath: '/spec.json'`, `docsPath: '/reference'`, `ui: 'docs-ui'` and a custom `cdnUrl`, When the app is started, Then the spec is served at `/spec.json`, the docs at `/reference` using docs UI from the custom URL and pointing at `/spec.json`, and the default paths return 404.",
       "receipts": [
         "evidence/receipts/suite/receipt.json"
       ]

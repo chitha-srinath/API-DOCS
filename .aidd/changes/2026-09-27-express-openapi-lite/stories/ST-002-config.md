@@ -100,7 +100,7 @@ ST-007 owns the barrels (`src/index.ts`, `src/manual.ts`, `src/zod.ts`); do not 
 
 **Options that must have rows (names provisional per A-6, behavior binding):**
 `specPath` (default `/openapi.json`, must start with `/`), `docsPath` (default `/docs`, must start
-with `/`), `ui` (`'scalar'` default | `'swagger-ui'`), `cdnUrl`, `serveSpec` (default true),
+with `/`), `ui` (`'single-value'` default | `'docs-ui'`), `cdnUrl`, `serveSpec` (default true),
 `serveDocs` (default true), `docs.specUrl`, `openapi.info` (title, version, description),
 `openapi.servers`, `openapi.tags`, `securitySchemes`, `security`, `validateRequests` (default true,
 A-7), `validateResponses` (unset/false | `'warn'` | `'error'`), `onValidationError`, `autoDetect`
@@ -132,7 +132,7 @@ Epic S-02 obligations: the existing `validate`, `merge`, `defaults`, `options.te
 
 1. `test/config/validate.test.ts`
    - `rejects unknown key specPth` → `ApiDocsConfigError`; message contains `specPth`.
-   - `rejects ui 'redoc'` → message contains `ui`, `scalar`, `swagger-ui`.
+   - `rejects ui 'redoc'` → message contains `ui`, `single-value`, `docs-ui`.
    - `rejects validateResponses 'maybe'` → message contains `validateResponses`, `warn`, `error`.
    - `rejects specPath 'no-slash'` → message contains `specPath` and "starts with `/`".
    - `rejects nested unknown key` (`openapi.infoo`) → message contains the dotted path.
@@ -149,7 +149,7 @@ Epic S-02 obligations: the existing `validate`, `merge`, `defaults`, `options.te
 3. `test/config/defaults.test.ts`
    - `DEFAULT_OPTIONS is deep-frozen` (recursive `Object.isFrozen`).
    - `has a row for every option` (explicit list of paths incl. `schemaAdapter` present in `OPTION_SPEC`).
-   - `defaults: specPath '/openapi.json', docsPath '/docs', ui 'scalar', validateRequests true, validateResponses off, autoDetect on, serveSpec/serveDocs true`.
+   - `defaults: specPath '/openapi.json', docsPath '/docs', ui 'single-value', validateRequests true, validateResponses off, autoDetect on, serveSpec/serveDocs true`.
    - `DEFAULT_OPTIONS.schemaAdapter === null` (ADR-38, AC-047).
    - `DEFAULT_OPTIONS passes validateOptions()`.
 4. `test/config/errors.test.ts` (ADR-49; supersedes the ADR-42 `this.name` brand)

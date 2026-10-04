@@ -122,7 +122,7 @@ Read the actual outcome from ST-005's Builder Report and the test before writing
 
 **Other documented limitations:** R-6 (response validation covers only `res.json` and `res.send(object)`; raw strings and streams are not validated). R-7 (`unrepresentable: 'any'` emits `{}` for transforms and custom types; docs are lossy by design).
 
-**Zero-config defaults (AC-035):** `GET /openapi.json`, `GET /docs` Scalar UI, invalid typed request → 400 problem+json, responses not validated by default; Swagger UI via `ui: 'swagger-ui'`; `cdnUrl` override; `autoDetect` (default on) with `autoDetect: false` opt-out and `exclude` globs.
+**Zero-config defaults (AC-035):** `GET /openapi.json`, `GET /docs` docs UI UI, invalid typed request → 400 problem+json, responses not validated by default; docs UI via `ui: 'docs-ui'`; `cdnUrl` override; `autoDetect` (default on) with `autoDetect: false` opt-out and `exclude` globs.
 
 The example in `examples/basic` must import `express-api-docs` before creating/mounting routers.
 
@@ -160,7 +160,7 @@ Write these FIRST; run `npm test` and capture the red output before writing docs
    - README/CHANGELOG/examples do not contain the old working name (build the needle from parts so this file does not itself contain it).
    - Red: missing files.
 3. `test/docs/example-smoke.test.ts`
-   - Import `createApp()` from `examples/basic/app.ts` (`server.ts` only calls `listen`); `supertest(app).get('/openapi.json')` → 200, `openapi` starts with `3.1.`, `@apidevtools/swagger-parser` `validate()` passes.
+   - Import `createApp()` from `examples/basic/app.ts` (`server.ts` only calls `listen`); `supertest(app).get('/openapi.json')` → 200, `openapi` starts with `3.1.`, `@readme/openapi-parser` `validate()` passes.
    - Assert the example's source imports `express-api-docs` (or local build) before any `Router()`/`use(` call.
    - Red: module-not-found.
 
@@ -308,7 +308,7 @@ development, e.g. the `createApiDocs`/`route`/`describe` call shapes.)
     and Node 22, verified by `test/docs/readme-sections.test.ts`'s CHANGELOG block.
   - `examples/basic` is a runnable example (`app.ts` + `server.ts`); `test/docs/example-smoke.test.ts` starts
     it via `createApp()` and asserts `GET /openapi.json` → 200, `openapi` starts with `3.1.`, and
-    `@apidevtools/swagger-parser`'s `validate()` accepts the document — all green.
+    `@readme/openapi-parser`'s `validate()` accepts the document — all green.
 
 ### Full suite (ADR-29 gate, this is the last wave)
 
@@ -348,7 +348,7 @@ stage.) No file outside `README.md`, `CHANGELOG.md`, `examples/**`, `test/docs/*
 
 ### Requests to other stories' owners
 
-None required. No `package.json` script/devDependency addition was needed: `@apidevtools/swagger-parser` and
+None required. No `package.json` script/devDependency addition was needed: `@readme/openapi-parser` and
 `supertest` (used by `test/docs/example-smoke.test.ts`) are already present in `devDependencies`
 (S-01-owned `package.json`), and `examples/basic` imports the package under its own published name
 (`express-api-docs`), resolved via the package's own `exports` self-reference against the `dist/` the test

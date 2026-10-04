@@ -124,11 +124,11 @@
   "components": [
     {
       "type": "library",
-      "name": "swagger-parser",
+      "name": "openapi-parser",
       "group": "@apidevtools",
       "version": "13.1.0",
-      "bom-ref": "express-api-docs@0.1.0|@apidevtools/swagger-parser@13.1.0",
-      "description": "Swagger 2.0 and OpenAPI 3.0 parser and validator for Node and browsers",
+      "bom-ref": "express-api-docs@0.1.0|@readme/openapi-parser@13.1.0",
+      "description": "OpenAPI 2.0 and OpenAPI 3.0 parser and validator for Node and browsers",
       "licenses": [
         {
           "license": {
@@ -137,25 +137,25 @@
           }
         }
       ],
-      "purl": "pkg:npm/%40apidevtools/swagger-parser@13.1.0",
+      "purl": "pkg:npm/%40apidevtools/openapi-parser@13.1.0",
       "externalReferences": [
         {
-          "url": "git+https://github.com/APIDevTools/swagger-parser.git",
+          "url": "git+https://github.com/readme/openapi-parser.git",
           "type": "vcs",
           "comment": "as detected from PackageJson property \"repository.url\""
         },
         {
-          "url": "https://apidevtools.com/swagger-parser/",
+          "url": "https://apidevtools.com/openapi-parser/",
           "type": "website",
           "comment": "as detected from PackageJson property \"homepage\""
         },
         {
-          "url": "https://github.com/APIDevTools/swagger-parser/issues",
+          "url": "https://github.com/readme/openapi-parser/issues",
           "type": "issue-tracker",
           "comment": "as detected from PackageJson property \"bugs.url\""
         },
         {
-          "url": "https://registry.npmjs.org/@apidevtools/swagger-parser/-/swagger-parser-13.1.0.tgz",
+          "url": "https://registry.npmjs.org/@readme/openapi-parser/-/openapi-parser-13.1.0.tgz",
           "type": "distribution",
           "hashes": [
             {
@@ -177,7 +177,7 @@
         },
         {
           "name": "cdx:npm:package:path",
-          "value": "node_modules/@apidevtools/swagger-parser"
+          "value": "node_modules/@readme/openapi-parser"
         }
       ]
     },
@@ -3029,12 +3029,12 @@
     },
     {
       "type": "library",
-      "name": "swagger-methods",
+      "name": "openapi-methods",
       "group": "@apidevtools",
       "version": "3.0.2",
-      "bom-ref": "express-api-docs@0.1.0|@apidevtools/swagger-methods@3.0.2",
+      "bom-ref": "express-api-docs@0.1.0|@apidevtools/openapi-methods@3.0.2",
       "author": "James Messinger",
-      "description": "HTTP methods that are supported by Swagger 2.0",
+      "description": "HTTP methods that are supported by OpenAPI 2.0",
       "licenses": [
         {
           "license": {
@@ -3043,25 +3043,25 @@
           }
         }
       ],
-      "purl": "pkg:npm/%40apidevtools/swagger-methods@3.0.2",
+      "purl": "pkg:npm/%40apidevtools/openapi-methods@3.0.2",
       "externalReferences": [
         {
-          "url": "git+https://github.com/APIDevTools/swagger-methods.git",
+          "url": "git+https://github.com/APIDevTools/openapi-methods.git",
           "type": "vcs",
           "comment": "as detected from PackageJson property \"repository.url\""
         },
         {
-          "url": "https://github.com/APIDevTools/swagger-methods",
+          "url": "https://github.com/APIDevTools/openapi-methods",
           "type": "website",
           "comment": "as detected from PackageJson property \"homepage\""
         },
         {
-          "url": "https://github.com/APIDevTools/swagger-methods/issues",
+          "url": "https://github.com/APIDevTools/openapi-methods/issues",
           "type": "issue-tracker",
           "comment": "as detected from PackageJson property \"bugs.url\""
         },
         {
-          "url": "https://registry.npmjs.org/@apidevtools/swagger-methods/-/swagger-methods-3.0.2.tgz",
+          "url": "https://registry.npmjs.org/@apidevtools/openapi-methods/-/openapi-methods-3.0.2.tgz",
           "type": "distribution",
           "hashes": [
             {
@@ -3079,7 +3079,7 @@
         },
         {
           "name": "cdx:npm:package:path",
-          "value": "node_modules/@apidevtools/swagger-methods"
+          "value": "node_modules/@apidevtools/openapi-methods"
         }
       ]
     },
@@ -34110,7 +34110,7 @@
     {
       "ref": "express-api-docs@0.1.0",
       "dependsOn": [
-        "express-api-docs@0.1.0|@apidevtools/swagger-parser@13.1.0",
+        "express-api-docs@0.1.0|@readme/openapi-parser@13.1.0",
         "express-api-docs@0.1.0|@arethetypeswrong/cli@0.18.5",
         "express-api-docs@0.1.0|@stryker-mutator/core@10.0.0",
         "express-api-docs@0.1.0|@types/express@5.0.6",
@@ -34134,11 +34134,11 @@
       ]
     },
     {
-      "ref": "express-api-docs@0.1.0|@apidevtools/swagger-parser@13.1.0",
+      "ref": "express-api-docs@0.1.0|@readme/openapi-parser@13.1.0",
       "dependsOn": [
         "express-api-docs@0.1.0|@apidevtools/json-schema-ref-parser@16.0.3",
         "express-api-docs@0.1.0|@apidevtools/openapi-schemas@2.1.0",
-        "express-api-docs@0.1.0|@apidevtools/swagger-methods@3.0.2",
+        "express-api-docs@0.1.0|@apidevtools/openapi-methods@3.0.2",
         "express-api-docs@0.1.0|@types/json-schema@7.0.15",
         "express-api-docs@0.1.0|ajv-draft-04@1.0.0",
         "express-api-docs@0.1.0|ajv@8.20.0",
@@ -34630,7 +34630,7 @@
       "ref": "express-api-docs@0.1.0|@apidevtools/openapi-schemas@2.1.0"
     },
     {
-      "ref": "express-api-docs@0.1.0|@apidevtools/swagger-methods@3.0.2"
+      "ref": "express-api-docs@0.1.0|@apidevtools/openapi-methods@3.0.2"
     },
     {
       "ref": "express-api-docs@0.1.0|@types/json-schema@7.0.15"

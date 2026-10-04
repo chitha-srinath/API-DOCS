@@ -6,6 +6,8 @@
 // the app's own routes exist.
 import { createApiDocs } from 'express-api-docs';
 
+import { STATUS_CODES } from 'node:http';
+
 import express from 'express';
 import { z } from 'zod';
 
@@ -41,6 +43,118 @@ export function createApp() {
     ),
   );
 
+
+  // Dummy endpoints that always fail with 500, so the docs UI can show documented error responses.
+  const problemBody = {
+    'application/problem+json': {
+      schema: {
+        type: 'object',
+        required: ['type', 'title', 'status', 'detail'],
+        properties: {
+          type: { type: 'string', example: 'about:blank' },
+          title: { type: 'string', example: 'Internal Server Error' },
+          status: { type: 'integer', example: 500 },
+          detail: { type: 'string', example: 'simulated failure' },
+        },
+      },
+    },
+  };
+  const serverError = { 500: { description: 'Internal Server Error (simulated)', content: problemBody } };
+
+  // File upload: raw body, Content-Type is the file type. `?fail=1` simulates a storage outage.
+  const uploadTypes = ['image/png', 'application/pdf', 'text/plain'];
+  const uploadLimit = '1mb';
+  app.post(
+    '/uploads',
+    apiDocs.describe('post', '/uploads', {
+      summary: 'Upload a file (raw body, Content-Type is the file type)',
+      tags: ['uploads'],
+      responses: {
+        201: {
+          description: 'File stored',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['id', 'name', 'size', 'type'],
+                properties: {
+                  id: { type: 'string', example: 'file_1' },
+                  name: { type: 'string', example: 'report.pdf' },
+                  size: { type: 'integer', example: 2048 },
+                  type: { type: 'string', example: 'application/pdf' },
+                },
+              },
+            },
+          },
+        },
+        400: { description: 'Empty upload', content: problemBody },
+        413: { description: 'File larger than 1 MB', content: problemBody },
+        415: { description: 'Unsupported file type', content: problemBody },
+        500: { description: 'Storage failed (simulated with ?fail=1)', content: problemBody },
+      },
+    }),
+    express.raw({ type: () => true, limit: uploadLimit }),
+    (req, res) => {
+      if (req.query.fail === '1') {
+        res.status(500).json({ type: 'about:blank', title: 'Internal Server Error', status: 500, detail: 'Storage unavailable (simulated)' });
+        return;
+      }
+      const body = req.body as Buffer;
+      const type = (req.headers['content-type'] ?? '').split(';')[0].trim();
+      if (!Buffer.isBuffer(body) || body.length === 0) {
+        res.status(400).json({ type: 'about:blank', title: 'Bad Request', status: 400, detail: 'Empty upload' });
+        return;
+      }
+      if (!uploadTypes.includes(type)) {
+        res.status(415).json({ type: 'about:blank', title: 'Unsupported Media Type', status: 415, detail: `${type || 'no type'} is not allowed` });
+        return;
+      }
+      res.status(201).json({ id: `file_${Date.now()}`, name: String(req.headers['x-file-name'] ?? 'upload'), size: body.length, type });
+    },
+  );
+
+  // Protected endpoint: needs `Authorization: Bearer demo-token`, or it answers 401.
+  const unauthorized = {
+    401: { description: 'Missing or invalid bearer token', content: problemBody },
+  };
+  app.get(
+    '/secure/whoami',
+    apiDocs.describe('get', '/secure/whoami', { summary: 'Who am I (bearer token required)', responses: unauthorized }),
+    (req, res) => {
+      if (req.headers.authorization !== 'Bearer demo-token') {
+        res.status(401).json({ type: 'about:blank', title: 'Unauthorized', status: 401, detail: 'Missing or invalid bearer token' });
+        return;
+      }
+      res.json({ user: 'demo', scheme: 'bearer' });
+    },
+  );
+  app.get(
+    '/widgets/crash',
+    apiDocs.describe('get', '/widgets/crash', { summary: 'Simulate a server error', responses: serverError }),
+    () => {
+      throw new Error('simulated failure');
+    },
+  );
+  app.get(
+    '/widgets/timeout',
+    apiDocs.describe('get', '/widgets/timeout', { summary: 'Simulate a failed upstream call', responses: serverError }),
+    () => {
+      throw new Error('simulated upstream timeout');
+    },
+  );
+
+  // 1000 dummy endpoints, each documented with a 500 and failing on call, to exercise the docs UI at scale.
+  for (let i = 1; i <= 1000; i++) {
+    const dummyPath = `/dummy/${String(i).padStart(4, '0')}`;
+    app.get(
+      dummyPath,
+      apiDocs.describe('get', dummyPath, { summary: `Dummy endpoint ${i}`, tags: ['dummy'], responses: serverError }),
+      () => {
+        throw new Error(`dummy endpoint ${i} failed`);
+      },
+    );
+  }
+
   // A plain Express route with no typed helper and no describe() call, to
   // demonstrate zero-config route auto-detection (ADR-?): the recorder picks
   // this up on its own because express-api-docs was imported before any
@@ -50,6 +164,13 @@ export function createApp() {
   });
 
   app.use(apiDocs.router);
+
+  // Express error handler: any uncaught error becomes a JSON 500 instead of an HTML stack trace.
+  app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    // Errors thrown by middleware (e.g. body-parser's 413) carry their own status.
+    const status = (err as { status?: number }).status ?? 500;
+    res.status(status).json({ type: 'about:blank', title: STATUS_CODES[status] ?? 'Error', status, detail: err instanceof Error ? err.message : 'Unknown error' });
+  });
 
   return app;
 }

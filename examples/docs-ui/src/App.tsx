@@ -81,6 +81,9 @@ function flatten(spec: Spec): SpecOperation[] {
   );
 }
 
+/** How often the page re-reads /openapi.json to pick up API changes. */
+const SPEC_POLL_MS = 2000;
+
 type AuthMode = 'none' | 'bearer' | 'apikey';
 
 /** Credentials typed into the page. Kept in memory only, never written to localStorage. */
@@ -672,14 +675,32 @@ export function App() {
   const [query, setQuery] = useState('');
   const [auth, setAuth] = useState<Auth>(NO_AUTH);
 
+  // Re-read the spec on an interval so a route change in the API shows up without a page reload.
+  const specText = useRef('');
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   useEffect(() => {
-    fetch('/openapi.json')
-      .then((r) => {
+    let cancelled = false;
+    async function loadSpec() {
+      try {
+        const r = await fetch('/openapi.json', { cache: 'no-store' });
         if (!r.ok) throw new Error(`Spec request failed: ${r.status}`);
-        return r.json() as Promise<Spec>;
-      })
-      .then(setSpec)
-      .catch((e: Error) => setError(e.message));
+        const text = await r.text();
+        if (cancelled) return;
+        setError(null);
+        if (text === specText.current) return;
+        specText.current = text;
+        setSpec(JSON.parse(text) as Spec);
+        setUpdatedAt(new Date().toLocaleTimeString());
+      } catch (e) {
+        if (!cancelled) setError((e as Error).message);
+      }
+    }
+    void loadSpec();
+    const timer = setInterval(loadSpec, SPEC_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
   }, []);
 
   const ops = useMemo(() => (spec ? flatten(spec) : []), [spec]);
@@ -720,6 +741,9 @@ export function App() {
             <>
               <Badge variant="secondary">v{spec.info.version}</Badge>
               <Badge variant="outline">OpenAPI {spec.openapi}</Badge>
+              <span className="text-xs text-muted-foreground" title={`Re-reads the spec every ${SPEC_POLL_MS / 1000}s`}>
+                {updatedAt ? `Updated ${updatedAt}` : 'Live'}
+              </span>
             </>
           )}
           <Button
@@ -859,7 +883,8 @@ export function App() {
                     <UploadPanel auth={auth} />
                   ) : (
                     <TryIt
-                      key={`${current.method} ${current.path}`}
+                      // Keyed on this operation's parameters and body, so the form resets only when its schema changes.
+                      key={`${current.method} ${current.path} ${JSON.stringify([current.parameters, current.requestBody])}`}
                       op={current}
                       auth={auth}
                       components={spec.components}

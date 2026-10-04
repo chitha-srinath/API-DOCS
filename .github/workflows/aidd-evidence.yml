@@ -22,18 +22,20 @@ jobs:
       - run: npm ci
       - name: Capture suite receipt
         run: |
+          CHANGE=$(ls -d .aidd/changes/20*/ | head -n 1)
           python3 .aidd/framework/scripts/aidd-evidence.py capture --host \
-            --out .aidd/changes/2026-09-27-express-openapi-lite/evidence/receipts/suite \
+            --out "${CHANGE}evidence/receipts/suite" \
             --timeout 900 --max-output-bytes 4194304 -- npm test
       - name: Verify suite receipt
         run: |
+          CHANGE=$(ls -d .aidd/changes/20*/ | head -n 1)
           python3 .aidd/framework/scripts/aidd-evidence.py check \
-            .aidd/changes/2026-09-27-express-openapi-lite/evidence/receipts/suite/receipt.json
+            "${CHANGE}evidence/receipts/suite/receipt.json"
       - name: Commit receipt back to branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .aidd/changes/2026-09-27-express-openapi-lite/evidence/receipts
+          git add .aidd/changes/20*/evidence/receipts
           git diff --cached --quiet && exit 0
           git commit -m "chore(aidd): capture suite receipt on CI"
           git push origin HEAD:${{ github.ref_name }}

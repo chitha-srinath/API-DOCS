@@ -6,3 +6,4 @@ node_modules
 .aidd
 package-lock.json
 *.md
+src/serve/docs-ui.generated.ts

@@ -88,6 +88,13 @@ function flatten(spec: Spec): SpecOperation[] {
 /** How often the page re-reads /openapi.json to pick up API changes. */
 const SPEC_POLL_MS = 2000;
 
+// The server injects the configured spec path as window.__API_DOCS__ (see src/serve/docs-page.ts).
+// Falls back to /openapi.json when the page is opened without that injection, e.g. under Vite dev.
+function specUrl(): string {
+  const injected = (window as unknown as { __API_DOCS__?: { specPath?: string } }).__API_DOCS__;
+  return injected?.specPath ?? '/openapi.json';
+}
+
 type AuthMode = 'none' | 'bearer' | 'apikey';
 
 /** Credentials typed into the page. Kept in memory only, never written to localStorage. */
@@ -729,7 +736,7 @@ export function App() {
     let cancelled = false;
     async function loadSpec() {
       try {
-        const r = await fetch('/openapi.json', { cache: 'no-store' });
+        const r = await fetch(specUrl(), { cache: 'no-store' });
         if (!r.ok) throw new Error(`Spec request failed: ${r.status}`);
         const text = await r.text();
         if (cancelled) return;

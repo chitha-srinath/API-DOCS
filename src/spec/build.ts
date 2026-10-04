@@ -97,7 +97,8 @@ function applyAutoDetectFilter(ops: SpecOperation[], config: ApiDocsOptions): Sp
 function selfExcludePaths(ops: SpecOperation[], config: ApiDocsOptions): SpecOperation[] {
   const specPath = config.specPath ?? (DEFAULT_OPTIONS.specPath as string);
   const docsPath = config.docsPath ?? (DEFAULT_OPTIONS.docsPath as string);
-  return ops.filter((op) => op.path !== specPath && op.path !== docsPath);
+  const docsAssetsPrefix = `${docsPath.replace(/\/$/, '')}/assets/`;
+  return ops.filter((op) => op.path !== specPath && op.path !== docsPath && !op.path.startsWith(docsAssetsPrefix));
 }
 
 interface JsonObjectSchema {

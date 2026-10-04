@@ -63,6 +63,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "build:docs-ui": "node scripts/build-docs-ui.mjs",
     "test": "vitest run --coverage --typecheck",
     "test:v4": "vitest run --coverage && npm run typecheck:v4",
     "typecheck:v4": "tsc --noEmit -p tsconfig.v4.json && vitest run --config vitest.typecheck.v4.config.ts",

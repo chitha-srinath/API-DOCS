@@ -71,17 +71,20 @@ See `examples/basic` for a complete, runnable version of this example.
 ## Rendered docs UI
 
 Once `app.use(apiDocs.router)` is mounted, the API docs UI is served on the same
-Express port at `/docs` (Swagger UI, loading the spec from `/openapi.json`). No
-extra setup is needed.
+Express port at `/docs`. It is a shadcn/React app that loads the spec from
+`/openapi.json` and can call your endpoints from the page. No extra setup is
+needed.
 
 - Change the path with `createApiDocs({ docsPath: '/api-docs' })`. It must start
   with `/`.
 - Turn the UI off with `createApiDocs({ serveDocs: false })`. The spec at
   `/openapi.json` is still served.
-- The page is fixed: the only value that goes into it is the spec path, so
-  configuration cannot inject markup.
-- The page loads Swagger UI assets from unpkg.com, so the browser needs network
-  access to that CDN.
+- The UI is bundled into the package at build time, so it works offline and
+  needs no CDN.
+- The only configuration value that reaches the page is the spec path, which is
+  JSON-encoded, so configuration cannot inject markup.
+- To change the UI, edit `examples/docs-ui`, then run `npm run build:docs-ui`
+  and commit `src/serve/docs-ui.generated.ts`.
 
 ## SchemaAdapter
 

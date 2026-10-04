@@ -23,7 +23,7 @@ import { createRoute } from '../route/typed.js';
 import type { OpenApiDocument, SpecOperation } from '../spec/build.js';
 import { buildSpec, specOperationsFromRegistry } from '../spec/build.js';
 import { createSpecCache } from '../spec/cache.js';
-import { renderDocsPage } from './docs-page.js';
+import { getDocsAsset, renderDocsPage } from './docs-page.js';
 
 export interface GetSpecContext {
   readonly app?: unknown;
@@ -92,11 +92,19 @@ export function createApiDocs(rawOptions?: unknown): ApiDocsInstance {
   }
 
   // The rendered UI is a fixed page that loads the spec from `specPath` on the same origin.
-  // Only the path is configurable (`docsPath`); the page itself has no user-supplied markup.
+  // Only the paths are configurable; the page itself has no user-supplied markup.
   if (options.serveDocs) {
-    const html = renderDocsPage(specPath);
+    const html = renderDocsPage(docsPath, specPath);
     router.get(docsPath, (_req: Request, res: Response) => {
       res.type('html').send(html);
+    });
+    router.get(`${docsPath.replace(/\/$/, '')}/assets/:file`, (req: Request, res: Response) => {
+      const asset = getDocsAsset(docsPath, String(req.params.file));
+      if (!asset) {
+        res.status(404).end();
+        return;
+      }
+      res.type(asset.type).send(asset.body);
     });
   }
 

@@ -27,6 +27,8 @@ interface ExtendedMeta extends OperationMeta {
   query?: unknown;
   body?: unknown;
   response?: unknown;
+  /** Extra documented responses, keyed by status code, e.g. `{ 500: { description: 'Server error' } }`. */
+  responses?: Record<string, { description: string; content?: Record<string, unknown> }>;
   adapter?: SchemaAdapter<unknown>;
   security?: Array<Record<string, string[]>>;
   operationId?: string;
@@ -284,6 +286,13 @@ function responsesOf(
       description: 'Bad Request',
       content: { [PROBLEM_CONTENT_TYPE]: { schema: { $ref: PROBLEM_REF } } },
     };
+  }
+
+  // User-declared responses (e.g. error statuses) pass through with an optional raw `content` map.
+  for (const [status, declared] of Object.entries(meta.responses ?? {})) {
+    responses[status] = declared.content
+      ? { description: declared.description, content: declared.content }
+      : { description: declared.description };
   }
 
   return responses;

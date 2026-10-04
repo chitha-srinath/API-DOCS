@@ -30,15 +30,30 @@ function encodeSpecUrlScript(specUrl: string): string {
   return JSON.stringify(specUrl).replace(/</g, '\\u003c');
 }
 
+/** Scalar options: a clean default theme, dark mode following the OS, and the modern layout. */
+const SCALAR_CONFIGURATION = JSON.stringify({
+  theme: 'default',
+  layout: 'modern',
+  darkMode: true,
+  hideClientButton: true,
+});
+
 function renderScalarHtml(specUrl: string, cdnUrl: string | undefined): string {
   const scriptUrl = escapeHtml(cdnUrl ?? SCALAR_CDN_URL);
   const encodedUrl = encodeSpecUrlAttr(specUrl);
+  // Single-quoted attribute, so the JSON's double quotes stay readable.
+  const configuration = SCALAR_CONFIGURATION.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/'/g, '&#39;');
   return [
     '<!doctype html>',
-    '<html>',
-    '<head><meta charset="utf-8"><title>API Docs</title></head>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1">',
+    '<title>API Docs</title>',
+    '<style>html,body{margin:0;background:#0f0f10;}</style>',
+    '</head>',
     '<body>',
-    `<script id="api-reference" data-url="${encodedUrl}"></script>`,
+    `<script id="api-reference" data-url="${encodedUrl}" data-configuration='${configuration}'></script>`,
     `<script src="${scriptUrl}"></script>`,
     '</body>',
     '</html>',

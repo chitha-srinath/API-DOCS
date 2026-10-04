@@ -1,0 +1,39 @@
+{
+  "argv": [
+    "npm",
+    "test"
+  ],
+  "cwd": ".",
+  "duration_seconds": 12.102008,
+  "error": null,
+  "execution": "host",
+  "exit_code": 0,
+  "finished_at": "2026-10-04T16:25:14Z",
+  "limits": {
+    "output_bytes": 4194304,
+    "timeout_seconds": 900.0
+  },
+  "output": {
+    "bytes": 15901,
+    "path": "output.log",
+    "sha256": "8ef115106563eb58462348f104d7aadf105d93496459fad106939f733e38af72"
+  },
+  "runtime": {
+    "git": "git version 2.55.0",
+    "platform": "Linux",
+    "python": "3.12.3"
+  },
+  "schema": 1,
+  "source_after": {
+    "file_count": 163,
+    "scope": "git-tracked-and-unignored-v1-excluding-root-aidd",
+    "sha256": "ea2cb76c128949254a1ee8e18bd6f46472817ecbe3844ce8f4ab075a5f0ef57f"
+  },
+  "source_before": {
+    "file_count": 163,
+    "scope": "git-tracked-and-unignored-v1-excluding-root-aidd",
+    "sha256": "ea2cb76c128949254a1ee8e18bd6f46472817ecbe3844ce8f4ab075a5f0ef57f"
+  },
+  "started_at": "2026-10-04T16:25:02Z",
+  "status": "completed"
+}

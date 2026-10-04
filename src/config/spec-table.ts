@@ -35,6 +35,20 @@ export const OPTION_SPEC = {
     allowed: 'a boolean',
     description: 'whether the spec endpoint is mounted',
   },
+  docsPath: {
+    path: 'docsPath',
+    default: '/docs',
+    check: (v: unknown) => typeof v === 'string' && v.startsWith('/'),
+    allowed: 'a string that starts with "/"',
+    description: 'the path the rendered API docs UI is served from',
+  },
+  serveDocs: {
+    path: 'serveDocs',
+    default: true,
+    check: (v: unknown) => typeof v === 'boolean',
+    allowed: 'a boolean',
+    description: 'whether the rendered API docs UI is mounted',
+  },
   'openapi.info': {
     path: 'openapi.info',
     default: undefined,

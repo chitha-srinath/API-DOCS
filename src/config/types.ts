@@ -61,6 +61,8 @@ export type OnValidationError = (error: unknown) => { status: number; body: unkn
 export interface ApiDocsOptions {
   specPath?: string;
   serveSpec?: boolean;
+  docsPath?: string;
+  serveDocs?: boolean;
   openapi?: OpenApiOptions;
   securitySchemes?: Record<string, unknown>;
   security?: SecurityRequirement[];

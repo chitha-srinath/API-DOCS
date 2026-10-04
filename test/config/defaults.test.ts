@@ -28,6 +28,8 @@ describe('config/defaults: DEFAULT_OPTIONS', () => {
     const expectedPaths = [
       'specPath',
       'serveSpec',
+      'docsPath',
+      'serveDocs',
       'openapi.info',
       'openapi.servers',
       'openapi.tags',

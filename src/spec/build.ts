@@ -96,7 +96,8 @@ function applyAutoDetectFilter(ops: SpecOperation[], config: ApiDocsOptions): Sp
 
 function selfExcludePaths(ops: SpecOperation[], config: ApiDocsOptions): SpecOperation[] {
   const specPath = config.specPath ?? (DEFAULT_OPTIONS.specPath as string);
-  return ops.filter((op) => op.path !== specPath);
+  const docsPath = config.docsPath ?? (DEFAULT_OPTIONS.docsPath as string);
+  return ops.filter((op) => op.path !== specPath && op.path !== docsPath);
 }
 
 interface JsonObjectSchema {

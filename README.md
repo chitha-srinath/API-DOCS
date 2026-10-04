@@ -68,6 +68,21 @@ app.listen(3000);
 
 See `examples/basic` for a complete, runnable version of this example.
 
+## Rendered docs UI
+
+Once `app.use(apiDocs.router)` is mounted, the API docs UI is served on the same
+Express port at `/docs` (Swagger UI, loading the spec from `/openapi.json`). No
+extra setup is needed.
+
+- Change the path with `createApiDocs({ docsPath: '/api-docs' })`. It must start
+  with `/`.
+- Turn the UI off with `createApiDocs({ serveDocs: false })`. The spec at
+  `/openapi.json` is still served.
+- The page is fixed: the only value that goes into it is the spec path, so
+  configuration cannot inject markup.
+- The page loads Swagger UI assets from unpkg.com, so the browser needs network
+  access to that CDN.
+
 ## SchemaAdapter
 
 `createApiDocs` resolves a `SchemaAdapter` per route in this order:
@@ -273,6 +288,8 @@ is optional and merges over `DEFAULT_OPTIONS` (a public export of `.`).
 | --- | --- | --- |
 | `specPath` | `/openapi.json` | the path the generated OpenAPI document is served from |
 | `serveSpec` | `true` | whether the spec endpoint is mounted |
+| `docsPath` | `/docs` | the path the rendered API docs UI is served from |
+| `serveDocs` | `true` | whether the rendered API docs UI is mounted |
 | `openapi.info` | `undefined` | OpenAPI info overrides (default: `{ title: 'API', version: '0.0.0' }`) |
 | `openapi.servers` | `undefined` | OpenAPI servers list |
 | `openapi.tags` | `undefined` | OpenAPI tag definitions |

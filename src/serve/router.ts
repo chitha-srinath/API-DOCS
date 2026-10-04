@@ -23,6 +23,7 @@ import { createRoute } from '../route/typed.js';
 import type { OpenApiDocument, SpecOperation } from '../spec/build.js';
 import { buildSpec, specOperationsFromRegistry } from '../spec/build.js';
 import { createSpecCache } from '../spec/cache.js';
+import { renderDocsPage } from './docs-page.js';
 
 export interface GetSpecContext {
   readonly app?: unknown;
@@ -64,11 +65,12 @@ export function createApiDocs(rawOptions?: unknown): ApiDocsInstance {
   const describe = createDescribe({ registry });
 
   const specPath = options.specPath as string;
+  const docsPath = options.docsPath as string;
 
   function buildFromApp(app: unknown): OpenApiDocument {
     const ops = introspect(app, registry, logger, {
       autoDetect: options.autoDetect !== false,
-      ownPaths: [specPath],
+      ownPaths: [specPath, docsPath],
     });
     return buildSpec(ops, options, adapter);
   }
@@ -86,6 +88,15 @@ export function createApiDocs(rawOptions?: unknown): ApiDocsInstance {
   if (options.serveSpec) {
     router.get(specPath, (req: Request, res: Response) => {
       res.json(getSpec({ app: req.app }));
+    });
+  }
+
+  // The rendered UI is a fixed page that loads the spec from `specPath` on the same origin.
+  // Only the path is configurable (`docsPath`); the page itself has no user-supplied markup.
+  if (options.serveDocs) {
+    const html = renderDocsPage(specPath);
+    router.get(docsPath, (_req: Request, res: Response) => {
+      res.type('html').send(html);
     });
   }
 

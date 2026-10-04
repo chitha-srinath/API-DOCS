@@ -20,20 +20,25 @@ function escapeHtml(raw: string): string {
     .replace(/'/g, '&#39;');
 }
 
-/** JSON-encodes then HTML-escapes `specUrl`, so it is safe to embed as a quoted HTML attribute value. */
-function encodeSpecUrl(specUrl: string): string {
-  return escapeHtml(JSON.stringify(specUrl));
+/** HTML-escapes `specUrl` for use inside a double-quoted attribute value (data-url="..."). */
+function encodeSpecUrlAttr(specUrl: string): string {
+  return escapeHtml(specUrl);
+}
+
+/** JSON-encodes `specUrl` as a JS string literal for a <script> block; `<` is escaped so `</script>` cannot close the tag. */
+function encodeSpecUrlScript(specUrl: string): string {
+  return JSON.stringify(specUrl).replace(/</g, '\\u003c');
 }
 
 function renderScalarHtml(specUrl: string, cdnUrl: string | undefined): string {
   const scriptUrl = escapeHtml(cdnUrl ?? SCALAR_CDN_URL);
-  const encodedUrl = encodeSpecUrl(specUrl);
+  const encodedUrl = encodeSpecUrlAttr(specUrl);
   return [
     '<!doctype html>',
     '<html>',
     '<head><meta charset="utf-8"><title>API Docs</title></head>',
     '<body>',
-    `<script id="api-reference" data-url=${encodedUrl}></script>`,
+    `<script id="api-reference" data-url="${encodedUrl}"></script>`,
     `<script src="${scriptUrl}"></script>`,
     '</body>',
     '</html>',
@@ -43,7 +48,7 @@ function renderScalarHtml(specUrl: string, cdnUrl: string | undefined): string {
 function renderSwaggerHtml(specUrl: string, cdnUrl: string | undefined): string {
   const jsUrl = escapeHtml(cdnUrl ?? SWAGGER_UI_JS_CDN_URL);
   const cssUrl = escapeHtml(SWAGGER_UI_CSS_CDN_URL);
-  const encodedUrl = encodeSpecUrl(specUrl);
+  const encodedUrl = encodeSpecUrlScript(specUrl);
   return [
     '<!doctype html>',
     '<html>',

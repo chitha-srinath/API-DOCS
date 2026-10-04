@@ -27,6 +27,13 @@ export function createApp() {
     res.json({ status: 'ok' });
   });
 
+  // In-memory widgets so the GET examples return real data.
+  const widgets = [
+    { id: 1, name: 'Blue widget' },
+    { id: 2, name: 'Red widget' },
+    { id: 3, name: 'Green widget' },
+  ];
+
   app.post(
     '/widgets',
     ...route(
@@ -34,11 +41,43 @@ export function createApp() {
       '/widgets',
       {
         summary: 'Create a widget',
-        body: z.object({ name: z.string().min(1) }),
+        body: z.object({
+          name: z.string().min(1).max(80),
+          description: z.string().max(500).optional(),
+          price: z.number().min(0).max(10000).optional(),
+          quantity: z.number().int().min(1).optional(),
+          tags: z.array(z.string()).optional(),
+          metadata: z.record(z.string(), z.unknown()).optional(),
+        }),
         response: z.object({ id: z.string(), name: z.string() }),
       },
       (req, res) => {
         res.status(201).json({ id: '1', name: req.body.name });
+      },
+    ),
+  );
+
+  // Query parameters: a text search, a number limit and an enum sort.
+  app.get(
+    '/widgets',
+    ...route(
+      'get',
+      '/widgets',
+      {
+        summary: 'List widgets',
+        query: z.object({
+          q: z.string().max(100).optional(),
+          limit: z.coerce.number().int().min(1).max(50).optional(),
+          sort: z.enum(['id', 'name']).optional(),
+        }),
+        response: z.array(z.object({ id: z.number(), name: z.string() })),
+      },
+      (req, res) => {
+        const q = (req.query.q ?? '').toLowerCase();
+        const sorted = widgets
+          .filter((w) => w.name.toLowerCase().includes(q))
+          .sort((a, b) => (req.query.sort === 'name' ? a.name.localeCompare(b.name) : a.id - b.id));
+        res.json(sorted.slice(0, req.query.limit ?? 10));
       },
     ),
   );
@@ -141,6 +180,30 @@ export function createApp() {
     () => {
       throw new Error('simulated upstream timeout');
     },
+  );
+
+  // Path parameter: registered after /widgets/crash and /widgets/timeout so those literal paths win.
+  const notFound = { 404: { description: 'Widget not found', content: problemBody } };
+  app.get(
+    '/widgets/:id',
+    ...route(
+      'get',
+      '/widgets/:id',
+      {
+        summary: 'Get one widget by id',
+        params: z.object({ id: z.coerce.number().int().min(1) }),
+        response: z.object({ id: z.number(), name: z.string() }),
+        responses: notFound,
+      },
+      (req, res) => {
+        const widget = widgets.find((w) => w.id === req.params.id);
+        if (!widget) {
+          res.status(404).json({ type: 'about:blank', title: 'Not Found', status: 404, detail: `widget ${req.params.id} not found` });
+          return;
+        }
+        res.json(widget);
+      },
+    ),
   );
 
   // 1000 dummy endpoints, each documented with a 500 and failing on call, to exercise the docs UI at scale.

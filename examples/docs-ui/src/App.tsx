@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,15 +8,24 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  buildRequest,
+  buildSections,
+  checkAll,
+  fieldId,
+  hintFor,
+  initialValues,
+  type Components,
+  type Field,
+  type JsonSchema,
+  type Parameter,
+  type RequestBody,
+  type Section,
+} from '@/lib/schema-form';
 
 interface MediaType {
   schema?: JsonSchema;
-}
-
-interface JsonSchema {
-  type?: string;
-  example?: unknown;
-  properties?: Record<string, JsonSchema>;
 }
 
 interface SpecOperation {
@@ -24,6 +33,8 @@ interface SpecOperation {
   path: string;
   summary?: string;
   tags?: string[];
+  parameters?: Parameter[];
+  requestBody?: RequestBody;
   responses: Record<string, { description?: string; content?: Record<string, MediaType> }>;
 }
 
@@ -44,6 +55,7 @@ interface Spec {
   info: { title: string; version: string };
   openapi: string;
   paths: Record<string, Record<string, Omit<SpecOperation, 'method' | 'path'>>>;
+  components?: Components;
 }
 
 const METHOD_CLASS: Record<string, string> = {
@@ -315,19 +327,159 @@ function UploadPanel({ auth }: { auth: Auth }) {
   );
 }
 
-function TryIt({ op, auth }: { op: SpecOperation; auth: Auth }) {
+const SECTION_TITLE: Record<Section['key'], string> = {
+  path: 'Path parameters',
+  query: 'Query parameters',
+  body: 'Request body',
+};
+
+/** One form control per schema field: number, text, long text, enum/boolean select, or a JSON editor. */
+function FieldControl({
+  id,
+  field,
+  value,
+  error,
+  onChange,
+}: {
+  id: string;
+  field: Field;
+  value: string;
+  error?: string;
+  onChange: (next: string) => void;
+}) {
+  const s = field.schema;
+  const invalid = error !== undefined;
+  const options = field.kind === 'enum' ? (s.enum ?? []).map(String) : ['true', 'false'];
+  const json = field.kind === 'json';
+
+  let control: ReactNode;
+  if (field.kind === 'integer' || field.kind === 'number') {
+    control = (
+      <Input
+        id={id}
+        type="number"
+        step={field.kind === 'integer' ? 1 : 'any'}
+        min={s.minimum}
+        max={s.maximum}
+        value={value}
+        aria-invalid={invalid || undefined}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
+  } else if (field.kind === 'text') {
+    control = (
+      <Input
+        id={id}
+        value={value}
+        aria-invalid={invalid || undefined}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
+  } else if (field.kind === 'textarea') {
+    control = (
+      <Textarea
+        id={id}
+        rows={4}
+        value={value}
+        aria-invalid={invalid || undefined}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
+  } else if (json) {
+    control = (
+      <Textarea
+        id={id}
+        rows={6}
+        spellCheck={false}
+        className="font-mono text-xs"
+        value={value}
+        aria-invalid={invalid || undefined}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
+  } else {
+    control = (
+      <select
+        id={id}
+        value={value}
+        aria-invalid={invalid || undefined}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive dark:bg-input/30"
+      >
+        <option value="">{field.required ? 'Choose…' : 'Not set'}</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
+  return (
+    <div className={`space-y-2 ${json || field.kind === 'textarea' ? 'sm:col-span-2' : ''}`}>
+      <div className="flex flex-wrap items-center gap-2">
+        <label htmlFor={id} className="font-mono text-sm font-medium">
+          {field.name}
+        </label>
+        <Badge variant={field.required ? 'default' : 'outline'}>{field.required ? 'required' : 'optional'}</Badge>
+        <span className="text-xs text-muted-foreground">{hintFor(field)}</span>
+      </div>
+      {field.description && <p className="text-xs text-muted-foreground">{field.description}</p>}
+      {control}
+      {json && (
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <span className={!invalid && value.trim() !== '' ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}>
+            {!invalid && value.trim() !== '' ? 'Valid JSON' : 'JSON editor'}
+          </span>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={invalid || value.trim() === ''}
+            onClick={() => onChange(JSON.stringify(JSON.parse(value), null, 2))}
+          >
+            Format
+          </Button>
+        </div>
+      )}
+      {invalid && (
+        <p className="text-xs text-destructive" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function TryIt({ op, auth, components }: { op: SpecOperation; auth: Auth; components?: Components }) {
+  const sections = useMemo(
+    () => buildSections(op.parameters ?? [], op.requestBody, components),
+    [op, components],
+  );
+  const [values, setValues] = useState<Record<string, string>>(() => initialValues(sections));
+  const [attempted, setAttempted] = useState(false);
   const [result, setResult] = useState<{ status: number; body: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const errors = checkAll(sections, values);
+  const errorCount = Object.keys(errors).length;
+  const preview = buildRequest(op.path, sections, values).url;
+  const method = op.method.toUpperCase();
+
+  function setValue(id: string, next: string) {
+    setValues((prev) => ({ ...prev, [id]: next }));
+  }
+
   async function send() {
+    setAttempted(true);
+    if (errorCount > 0) return;
     setLoading(true);
     try {
-      const init: RequestInit = { method: op.method.toUpperCase(), headers: authHeaders(auth) };
-      if (op.method === 'post') {
-        init.headers = { ...init.headers, 'content-type': 'application/json' };
-        init.body = JSON.stringify({ name: 'Demo widget' });
-      }
-      const res = await fetch(op.path, init);
+      const { url, body } = buildRequest(op.path, sections, values);
+      const hasBody = body !== undefined && method !== 'GET' && method !== 'HEAD';
+      const headers: Record<string, string> = { ...authHeaders(auth) };
+      if (hasBody) headers['content-type'] = 'application/json';
+      const res = await fetch(url, { method, headers, body: hasBody ? body : undefined });
       setResult({ status: res.status, body: await res.text() });
     } catch (err) {
       setResult({ status: 0, body: String(err) });
@@ -337,13 +489,41 @@ function TryIt({ op, auth }: { op: SpecOperation; auth: Auth }) {
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3">
+    <div className="space-y-4">
+      {sections.map((section) => (
+        <fieldset key={section.key} className="space-y-4 rounded-lg border p-4">
+          <legend className="px-1 text-sm font-medium">{SECTION_TITLE[section.key]}</legend>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {section.fields.map((field) => {
+              const id = fieldId(section.key, field.name);
+              const raw = values[id] ?? '';
+              // Required-but-empty is only flagged after a send attempt; anything typed is checked live.
+              const error = errors[id] && (attempted || raw.trim() !== '') ? errors[id] : undefined;
+              return (
+                <FieldControl
+                  key={id}
+                  id={id}
+                  field={field}
+                  value={raw}
+                  error={error}
+                  onChange={(next) => setValue(id, next)}
+                />
+              );
+            })}
+          </div>
+        </fieldset>
+      ))}
+      <div className="flex flex-wrap items-center gap-3">
         <Button onClick={send} disabled={loading}>
-          {loading ? 'Sending…' : `Send ${op.method.toUpperCase()}`}
+          {loading ? 'Sending…' : `Send ${method}`}
         </Button>
-        <code className="text-sm text-muted-foreground">{op.path}</code>
+        <code className="break-all text-sm text-muted-foreground">{preview}</code>
       </div>
+      {attempted && errorCount > 0 && (
+        <p className="text-sm text-destructive">
+          Fix {errorCount} {errorCount === 1 ? 'field' : 'fields'} before sending.
+        </p>
+      )}
       {result && (
         <div className="rounded-lg border bg-muted/40">
           <div className="flex items-center justify-between border-b px-4 py-2 text-sm">
@@ -573,7 +753,16 @@ export function App() {
                 </TabsContent>
                 <TabsContent value="try" className="space-y-4 pt-4">
                   <AuthPanel auth={auth} onChange={setAuth} />
-                  {current.path === '/uploads' ? <UploadPanel auth={auth} /> : <TryIt op={current} auth={auth} />}
+                  {current.path === '/uploads' ? (
+                    <UploadPanel auth={auth} />
+                  ) : (
+                    <TryIt
+                      key={`${current.method} ${current.path}`}
+                      op={current}
+                      auth={auth}
+                      components={spec.components}
+                    />
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>

@@ -135,11 +135,38 @@ function rangeError(n: number, schema: JsonSchema): string | null {
   return null;
 }
 
+/** Client-side checks for OpenAPI string formats. Zod also emits a `pattern` for these; the format check gives the clearer message. */
+const FORMAT_CHECKS: Record<string, { label: string; test: (s: string) => boolean }> = {
+  uuid: {
+    label: 'a UUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)',
+    test: (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s),
+  },
+  date: {
+    label: 'a date (YYYY-MM-DD)',
+    // Round-tripping through Date rejects impossible dates such as 2025-02-30.
+    test: (s) => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+      const d = new Date(`${s}T00:00:00Z`);
+      return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+    },
+  },
+  'date-time': {
+    label: 'an ISO 8601 date-time',
+    test: (s) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) && !Number.isNaN(Date.parse(s)),
+  },
+  email: {
+    label: 'an email address',
+    test: (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s),
+  },
+};
+
 function textError(raw: string, schema: JsonSchema): string | null {
   if (schema.minLength !== undefined && raw.length < schema.minLength) return `At least ${schema.minLength} characters`;
   if (schema.maxLength !== undefined && raw.length > schema.maxLength) {
     return `At most ${schema.maxLength} characters (now ${raw.length})`;
   }
+  const check = schema.format ? FORMAT_CHECKS[schema.format] : undefined;
+  if (check && !check.test(raw)) return `Must be ${check.label}`;
   if (schema.pattern) {
     try {
       if (!new RegExp(schema.pattern, 'u').test(raw)) return `Must match ${schema.pattern}`;
@@ -233,9 +260,12 @@ export function hintFor(field: Field): string {
     if (max !== undefined) return `${kind} ≤ ${max}`;
     return kind;
   }
-  if (s.minLength !== undefined && s.maxLength !== undefined) return `${s.minLength}–${s.maxLength} characters`;
-  if (s.maxLength !== undefined) return `up to ${s.maxLength} characters`;
-  return 'text';
+  const parts: string[] = [];
+  if (s.format) parts.push(s.format);
+  if (s.minLength !== undefined && s.maxLength !== undefined) parts.push(`${s.minLength}–${s.maxLength} characters`);
+  else if (s.maxLength !== undefined) parts.push(`up to ${s.maxLength} characters`);
+  else if (s.minLength !== undefined) parts.push(`at least ${s.minLength} characters`);
+  return parts.join(' · ') || 'text';
 }
 
 export interface BuiltRequest {

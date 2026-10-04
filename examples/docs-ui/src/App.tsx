@@ -370,6 +370,7 @@ function FieldControl({
     control = (
       <Input
         id={id}
+        type={s.format === 'date' ? 'date' : 'text'}
         value={value}
         aria-invalid={invalid || undefined}
         onChange={(e) => onChange(e.target.value)}
@@ -427,6 +428,17 @@ function FieldControl({
       </div>
       {field.description && <p className="text-xs text-muted-foreground">{field.description}</p>}
       {control}
+      {(field.kind === 'text' || field.kind === 'textarea') && (s.minLength !== undefined || s.maxLength !== undefined) && (
+        <p
+          className={`text-right text-xs tabular-nums ${
+            s.maxLength !== undefined && value.length > s.maxLength ? 'text-destructive' : 'text-muted-foreground'
+          }`}
+        >
+          {value.length}
+          {s.maxLength !== undefined && ` / ${s.maxLength}`}
+          {s.minLength !== undefined && ` · min ${s.minLength}`}
+        </p>
+      )}
       {json && (
         <div className="flex items-center justify-between gap-2 text-xs">
           <span className={!invalid && value.trim() !== '' ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}>

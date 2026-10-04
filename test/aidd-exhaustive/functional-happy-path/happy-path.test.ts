@@ -2,7 +2,7 @@
 // Independent end-to-end verification (real Express apps + supertest) of the
 // intended flow for every AC in prd.md. Written fresh by the test-engineer
 // role, not copied from src's own test suite, to give independent evidence.
-import SwaggerParser from '@apidevtools/swagger-parser';
+import * as OpenApiParser from '@readme/openapi-parser';
 import { describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { z } from 'zod';
@@ -215,7 +215,7 @@ describe.each(majors)('functional-happy-path ($alias)', ({ major, express }) => 
     expect((res.body.openapi as string).startsWith('3.1.')).toBe(true);
     const op = res.body.paths['/users/{id}'].get;
     expect(op.parameters).toContainEqual(expect.objectContaining({ name: 'id', in: 'path', required: true }));
-    await expect(SwaggerParser.validate(structuredClone(res.body))).resolves.toBeDefined();
+    await expect(OpenApiParser.validate(structuredClone(res.body))).resolves.toBeDefined();
   });
 
   // TC-HAPPY-018: AC-021 typed route mounted alongside plain routes on an existing router.

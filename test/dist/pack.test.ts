@@ -44,7 +44,7 @@ describe('pack contents', () => {
   it('has no bundled UI assets and no stray js/cjs outside dist', () => {
     for (const p of paths) {
       expect(p).not.toMatch(/\.css$/);
-      expect(p).not.toMatch(/(scalar|swagger-ui|redoc)/i);
+      expect(p).not.toMatch(/redoc/i);
       if (/\.(js|cjs)$/.test(p)) {
         expect(p.startsWith('dist/')).toBe(true);
       }

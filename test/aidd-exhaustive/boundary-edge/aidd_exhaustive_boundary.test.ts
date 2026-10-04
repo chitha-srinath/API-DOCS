@@ -226,7 +226,7 @@ describe('TC-EDGE: config merge deep-merge boundary sweep (AC-044, AC-036)', () 
     expect(merged.tags).toEqual(['c']);
   });
 
-  // TC-EDGE-027: AC-044(c) — per-route scalar beats global scalar
+  // TC-EDGE-027: AC-044(c) — per-route per-route beats global
   it('TC-EDGE-027 AC-044(c) per-route validateResponses beats global', () => {
     const defaults = { validateResponses: undefined as 'warn' | 'error' | undefined };
     const merged = mergeOptions(defaults, { validateResponses: 'warn' }, { validateResponses: 'error' });

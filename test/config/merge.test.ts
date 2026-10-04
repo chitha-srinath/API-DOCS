@@ -52,9 +52,9 @@ describe('config/merge: mergeOptions', () => {
   });
 
   it('primitives replace', () => {
-    const defaults: { ui?: 'scalar' | 'swagger-ui' } = { ui: 'scalar' };
-    const result = mergeOptions(defaults, { ui: 'swagger-ui' }, {});
-    expect(result.ui).toBe('swagger-ui');
+    const defaults: { ui?: 'alpha' | 'beta' } = { ui: 'alpha' };
+    const result = mergeOptions(defaults, { ui: 'beta' }, {});
+    expect(result.ui).toBe('beta');
   });
 
   it('inputs are not mutated', () => {
@@ -68,8 +68,8 @@ describe('config/merge: mergeOptions', () => {
   });
 
   it('undefined does not override', () => {
-    const defaults: { ui?: string } = { ui: 'scalar' };
+    const defaults: { ui?: string } = { ui: 'alpha' };
     const result = mergeOptions(defaults, { ui: undefined }, {});
-    expect(result.ui).toBe('scalar');
+    expect(result.ui).toBe('alpha');
   });
 });

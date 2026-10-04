@@ -1,6 +1,6 @@
 // ST-006 (S-06), ADR-32: spec-side half of AC-023. For each `majors` entry,
 // walk the nested fixture from `test/fixtures/apps.ts` then run `buildSpec`.
-import SwaggerParser from '@apidevtools/swagger-parser';
+import * as OpenApiParser from '@readme/openapi-parser';
 import { describe, expect, it } from 'vitest';
 
 import { standardSchemaAdapter } from '../../src/adapter/standard.js';
@@ -42,6 +42,6 @@ describe.each(majors)('spec/ac023 ($alias)', ({ major, express }) => {
       expect(operation.tags).toEqual(['api']);
     }
 
-    await expect(SwaggerParser.validate(structuredClone(spec) as never)).resolves.toBeDefined();
+    await expect(OpenApiParser.validate(structuredClone(spec) as never)).resolves.toBeDefined();
   });
 });

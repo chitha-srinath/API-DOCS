@@ -6,9 +6,9 @@ All notable changes to this project are documented in this file.
 
 ### Removed
 
-- The Scalar and Swagger UI docs page. `GET /docs` is no longer mounted, and the
-  `docsPath`, `ui`, `cdnUrl`, `serveDocs` and `docs.specUrl` options are removed.
-  The OpenAPI document at `specPath` (default `/openapi.json`) is unchanged.
+- The built-in `/docs` page is removed, along with the `docsPath`, `ui`, `cdnUrl`,
+  `serveDocs` and `docs.specUrl` options. The OpenAPI document at `specPath`
+  (default `/openapi.json`) is unchanged.
 
 ## [0.1.0] - 2026-09-28
 
@@ -17,7 +17,7 @@ Initial release.
 ### Added
 
 - `createApiDocs(options?)` — zero-config OpenAPI 3.1 document generation and
-  a `/docs` UI (Scalar by default, Swagger UI opt-in) for Express 4 and 5.
+  a `/docs` UI for Express 4 and 5.
 - Typed routes via `route(method, localPath, meta, handler)`: request
   validation (`validateRequests`) and optional response validation
   (`validateResponses: 'warn' | 'error'`) against a `SchemaAdapter`.

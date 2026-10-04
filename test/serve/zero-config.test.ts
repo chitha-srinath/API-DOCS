@@ -1,6 +1,6 @@
 // ST-007 (S-07): AC-035, AC-036 — zero-config createApiDocs() end-to-end,
 // per Express major.
-import SwaggerParser from '@apidevtools/swagger-parser';
+import * as OpenApiParser from '@readme/openapi-parser';
 import { describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { z } from 'zod';
@@ -33,7 +33,7 @@ describe.each(majors)('serve/zero-config ($alias)', ({ express }) => {
     const res = await request(app).get('/openapi.json');
     expect(res.status).toBe(200);
     expect((res.body as { openapi: string }).openapi.startsWith('3.1.')).toBe(true);
-    await expect(SwaggerParser.validate(structuredClone(res.body) as never)).resolves.toBeDefined();
+    await expect(OpenApiParser.validate(structuredClone(res.body) as never)).resolves.toBeDefined();
   });
 
 

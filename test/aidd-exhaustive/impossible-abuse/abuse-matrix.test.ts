@@ -433,8 +433,8 @@ describe('impossible-abuse: out-of-range / type-confused inputs', () => {
     expect(nan.status).toBe(400);
   });
 
-  // TC-ABUSE-027: array sent where schema expects a scalar string param.
-  it('TC-ABUSE-027: array value sent for scalar query param -> validation rejects, no crash', async () => {
+  // TC-ABUSE-027: array sent where schema expects a single string param.
+  it('TC-ABUSE-027: array value sent for single-value query param -> validation rejects, no crash', async () => {
     const { route } = makeRouteFactory();
     const [validator, wrapped] = route('get', '/items', { query: z.object({ q: z.string() }) }, (_req, res) =>
       res.json({ ok: true }),

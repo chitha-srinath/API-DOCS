@@ -1,6 +1,6 @@
 // ST-006 (S-06, component C6): buildSpec unit tests. Every spec-producing
-// test validates via `@apidevtools/swagger-parser` (ADR-14).
-import SwaggerParser from '@apidevtools/swagger-parser';
+// test validates via `@readme/openapi-parser` (ADR-14).
+import * as OpenApiParser from '@readme/openapi-parser';
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -15,7 +15,7 @@ import type { SpecOperation } from '../../src/spec/build.js';
 import { buildSpec } from '../../src/spec/build.js';
 
 async function validates(spec: unknown): Promise<void> {
-  await expect(SwaggerParser.validate(structuredClone(spec) as never)).resolves.toBeDefined();
+  await expect(OpenApiParser.validate(structuredClone(spec) as never)).resolves.toBeDefined();
 }
 
 function op(partial: Partial<SpecOperation> & Pick<SpecOperation, 'method' | 'path' | 'source'>): SpecOperation {

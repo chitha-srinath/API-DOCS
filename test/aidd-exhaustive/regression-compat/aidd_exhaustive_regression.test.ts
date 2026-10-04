@@ -2,7 +2,7 @@
 // Greenfield package: "regression" here = (a) Express 4/5 side-by-side support holds,
 // (b) ADR-41 export contract stable, (c) upgrade path (zero-config -> add options)
 // doesn't silently break what worked before, (d) semver-relevant surface stability.
-import SwaggerParser from '@apidevtools/swagger-parser';
+import * as OpenApiParser from '@readme/openapi-parser';
 import { describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { z } from 'zod';
@@ -41,7 +41,7 @@ describe.each(majors)('TC-REG: upgrade path zero-config -> add options ($alias)'
     const { app } = zeroConfigApp();
     const spec = await request(app).get('/openapi.json');
     expect(spec.status).toBe(200);
-    await expect(SwaggerParser.validate(structuredClone(spec.body) as never)).resolves.toBeDefined();
+    await expect(OpenApiParser.validate(structuredClone(spec.body) as never)).resolves.toBeDefined();
     const bad = await request(app).post('/users').send({});
     expect(bad.status).toBe(400);
   });

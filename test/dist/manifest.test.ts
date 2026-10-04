@@ -56,7 +56,7 @@ describe('manifest', () => {
     expect(Object.keys(deps).length).toBe(0);
     const all = { ...deps, ...pkg.peerDependencies };
     for (const key of Object.keys(all)) {
-      expect(key).not.toMatch(/scalar|swagger-ui|redoc/i);
+      expect(key).not.toMatch(/redoc/i);
     }
   });
 

@@ -386,18 +386,18 @@ async function main() {
     );
   }
 
-  // TC-CONTRACT-018: swagger-parser validates the default-generated spec (control, expect PASS)
+  // TC-CONTRACT-018: OpenAPI parser validates the default-generated spec (control, expect PASS)
   {
-    const SwaggerParser = (await import('@apidevtools/swagger-parser')).default;
+    const OpenApiParser = (await import('@readme/openapi-parser'));
     const r = await get(server, '/openapi.json');
     const doc = JSON.parse(r.body);
     try {
-      await SwaggerParser.validate(structuredClone(doc));
+      await OpenApiParser.validate(structuredClone(doc));
       record(
         'TC-CONTRACT-018',
         'PASS',
-        'default-generated spec (no .meta({id}) schema) validates against OpenAPI 3.1 via swagger-parser',
-        'SwaggerParser.validate(doc) resolved without throwing',
+        'default-generated spec (no .meta({id}) schema) validates against OpenAPI 3.1 via OpenAPI parser',
+        'OpenApiParser.validate(doc) resolved without throwing',
       );
     } catch (e) {
       record(
@@ -410,9 +410,9 @@ async function main() {
   }
 
   // TC-CONTRACT-019: independent confirmation of F-01 — .meta({id})-tagged, REUSED zod schema
-  // via zodAdapter (opt-in subpath) produces a spec that fails swagger-parser validation.
+  // via zodAdapter (opt-in subpath) produces a spec that fails OpenAPI parser validation.
   {
-    const SwaggerParser = (await import('@apidevtools/swagger-parser')).default;
+    const OpenApiParser = (await import('@readme/openapi-parser'));
     const Named = z.object({ id: z.string(), label: z.string() }).meta({ id: 'NamedThing' });
     const apiDocs3 = createApiDocs();
     const app3 = express();
@@ -432,7 +432,7 @@ async function main() {
     let validated = false;
     let errMsg = '';
     try {
-      await SwaggerParser.validate(structuredClone(doc));
+      await OpenApiParser.validate(structuredClone(doc));
       validated = true;
     } catch (e) {
       errMsg = e.message;
@@ -443,9 +443,9 @@ async function main() {
       'TC-CONTRACT-019',
       confirmsF01 ? 'FAIL' : 'PASS',
       confirmsF01
-        ? `CONFIRMS F-01 (CRITICAL, already-confirmed by adversarial verification): a .meta({id})-reused Zod schema via zodAdapter produces a spec that fails SwaggerParser.validate — ${errMsg}`
+        ? `CONFIRMS F-01 (CRITICAL, already-confirmed by adversarial verification): a .meta({id})-reused Zod schema via zodAdapter produces a spec that fails OpenApiParser.validate — ${errMsg}`
         : 'spec validated unexpectedly — could not reproduce F-01 via zodAdapter route',
-      `spec snippet references $defs/$ref: ${hasDanglingRef}; SwaggerParser.validate threw: ${!validated} (${errMsg}); doc.components.schemas keys=${JSON.stringify(Object.keys(doc.components?.schemas || {}))}`,
+      `spec snippet references $defs/$ref: ${hasDanglingRef}; OpenApiParser.validate threw: ${!validated} (${errMsg}); doc.components.schemas keys=${JSON.stringify(Object.keys(doc.components?.schemas || {}))}`,
     );
     server3.close();
   }
@@ -454,7 +454,7 @@ async function main() {
   // no explicit `adapter:` override) — tests the verdict's "scope widened, reachable via the
   // default adapter, not only the opt-in zod subpath" claim.
   {
-    const SwaggerParser = (await import('@apidevtools/swagger-parser')).default;
+    const OpenApiParser = (await import('@readme/openapi-parser'));
     const Named2 = z.object({ id: z.string(), label: z.string() }).meta({ id: 'NamedThing2' });
     const apiDocs4 = createApiDocs();
     const app4 = express();
@@ -470,7 +470,7 @@ async function main() {
     let jsonSchemaOutput = null;
     try {
       jsonSchemaOutput = doc.paths?.['/c']?.post?.requestBody?.content?.['application/json']?.schema ?? null;
-      await SwaggerParser.validate(structuredClone(doc));
+      await OpenApiParser.validate(structuredClone(doc));
       validated = true;
     } catch (e) {
       errMsg = e.message;
@@ -480,14 +480,14 @@ async function main() {
         'TC-CONTRACT-020',
         'PASS',
         "default standardSchemaAdapter path did NOT reproduce F-01 for this Zod-via-Standard-Schema route (Zod's Standard Schema '~standard.jsonSchema' converter behaves differently than the direct zodAdapter path, or was unavailable and fell back to NO_JSON_SCHEMA/{}) — narrows, does not contradict, the CONFIRMED scope-widening claim, which is independently reproduced via zodAdapter in TC-CONTRACT-019",
-        `requestBody schema via default adapter = ${JSON.stringify(jsonSchemaOutput)}; SwaggerParser.validate threw: false`,
+        `requestBody schema via default adapter = ${JSON.stringify(jsonSchemaOutput)}; OpenApiParser.validate threw: false`,
       );
     } else {
       record(
         'TC-CONTRACT-020',
         'FAIL',
         `CONFIRMS the verdict's scope-widening: default adapter path (no explicit zodAdapter) also produces an invalid spec for a .meta({id}) schema — ${errMsg}`,
-        `requestBody schema via default adapter = ${JSON.stringify(jsonSchemaOutput)}; SwaggerParser.validate threw: true (${errMsg})`,
+        `requestBody schema via default adapter = ${JSON.stringify(jsonSchemaOutput)}; OpenApiParser.validate threw: true (${errMsg})`,
       );
     }
     server4.close();

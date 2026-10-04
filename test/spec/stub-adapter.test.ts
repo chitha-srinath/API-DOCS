@@ -1,7 +1,7 @@
 // ST-006 (S-06), ADR-38: the stub-adapter (non-Zod) proves spec generation is
 // adapter-agnostic, and that a per-route `meta.adapter` beats the `adapter`
 // parameter.
-import SwaggerParser from '@apidevtools/swagger-parser';
+import * as OpenApiParser from '@readme/openapi-parser';
 import { describe, expect, it } from 'vitest';
 
 import { standardSchemaAdapter } from '../../src/adapter/standard.js';
@@ -12,7 +12,7 @@ import type { SpecOperation } from '../../src/spec/build.js';
 import { obj, str, stubAdapter } from '../fixtures/stub-adapter.js';
 
 async function validates(spec: unknown): Promise<void> {
-  await expect(SwaggerParser.validate(structuredClone(spec) as never)).resolves.toBeDefined();
+  await expect(OpenApiParser.validate(structuredClone(spec) as never)).resolves.toBeDefined();
 }
 
 describe('spec/stub-adapter (ADR-38)', () => {

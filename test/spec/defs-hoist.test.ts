@@ -2,10 +2,10 @@
 // Zod schema, when converted via `toJSONSchema`, lifts the named subschema into a sibling
 // `$defs` bag with a `$ref` in its place. `pathParameters`/`queryParameters` used to
 // extract only `schema.properties[name]` and silently drop `$defs`, leaving a dangling,
-// unresolvable `$ref` that fails `SwaggerParser.validate()`. Confirmed reachable via BOTH
+// unresolvable `$ref` that fails `OpenApiParser.validate()`. Confirmed reachable via BOTH
 // the default `standardSchemaAdapter` (ADR-21 zero-config default) and the opt-in
 // `./zod` subpath adapter (`zodAdapter`) — both are exercised here.
-import SwaggerParser from '@apidevtools/swagger-parser';
+import * as OpenApiParser from '@readme/openapi-parser';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
@@ -17,7 +17,7 @@ import type { SpecOperation } from '../../src/spec/build.js';
 import { buildSpec } from '../../src/spec/build.js';
 
 async function validates(spec: unknown): Promise<void> {
-  await expect(SwaggerParser.validate(structuredClone(spec) as never)).resolves.toBeDefined();
+  await expect(OpenApiParser.validate(structuredClone(spec) as never)).resolves.toBeDefined();
 }
 
 function op(partial: Partial<SpecOperation> & Pick<SpecOperation, 'method' | 'path' | 'source'>): SpecOperation {

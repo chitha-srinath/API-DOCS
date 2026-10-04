@@ -1,6 +1,6 @@
 // ST-007 (S-07): AC-005, AC-047, ADR-38 — schema adapter wiring (global option,
 // default, and per-route `meta.adapter` override).
-import SwaggerParser from '@apidevtools/swagger-parser';
+import * as OpenApiParser from '@readme/openapi-parser';
 import { describe, expect, it } from 'vitest';
 import request from 'supertest';
 
@@ -35,7 +35,7 @@ describe.each(majors)('serve/schema-adapter ($alias)', ({ express }) => {
       properties: { name: { type: 'string' } },
       required: ['name'],
     });
-    await expect(SwaggerParser.validate(structuredClone(spec.body) as never)).resolves.toBeDefined();
+    await expect(OpenApiParser.validate(structuredClone(spec.body) as never)).resolves.toBeDefined();
   });
 
   it('meta.adapter on one route overrides both the global option and the default', async () => {

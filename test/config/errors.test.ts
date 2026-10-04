@@ -67,11 +67,11 @@ describe('config/errors: ApiDocsConfigError (ADR-49)', () => {
   });
 
   it('exposes a stable name and code, is a real Error, and exposes path/expected', () => {
-    const err = new ApiDocsConfigError('ui', "'scalar' or 'swagger-ui'");
+    const err = new ApiDocsConfigError('ui', "'alpha' or 'beta'");
     expect(err.name).toBe('ApiDocsConfigError');
     expect(typeof err.code).toBe('string');
     expect(err).toBeInstanceOf(Error);
     expect(err.path).toBe('ui');
-    expect(err.expected).toBe("'scalar' or 'swagger-ui'");
+    expect(err.expected).toBe("'alpha' or 'beta'");
   });
 });

@@ -9,8 +9,8 @@ import request from 'supertest';
 const require = createRequire(import.meta.url);
 const root = process.cwd();
 
-const BRAND = Symbol.for('express-api-docs.v1.brand');
-const BRAND_KEY = Symbol.for('express-api-docs.v1.brandKey');
+const BRAND = Symbol.for('express-api-contract.v1.brand');
+const BRAND_KEY = Symbol.for('express-api-contract.v1.brandKey');
 
 describe('entries/dual-load', () => {
   it('ESM and CJS copies interoperate without double-wrapping use', async () => {
@@ -69,9 +69,9 @@ describe('entries/dual-load', () => {
     expect(esmErr).toBeInstanceOf(cjs.ApiDocsConfigError);
 
     const brands = (cjsErr as Record<PropertyKey, unknown>)[BRAND];
-    expect(brands).toContain('express-api-docs.v1.ApiDocsConfigError');
+    expect(brands).toContain('express-api-contract.v1.ApiDocsConfigError');
     const classBrand = (cjs.ApiDocsConfigError as unknown as Record<PropertyKey, unknown>)[BRAND_KEY];
-    expect(classBrand).toBe('express-api-docs.v1.ApiDocsConfigError');
+    expect(classBrand).toBe('express-api-contract.v1.ApiDocsConfigError');
   });
 
   it('a user subclass of the CJS ApiDocsSchemaError is instanceof the ESM export, and the reverse', async () => {

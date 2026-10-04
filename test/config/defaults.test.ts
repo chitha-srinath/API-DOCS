@@ -27,12 +27,9 @@ describe('config/defaults: DEFAULT_OPTIONS', () => {
   it('has a row for every option', () => {
     const expectedPaths = [
       'specPath',
-      'docsPath',
-      'ui',
-      'cdnUrl',
       'serveSpec',
+      'docsPath',
       'serveDocs',
-      'docs.specUrl',
       'openapi.info',
       'openapi.servers',
       'openapi.tags',
@@ -52,13 +49,10 @@ describe('config/defaults: DEFAULT_OPTIONS', () => {
 
   it('has the documented defaults', () => {
     expect(DEFAULT_OPTIONS.specPath).toBe('/openapi.json');
-    expect(DEFAULT_OPTIONS.docsPath).toBe('/docs');
-    expect(DEFAULT_OPTIONS.ui).toBe('scalar');
     expect(DEFAULT_OPTIONS.validateRequests).toBe(true);
     expect(DEFAULT_OPTIONS.validateResponses).toBe(false);
     expect(DEFAULT_OPTIONS.autoDetect).toBe(true);
     expect(DEFAULT_OPTIONS.serveSpec).toBe(true);
-    expect(DEFAULT_OPTIONS.serveDocs).toBe(true);
   });
 
   it('DEFAULT_OPTIONS.schemaAdapter === null (ADR-38, AC-047)', () => {

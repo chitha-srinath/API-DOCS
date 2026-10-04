@@ -1,6 +1,6 @@
 // ST-006 (S-06, component C6): buildSpec unit tests. Every spec-producing
-// test validates via `@apidevtools/swagger-parser` (ADR-14).
-import SwaggerParser from '@apidevtools/swagger-parser';
+// test validates via `@readme/openapi-parser` (ADR-14).
+import * as OpenApiParser from '@readme/openapi-parser';
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -15,7 +15,7 @@ import type { SpecOperation } from '../../src/spec/build.js';
 import { buildSpec } from '../../src/spec/build.js';
 
 async function validates(spec: unknown): Promise<void> {
-  await expect(SwaggerParser.validate(structuredClone(spec) as never)).resolves.toBeDefined();
+  await expect(OpenApiParser.validate(structuredClone(spec) as never)).resolves.toBeDefined();
 }
 
 function op(partial: Partial<SpecOperation> & Pick<SpecOperation, 'method' | 'path' | 'source'>): SpecOperation {
@@ -245,28 +245,24 @@ describe('spec/build: buildSpec', () => {
     expect(paths['/dup2']?.get?.summary).toBe('describe wins');
   });
 
-  it('self-excludes specPath and docsPath (default and custom) (AC-033)', () => {
+  it('self-excludes specPath (default and custom) (AC-033)', () => {
     const ops: SpecOperation[] = [
       op({ method: 'get', path: '/openapi.json', source: 'plain' }),
-      op({ method: 'get', path: '/docs', source: 'plain' }),
       op({ method: 'get', path: '/kept', source: 'plain' }),
     ];
     const spec = buildSpec(ops, DEFAULT_OPTIONS as ApiDocsOptions, standardSchemaAdapter);
     const paths = spec.paths as Record<string, unknown>;
     expect(paths['/openapi.json']).toBeUndefined();
-    expect(paths['/docs']).toBeUndefined();
     expect(paths['/kept']).toBeDefined();
 
-    const custom: ApiDocsOptions = { specPath: '/custom-spec', docsPath: '/custom-docs' };
+    const custom: ApiDocsOptions = { specPath: '/custom-spec' };
     const ops2: SpecOperation[] = [
       op({ method: 'get', path: '/custom-spec', source: 'plain' }),
-      op({ method: 'get', path: '/custom-docs', source: 'plain' }),
       op({ method: 'get', path: '/kept2', source: 'plain' }),
     ];
     const spec2 = buildSpec(ops2, custom, standardSchemaAdapter);
     const paths2 = spec2.paths as Record<string, unknown>;
     expect(paths2['/custom-spec']).toBeUndefined();
-    expect(paths2['/custom-docs']).toBeUndefined();
     expect(paths2['/kept2']).toBeDefined();
   });
 

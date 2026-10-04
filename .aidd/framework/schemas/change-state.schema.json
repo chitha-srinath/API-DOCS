@@ -112,7 +112,7 @@
     "quality_gates": {
       "type": "object",
       "additionalProperties": false,
-      "$comment": "Every gate takes one of two encodings, per core/protocol/gates.md 'Quality gates': the bare status, or the object form {status, reason} — which is what a gate skipped by rigor mode MUST use to carry `reason: rigor:<mode>`. The scalar form stays valid for gates with no reason to record.",
+      "$comment": "Every gate takes one of two encodings, per core/protocol/gates.md 'Quality gates': the bare status, or the object form {status, reason} — which is what a gate skipped by rigor mode MUST use to carry `reason: rigor:<mode>`. The single-value form stays valid for gates with no reason to record.",
       "properties": {
         "tests_green": { "oneOf": [
           { "enum": ["pending", "passed", "failed", "na"] },

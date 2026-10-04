@@ -7,7 +7,7 @@ additionalProperties, items, minimum, maximum, oneOf).
 
 The AIDD YAML subset is deliberately small so this parser stays tiny and every
 runtime (Claude Code, Codex CLI, CI) can validate state without installing
-anything: block-style maps and lists, 2-space indentation, scalar values
+anything: block-style maps and lists, 2-space indentation, single-value values
 (string, int, float, bool, null), inline empty collections ({} and []),
 comments with '#'. No anchors, aliases, multiline strings, or flow style.
 
@@ -45,7 +45,7 @@ def strip_comment(line):
     return ''.join(out).rstrip()
 
 
-def parse_scalar(text):
+def parse_leaf(text):
     s = text.strip()
     if s == '' or s in ('null', '~'):
         return None
@@ -117,7 +117,7 @@ def parse_map(lines, index, indent):
         if key in result:
             raise ParseError(f'duplicate key: {key}')
         if inline is not None and inline != '':
-            result[key] = parse_scalar(inline)
+            result[key] = parse_leaf(inline)
             index += 1
         else:
             index += 1
@@ -155,7 +155,7 @@ def parse_list(lines, index, indent):
                 raise ParseError(f'bad list-item map near: {item_text}')
             result.append(value)
         else:
-            result.append(parse_scalar(item_text))
+            result.append(parse_leaf(item_text))
             index += 1
     return result, index
 

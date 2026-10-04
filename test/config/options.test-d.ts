@@ -12,10 +12,6 @@ test('config/types: ApiDocsOptions type shape (AC-046)', () => {
   const badKey: ApiDocsOptions = { specPth: '/x' };
   void badKey;
 
-  // @ts-expect-error - 'redoc' is not a valid ui
-  const badUi: ApiDocsOptions = { ui: 'redoc' };
-  void badUi;
-
   // @ts-expect-error - 'maybe' is not a valid validateResponses
   const badValidateResponses: ApiDocsOptions = { validateResponses: 'maybe' };
   void badValidateResponses;
@@ -33,5 +29,4 @@ test('config/types: ApiDocsOptions type shape (AC-046)', () => {
   void badRoute;
 
   expectTypeOf<ApiDocsOptions>().toHaveProperty('specPath').toEqualTypeOf<string | undefined>();
-  expectTypeOf<ApiDocsOptions>().toHaveProperty('docsPath').toEqualTypeOf<string | undefined>();
 });

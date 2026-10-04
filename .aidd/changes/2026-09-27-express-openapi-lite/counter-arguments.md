@@ -20,7 +20,7 @@
 
 ## Most likely late/production failure mode
 
-A user on Express 5 with the standard structure `app.use('/api', apiRouter)`, plus one APM or async wrapper, sees docs that are valid OpenAPI (swagger-parser passes) but have wrong paths or missing schemas. No exception is thrown, no test fails, and the only trace is a debug log line. All fixture tests pass because fixtures build apps the way the author expects, not the way production apps are instrumented. The swagger-parser oracle (ADR-14) cannot catch it, because a wrong spec can still be a valid one.
+A user on Express 5 with the standard structure `app.use('/api', apiRouter)`, plus one APM or async wrapper, sees docs that are valid OpenAPI (openapi-parser passes) but have wrong paths or missing schemas. No exception is thrown, no test fails, and the only trace is a debug log line. All fixture tests pass because fixtures build apps the way the author expects, not the way production apps are instrumented. The openapi-parser oracle (ADR-14) cannot catch it, because a wrong spec can still be a valid one.
 
 ## Alternative worth reconsidering (+ the cheap experiment to settle it)
 

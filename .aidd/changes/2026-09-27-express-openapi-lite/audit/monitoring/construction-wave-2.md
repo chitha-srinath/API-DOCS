@@ -23,7 +23,7 @@ ST-003's Builder Report (Lint/typecheck evidence section) states:
 Checked `src/config/errors.ts` directly (read in full):
 
 ```
-static readonly [BRAND_KEY]: string = 'express-api-docs.v1.ApiDocsConfigError';
+static readonly [BRAND_KEY]: string = 'express-api-contract.v1.ApiDocsConfigError';
 ```
 
 This is already the widened `: string` typing ST-002's own Builder Report claims
@@ -32,7 +32,7 @@ differently-valued `[BRAND_KEY]` without a `tsc` variance error"). Comparing aga
 `src/adapter/errors.ts` (ST-003's own file):
 
 ```
-static readonly [BRAND_KEY]: string = 'express-api-docs.v1.ApiDocsSchemaError';
+static readonly [BRAND_KEY]: string = 'express-api-contract.v1.ApiDocsSchemaError';
 ```
 
 Identical pattern — the fix is present in both files. ST-002's own Builder Report
@@ -69,7 +69,7 @@ merely because a lint rule exists.
 Read both files in full (`src/config/errors.ts`, `src/adapter/errors.ts`). Same
 shape in both:
 
-- `static readonly [BRAND_KEY]: string = 'express-api-docs.v1.<ClassName>'` (widened
+- `static readonly [BRAND_KEY]: string = 'express-api-contract.v1.<ClassName>'` (widened
   literal, both).
 - `readonly [BRAND]: string[]` instance property, both.
 - `collectBrands(new.target)` walking `Object.getPrototypeOf` over constructors,
@@ -83,8 +83,8 @@ shape in both:
 No divergence found — the two implementations are consistent with each other and
 with the ADR-49 verbatim spec (`Symbol.hasInstance` snippet in both stories'
 context sections matches what's on disk). `BRAND`/`BRAND_KEY` both sourced from
-the single `src/core/types.ts` definition (`Symbol.for('express-api-docs.v1.brand')`
-/ `Symbol.for('express-api-docs.v1.brandKey')`), so no drift in the underlying
+the single `src/core/types.ts` definition (`Symbol.for('express-api-contract.v1.brand')`
+/ `Symbol.for('express-api-contract.v1.brandKey')`), so no drift in the underlying
 symbols either.
 
 ## Other observations (not blocking)

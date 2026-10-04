@@ -46,7 +46,7 @@ Any story may import these files, but only the owner may edit them. S-01 creates
 
 | Item | ADR | Owner | File |
 |---|---|---|---|
-| The five versioned `Symbol.for` keys (`express-api-docs.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder`, `.v1.error`) and the `BRAND` constant | 20, 43 | S-01 | `src/core/types.ts` |
+| The five versioned `Symbol.for` keys (`express-api-contract.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder`, `.v1.error`) and the `BRAND` constant | 20, 43 | S-01 | `src/core/types.ts` |
 | `RECORDER` value `{protocol: 1, packageVersion}`; the coexistence rules | 43 | S-05 | `src/introspect/recorder.ts` |
 | ESLint `no-restricted-syntax` rule banning local `Symbol()` | 20 | S-01 | `eslint.config.js` |
 | ESLint rule flagging `require('express4')` outside `test/fixtures/**` | 39 | S-01 | `eslint.config.js` |
@@ -54,7 +54,7 @@ Any story may import these files, but only the owner may edit them. S-01 creates
 | Zod as an optional peer (`^4.2.0`), the `./zod` exports map, and zod `^4.6.5` as a devDependency | 21, 47 | S-01 | `package.json` |
 | `./package.json` export | 48 | S-01 | `package.json` |
 | Asserts the `./package.json` export is present | 48 | S-01 | `test/dist/manifest.test.ts` |
-| Asserts `require('express-api-docs/package.json')` resolves | 48 | S-01 | `test/dist/pack.test.ts` |
+| Asserts `require('express-api-contract/package.json')` resolves | 48 | S-01 | `test/dist/pack.test.ts` |
 | ESLint rule: zod is imported only in `src/adapter/zod.ts` | 21 | S-01 | `eslint.config.js` |
 | Grep that `dist/index.{js,cjs}` contains no `zod` | 21 | S-01 | `test/dist/pack.test.ts` |
 | Load the main entry with `zod` unresolvable | 21 | S-07 | `test/entries/no-zod-load.test.ts` |
@@ -194,7 +194,7 @@ S-01 keeps only the tests it can make green on its own scaffold with stub entrie
 | S-03 | medium | New Standard Schema path (ADR-21); `~standard.jsonSchema` conformance and the Zod floor `^4.2.0` (ADR-47) |
 | S-04 | medium | `res.json`/`send` delegation, exact-once error forwarding on both majors |
 | S-05 | **high** | R-1 and R-8: Express private internals; patches the `use` prototype at import; APM ordering; module identity across copies; gate G-S05 |
-| S-06 | medium | Byte determinism; dedupe; swagger-parser validity |
+| S-06 | medium | Byte determinism; dedupe; openapi-parser validity |
 | S-07 | medium-high | The three entries must re-export the same API; it owns the dual-package hazard tests (dual-load, bundle, parity, no-zod-load, recorder-install) and the perf gate |
 | S-08 | low | Documentation and parity tests |
 
@@ -282,7 +282,7 @@ Moved or added ACs:
     - the `exports` targets exist in the pack;
     - `sideEffects` is exactly `["./dist/auto-record.js","./dist/auto-record.cjs"]`;
     - `dist/index.{js,cjs}` contains no `zod`;
-    - `require('express-api-docs/package.json')` resolves from the extracted tarball.
+    - `require('express-api-contract/package.json')` resolves from the extracted tarball.
   - `test/dist/build-shape.test.ts` (ADR-40, static half only) checks:
     - there is no `dist/chunk-*` file;
     - `auto-record` is kept external: `dist/index.js` contains `import "./auto-record.js"` and `dist/index.cjs` contains `require("./auto-record.cjs")`;
@@ -334,9 +334,9 @@ Moved or added ACs:
   - `sniff.test.ts` covers ADR-27a.
   - `describe-meta.test.ts` covers ADR-44.
   - `test/describe/describe.test.ts` covers AC-022.
-- **S-06.** The existing tests stay: `build`, `canonical`, `cache` and `glob`, all checked with swagger-parser.
+- **S-06.** The existing tests stay: `build`, `canonical`, `cache` and `glob`, all checked with openapi-parser.
   - `test/spec/ac023.test.ts` asserts the whole AC-023 Then-clause on every entry of `majors`, including the tag `api` taken from the mounted path (ADR-32).
-  - `test/spec/stub-adapter.test.ts` checks that the stub's converted schema appears in `requestBody` and passes swagger-parser (ADR-38, AC-047).
+  - `test/spec/stub-adapter.test.ts` checks that the stub's converted schema appears in `requestBody` and passes openapi-parser (ADR-38, AC-047).
   - The builder reads registry entries only through the `RouteRegistry` interface from `core/types.ts`.
 - **S-07.** Every test here is written failing-first against the built `dist/` (the suite-wide globalSetup from S-01 builds it).
   - `test/docs-ui/render.test.ts` covers AC-018 and AC-019.
@@ -357,7 +357,7 @@ Moved or added ACs:
     - `installRecorder` and second copies of Express;
     - the `/manual` opt-out;
     - import order and the APM result (CR-3);
-    - the `express-api-docs/zod` subpath and the zod `<4.2` note (ADR-47);
+    - the `express-api-contract/zod` subpath and the zod `<4.2` note (ADR-47);
     - matching errors on `err.code` (ADR-42);
     - the "Internals" protocol-version note (ADR-43);
     - Node ≥22.

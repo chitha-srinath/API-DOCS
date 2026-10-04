@@ -1,0 +1,31 @@
+Note: playwright not attempted; this is a CLI/API-only package whose /docs endpoint returns a static HTML page (no interactive browser flow beyond loading a CDN script). Per role guidance, degrading explicitly to a raw HTTP transcript of the HTML response.
+
+$ curl -sv http://localhost:4123/docs
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>API Docs</title></head>
+<body>
+<script id="api-reference" data-url=&quot;/openapi.json&quot;></script>
+<script src="https://cdn.jsdelivr.net/npm/docs-ui-package@1.72.1"></script>
+</body>
+</html>*   Trying 127.0.0.1:4123...
+* Connected to localhost (127.0.0.1) port 4123 (#0)
+> GET /docs HTTP/1.1
+> Host: localhost:4123
+> User-Agent: curl/7.79.1
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< X-Powered-By: Express
+< Content-Type: text/html; charset=utf-8
+< Content-Length: 258
+< ETag: W/"102-hvch2KBSb4EglcUI9wtE7HAPlWY"
+< Date: Tue, 29 Sep 2026 23:53:10 GMT
+< Connection: keep-alive
+< Keep-Alive: timeout=5
+< 
+{ [258 bytes data]
+* Connection #0 to host localhost left intact
+
+EXIT:0

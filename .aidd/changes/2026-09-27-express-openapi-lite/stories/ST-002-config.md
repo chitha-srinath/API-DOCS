@@ -39,8 +39,8 @@ file_scope:
 
 The repo is greenfield (`.aidd/context/snapshot.md`; no re-crawl). ST-001 (Wave 1) supplies
 `package.json`, tsconfig, vitest, eslint, stryker and `src/core/types.ts` (including the `BRAND`
-instance key `Symbol.for('express-api-docs.v1.brand')` and the `BRAND_KEY` class key
-`Symbol.for('express-api-docs.v1.brandKey')`, per ADR-49, which supersedes ADR-43/ADR-42's brand
+instance key `Symbol.for('express-api-contract.v1.brand')` and the `BRAND_KEY` class key
+`Symbol.for('express-api-contract.v1.brandKey')`, per ADR-49, which supersedes ADR-43/ADR-42's brand
 comparison). Do **not** edit any of those
 (epic: "Other stories that need changes to these files send requests through their story report.
 They do not edit the files."). ST-003 runs in parallel and owns `src/adapter/**`, `test/adapter/**`
@@ -73,7 +73,7 @@ of the port from `src/core/types.ts` if S-01 defines it there) — never a value
 
 **ADR-49 (verbatim excerpt, owner S-02 for `config/errors.ts`):**
 
-> **Brand:** the brand is a **stable string code per class**, never `this.name`. `core/types.ts` exports `BRAND = Symbol.for('express-api-docs.v1.brand')` (the instance key) and `BRAND_KEY = Symbol.for('express-api-docs.v1.brandKey')` (the class key). Each class declares `static readonly [BRAND_KEY] = 'express-api-docs.v1.ApiDocsConfigError'` (respectively `…ApiDocsSchemaError`).
+> **Brand:** the brand is a **stable string code per class**, never `this.name`. `core/types.ts` exports `BRAND = Symbol.for('express-api-contract.v1.brand')` (the instance key) and `BRAND_KEY = Symbol.for('express-api-contract.v1.brandKey')` (the class key). Each class declares `static readonly [BRAND_KEY] = 'express-api-contract.v1.ApiDocsConfigError'` (respectively `…ApiDocsSchemaError`).
 > **Construction:** the constructor stores the **set of codes along its class chain**: `this[BRAND] = collectBrands(new.target)`, which walks `Object.getPrototypeOf` over constructors and gathers each own `[BRAND_KEY]`.
 > **`instanceof`:** `static [Symbol.hasInstance](x) { const k = Object.prototype.hasOwnProperty.call(this, BRAND_KEY) ? this[BRAND_KEY] : undefined; return k !== undefined && Array.isArray(x?.[BRAND]) && x[BRAND].includes(k); }`. When a user subclass declares no brand, it falls back to `Function.prototype[Symbol.hasInstance].call(this, x)` (a normal prototype check).
 > **Unchanged:** `name` and `code` properties stay for messages and for README guidance.
@@ -100,7 +100,7 @@ ST-007 owns the barrels (`src/index.ts`, `src/manual.ts`, `src/zod.ts`); do not 
 
 **Options that must have rows (names provisional per A-6, behavior binding):**
 `specPath` (default `/openapi.json`, must start with `/`), `docsPath` (default `/docs`, must start
-with `/`), `ui` (`'scalar'` default | `'swagger-ui'`), `cdnUrl`, `serveSpec` (default true),
+with `/`), `ui` (`'single-value'` default | `'docs-ui'`), `cdnUrl`, `serveSpec` (default true),
 `serveDocs` (default true), `docs.specUrl`, `openapi.info` (title, version, description),
 `openapi.servers`, `openapi.tags`, `securitySchemes`, `security`, `validateRequests` (default true,
 A-7), `validateResponses` (unset/false | `'warn'` | `'error'`), `onValidationError`, `autoDetect`
@@ -132,7 +132,7 @@ Epic S-02 obligations: the existing `validate`, `merge`, `defaults`, `options.te
 
 1. `test/config/validate.test.ts`
    - `rejects unknown key specPth` → `ApiDocsConfigError`; message contains `specPth`.
-   - `rejects ui 'redoc'` → message contains `ui`, `scalar`, `swagger-ui`.
+   - `rejects ui 'redoc'` → message contains `ui`, `single-value`, `docs-ui`.
    - `rejects validateResponses 'maybe'` → message contains `validateResponses`, `warn`, `error`.
    - `rejects specPath 'no-slash'` → message contains `specPath` and "starts with `/`".
    - `rejects nested unknown key` (`openapi.infoo`) → message contains the dotted path.
@@ -149,14 +149,14 @@ Epic S-02 obligations: the existing `validate`, `merge`, `defaults`, `options.te
 3. `test/config/defaults.test.ts`
    - `DEFAULT_OPTIONS is deep-frozen` (recursive `Object.isFrozen`).
    - `has a row for every option` (explicit list of paths incl. `schemaAdapter` present in `OPTION_SPEC`).
-   - `defaults: specPath '/openapi.json', docsPath '/docs', ui 'scalar', validateRequests true, validateResponses off, autoDetect on, serveSpec/serveDocs true`.
+   - `defaults: specPath '/openapi.json', docsPath '/docs', ui 'single-value', validateRequests true, validateResponses off, autoDetect on, serveSpec/serveDocs true`.
    - `DEFAULT_OPTIONS.schemaAdapter === null` (ADR-38, AC-047).
    - `DEFAULT_OPTIONS passes validateOptions()`.
 4. `test/config/errors.test.ts` (ADR-49; supersedes the ADR-42 `this.name` brand)
-   - `class brand code`: `ApiDocsConfigError[BRAND_KEY] === 'express-api-docs.v1.ApiDocsConfigError'` (own static property; `BRAND_KEY` from `src/core/types.ts`, equal to `Symbol.for('express-api-docs.v1.brandKey')`).
-   - `instance carries class-chain brand set`: `Array.isArray(err[BRAND])` and `err[BRAND]` includes `'express-api-docs.v1.ApiDocsConfigError'` (`BRAND` = `Symbol.for('express-api-docs.v1.brand')`); it never contains `err.name`.
-   - `Symbol.hasInstance` (brand path): a plain object `{ [BRAND]: ['express-api-docs.v1.ApiDocsConfigError'] }` is `instanceof ApiDocsConfigError`; a foreign object with a wrong brand (`{ [BRAND]: ['express-api-docs.v1.ApiDocsSchemaError'] }`), a non-array brand (`{ [BRAND]: 'express-api-docs.v1.ApiDocsConfigError' }`), `null`, `undefined` and `new Error()` are not.
-   - `subclass with its own brand`: `class Sub extends ApiDocsConfigError { static readonly [BRAND_KEY] = 'test.Sub' }` → `new Sub(...)[BRAND]` contains both `'test.Sub'` and `'express-api-docs.v1.ApiDocsConfigError'`; the instance is `instanceof Sub` and `instanceof ApiDocsConfigError`.
+   - `class brand code`: `ApiDocsConfigError[BRAND_KEY] === 'express-api-contract.v1.ApiDocsConfigError'` (own static property; `BRAND_KEY` from `src/core/types.ts`, equal to `Symbol.for('express-api-contract.v1.brandKey')`).
+   - `instance carries class-chain brand set`: `Array.isArray(err[BRAND])` and `err[BRAND]` includes `'express-api-contract.v1.ApiDocsConfigError'` (`BRAND` = `Symbol.for('express-api-contract.v1.brand')`); it never contains `err.name`.
+   - `Symbol.hasInstance` (brand path): a plain object `{ [BRAND]: ['express-api-contract.v1.ApiDocsConfigError'] }` is `instanceof ApiDocsConfigError`; a foreign object with a wrong brand (`{ [BRAND]: ['express-api-contract.v1.ApiDocsSchemaError'] }`), a non-array brand (`{ [BRAND]: 'express-api-contract.v1.ApiDocsConfigError' }`), `null`, `undefined` and `new Error()` are not.
+   - `subclass with its own brand`: `class Sub extends ApiDocsConfigError { static readonly [BRAND_KEY] = 'test.Sub' }` → `new Sub(...)[BRAND]` contains both `'test.Sub'` and `'express-api-contract.v1.ApiDocsConfigError'`; the instance is `instanceof Sub` and `instanceof ApiDocsConfigError`.
    - `subclass without a brand (prototype fallback)`: `class Plain extends ApiDocsConfigError {}` → `new Plain(...)` is `instanceof Plain` and `instanceof ApiDocsConfigError`; a bare `new ApiDocsConfigError(...)` and a branded plain object are **not** `instanceof Plain` (fallback is `Function.prototype[Symbol.hasInstance]`).
    - `renamed class`: a class obtained via `const Renamed = ApiDocsConfigError` / a subclass whose `name` is redefined via `Object.defineProperty(C, 'name', { value: 'x' })` still passes `instanceof ApiDocsConfigError` (no dependence on function names).
    - `name === 'ApiDocsConfigError'`; stable `code` property present and a string; `instanceof Error` for a real instance; `path` and `expected` exposed.
@@ -218,7 +218,7 @@ or written.
   sub-keys against dotted `OPTION_SPEC` rows; every other key is checked directly. Unknown
   keys and failed `row.check()` both throw `ApiDocsConfigError(path, allowed ?? description)`
   synchronously. The A-9 cross-field rule is checked last, after per-key validation.
-- `ApiDocsConfigError` (ADR-49): brand is the **string code** `express-api-docs.v1.ApiDocsConfigError`
+- `ApiDocsConfigError` (ADR-49): brand is the **string code** `express-api-contract.v1.ApiDocsConfigError`
   on `static readonly [BRAND_KEY]` (typed `: string`, not left as a literal type, so a
   subclass may declare its own differently-valued `[BRAND_KEY]` without a `tsc` variance
   error). The constructor sets `this[BRAND] = collectBrands(new.target)` (walks the
@@ -400,3 +400,21 @@ no challenge round issued. Evidence re-executed live by the auditor: `npm test` 
 Story-level scope narrowings (spec-generation deferred to ST-006/ST-007, runtime validation
 deferred to ST-004) match the story's own AC annotations, not builder-invented narrowing.
 Full verdict: `audit/interrogation/ST-002-verdict.md`.
+
+## Auditor Report (QA step 12 — final audit)
+
+Interrogated AC-005, AC-036, AC-038, AC-039, AC-040, AC-041, AC-042, AC-044, AC-045,
+AC-046, AC-047 (this story's share) against `ac-matrix.md`. Read `test/config/merge.test.ts`
+and `test/config/validate.test.ts` source directly to confirm the `AC-044a`/`AC-044b`
+labelled sub-cases assert what AC-044's Given/When/Then requires (route-level override
+wins over global for both request- and response-validation config).
+
+**Verdict: all 11 ACs — PROVEN.** No DISPUTED ACs for this story.
+Full matrix: `audit/interrogation/qa-final-verdict.md`.
+
+## Test Report (QA step 14 — g_test_report approved 2026-09-30)
+
+Approved by human (let-me-look). Consolidated `qa/test-report.md`: 237+3 exhaustive cases,
+all PASS, 0 open FAILs. Full suite 79/79 files, 644/649 tests (5 legit skips), coverage
+98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `ac-matrix.md` and
+this story's `## Auditor Report` section above for per-AC verdicts.

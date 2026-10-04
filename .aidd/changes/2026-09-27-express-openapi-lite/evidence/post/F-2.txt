@@ -1,0 +1,89 @@
+$ npm test
+
+> express-api-contract@0.1.0 test
+> vitest run --coverage --typecheck
+
+Testing types with tsc and vue-tsc is an experimental feature.
+Breaking changes might not follow SemVer, please pin Vitest's version when using it.
+
+ RUN  v5.0.2 C:/sai/code practice/Package/API-DOCS
+      Coverage enabled with v8
+
+
+> express-api-contract@0.1.0 build
+> tsup
+
+[34mCLI[39m Building entry: {"index":"src/index.ts","manual":"src/manual.ts","zod":"src/zod.ts","auto-record":"src/auto-record.ts"}
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.5.1
+[34mCLI[39m Using tsup config: C:\sai\code practice\Package\API-DOCS\tsup.config.ts
+[34mCLI[39m Target: es2022
+[34mCLI[39m Cleaning output folder
+[34mESM[39m Build start
+[34mCJS[39m Build start
+[32mESM[39m [1mdist\index.js       [22m[32m46.10 KB[39m
+[32mESM[39m [1mdist\auto-record.js [22m[32m3.86 KB[39m
+[32mESM[39m [1mdist\zod.js         [22m[32m2.03 KB[39m
+[32mESM[39m [1mdist\manual.js      [22m[32m46.06 KB[39m
+[32mESM[39m ⚡️ Build success in 63ms
+[32mCJS[39m [1mdist\index.cjs       [22m[32m47.76 KB[39m
+[32mCJS[39m [1mdist\manual.cjs      [22m[32m47.70 KB[39m
+[32mCJS[39m [1mdist\auto-record.cjs [22m[32m5.00 KB[39m
+[32mCJS[39m [1mdist\zod.cjs         [22m[32m3.10 KB[39m
+[32mCJS[39m ⚡️ Build success in 60ms
+[34mDTS[39m Build start
+[32mDTS[39m ⚡️ Build success in 3479ms
+[32mDTS[39m [1mdist\auto-record.d.ts     [22m[32m13.00 B[39m
+[32mDTS[39m [1mdist\zod.d.ts             [22m[32m241.00 B[39m
+[32mDTS[39m [1mdist\index.d.ts           [22m[32m7.26 KB[39m
+[32mDTS[39m [1mdist\manual.d.ts          [22m[32m714.00 B[39m
+[32mDTS[39m [1mdist\types-BKNLo49R.d.ts  [22m[32m4.31 KB[39m
+[32mDTS[39m [1mdist\auto-record.d.cts    [22m[32m13.00 B[39m
+[32mDTS[39m [1mdist\zod.d.cts            [22m[32m243.00 B[39m
+[32mDTS[39m [1mdist\index.d.cts          [22m[32m7.26 KB[39m
+[32mDTS[39m [1mdist\manual.d.cts         [22m[32m716.00 B[39m
+[32mDTS[39m [1mdist\types-BKNLo49R.d.cts [22m[32m4.31 KB[39m
+
+ Test Files  78 passed (78)
+      Tests  637 passed | 5 skipped (642)
+Type Errors  no errors
+   Start at  05:21:56
+   Duration  30.52s (import 47%, tests 41%, worker 5%, typecheck 4%, transform 4%)
+
+    Isolate  75 workers spawned · ~280ms startup each (spawn + environment, per file)
+             at least ~4.97s faster with isolate: false — reuses workers across files instead of one per file
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   98.56 |    93.35 |   99.45 |   99.34 |                   
+ src/adapter       |   97.56 |    89.13 |     100 |   98.71 |                   
+  standard.ts      |   96.15 |    83.33 |     100 |     100 | 20-22,50          
+  zod.ts           |    90.9 |       75 |     100 |    90.9 | 32                
+ src/config        |   98.23 |    96.72 |     100 |   98.13 |                   
+  errors.ts        |     100 |       90 |     100 |     100 | 13                
+  merge.ts         |   94.73 |     92.3 |     100 |   94.44 | 22                
+  validate.ts      |      96 |     92.3 |     100 |      96 | 38                
+ src/introspect    |   98.32 |    89.67 |   97.05 |   99.08 |                   
+  auto-record.ts   |     100 |       75 |      75 |     100 | 30                
+  index.ts         |   97.39 |    90.47 |     100 |   99.01 | 143               
+  paths.ts         |     100 |    95.83 |     100 |     100 | 22                
+  recorder.ts      |   98.41 |    84.61 |     100 |    98.3 | 23                
+ src/route         |   98.91 |     92.1 |     100 |     100 |                   
+  typed.ts         |   95.65 |    78.57 |     100 |     100 | 56,103-111        
+ src/serve         |     100 |    91.66 |     100 |     100 |                   
+  router.ts        |     100 |    91.66 |     100 |     100 | 99                
+ src/spec          |   98.79 |    95.59 |     100 |     100 |                   
+  build.ts         |   99.37 |    96.63 |     100 |     100 | 96-97,230,330     
+  cache.ts         |   96.29 |    92.85 |     100 |     100 | 16                
+  naming.ts        |   96.15 |       80 |     100 |     100 | 6,27              
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 98.56% ( 826/838 )
+Branches     : 93.35% ( 506/542 )
+Functions    : 99.45% ( 183/184 )
+Lines        : 99.34% ( 757/762 )
+================================================================================
+EXIT:0

@@ -1,0 +1,42 @@
+# Supervisor Final Audit — QA Phase (Refreshed 2026-10-04) — 2026-09-27-express-openapi-lite
+
+## Verdict: VIOLATIONS
+
+This supersedes the QA step 17 verdict of 2026-09-30T14:05Z ("COMPLIANT", audit.log:196). That verdict was written before the post-RED E2E history was reconciled against the git log and the on-disk artifacts, and it relied on two claims the artifacts do not support: (a) that the determinism report of record is the "FINAL dispatch" (it is the 2026-09-29 pre-fix run), and (b) that the three post-RED E2E re-dispatches were "correct behavior" without a record of their outcomes on disk.
+
+Scope: `supervision/audit.log` rows 134–198, `qa/*`, `ac-matrix.md`, `audit/**`, `evidence/post/*`, `cost/ledger.md`, `state.yaml`, git log (`.git/logs/HEAD`). Tooling limits as in `supervision/delivery-report.md` (no shell: aidd-cost.sh and sha256 not runnable; cost recomputed by hand).
+
+## Violations (itemized)
+
+| ID | Rule (playbook / protocol) | Evidence of breach | Required remediation |
+|---|---|---|---|
+| Q-1 | `40-qa.md` step 7: reproduce the green before trusting it; a repeat is a measurement, re-running until green is a VIOLATION; step 6: re-run after fixes | `state.yaml:179,182-183,194` gates passed from `qa/verification-report.md:5-7` (commit `98c51d3`). Fix commit `afd973b` (git .git/logs/HEAD line 38) changed `vitest.config.ts` after that run. Three fresh post-RED E2E dispatches (commits `2b77352`, `47fbee7`, `6f307d7`; lines 35, 37, 40) were RED. Commit `e910f7d` (line 41) asserts "PASSED" without a dispatch that produced a green on HEAD. | Fresh step 7 on current HEAD with full critical determinism repeats; mutation on the final tree or a recorded human re-scope; re-run steps 8–17 downstream of changed test files. Set gates only from the new run. |
+| Q-2 | `gates.md` gate ledger integrity | `state.yaml:374` flips `evidence_reproduced` failed→passed citing history `state.yaml:363-364`, a 2026-09-29T23:50 entry written after the RED entries (`:352,358,362`). audit.log:190 repeats it. | Revert gate to `pending` until Q-1 completes; record corrections as ordered, dated notes. |
+| Q-3 | `40-qa.md` step 7 determinism: every disagreement quarantined with a terminal disposition, recorded in `qa/determinism-report.md`; exit: no gate resting on a quarantined test | `qa/determinism-report.md:97-99` "Quarantined tests: None"; `:121-123` "quarantined: 0". `state.yaml:199-209` lists two quarantined tests (disposition `accepted`; history `:352,:358` say `pending`). No on-disk record of the RED runs. `state.yaml:349-352` says the prior report was "never produced" while the on-disk verification report is that run's report. This audit's earlier note (qa-final §5b) mis-described the report as the FINAL dispatch. | Write determinism records for every E2E run (or a consolidated record naming each run and outcome); give each quarantined test a real disposition; reconcile state with the report of record. |
+| Q-4 | `40-qa.md` step 6: fix loop max 3 iterations, shared budget; exhaustion → G3 forced-human | `state.yaml:243-245` `iteration: 2, max: 3`. Fix cycles on record: QA iter 1 (`06000a7`, git line 25; audit.log:164), QA iter 2 (`4fe1ea7`, line 30; history:344-346), post-E2E build-fixer timeout config (`2b77352`, line 35; history:354, unnumbered), build-fixer maxWorkers (`afd973b`, line 38; history:360, labelled "iter 2"). Four cycles against a budget of three; history:358/362 say "2 used, 1 remaining". | Reconcile the counter from the commit/dispatch record. Budget exceeded → FAIL-by-budget; G3 forced-human decision (accept-with-waiver / redirect / abort) recorded in state. |
+| Q-5 | `40-qa.md` steps 7–9: Master Agent monitoring note for the verification batch → `audit/monitoring/qa-verification-batch.md`; supervision: a note per QA batch | `audit/monitoring/` holds `qa-step1-3.md`, `qa-test-batch.md` only. Review-batch file is named `qa-step1-3.md` where audit.log:150 says `qa-review-batch` (naming, minor). | Dispatch Master Agent monitor over the verification artifacts after Q-1; write the note; reconcile the review-batch file name. |
+| Q-6 | `40-qa.md` steps 4/5/10: debate records `audit/debate/<category>.md` with change-global arithmetic line; supervision: "debate records present" | No `audit/debate/` directory exists. `state.yaml:257-259` exchanges 0/6; `quality_gates.debate_complete: passed` (`state.yaml:191`); history:370 "0/6 exchanges". | Write one record per category with the arithmetic line "0 of 6 exchanges used" and terminal item statuses; then re-confirm `debate_complete`. |
+| Q-7 | Supervision: counters must match artifacts | `audit/interrogation/qa-final-verdict.md:3` "Settled in round 1"; `state.yaml:250-252` `rounds_used: 0`. | Set counter per the single convention in C-2; note the value in the verdict. |
+| Q-8 | `gates.md` hash binding: approval covers the artifacts it names; supervision "gate hashes recorded" | `state.yaml:101` G3 approved 2026-09-30T14:20Z; `state.yaml:177` notes "only 5 of ~35 required artifacts were bound" at approval; the rest were bound 2026-10-01 (commit `df7c60a`) without a new approval. | Human re-approval of G3 over the full bound set (shared with D-2 in the delivery report). |
+| Q-9 | `40-qa.md` cost duty: one ledger row per returned dispatch; supervision: no phantom row; replay: every dispatch present | Ledger `cost/ledger.md:135-139` (E2E ×3, build-fixer ×2; 2026-09-30 00:20–02:05) has no audit.log lines; audit.log goes 181 (09-29T23:50) → 182 (23:59). Dispatches are real (commits at git lines 35, 37, 38, 40). | Append the missing dispatched/returned lines with true timestamps. |
+| Q-10 | Supervision cost checks: ceiling changes need a stops row (raised) or formula history | Ceilings raised 5.6M→20M (history:330), 1200→2500 (history:356) with no `cost.stops` row; only one stops row exists (`state.yaml:28-32`), which itself says phase `qa` at 88% although history:290 shows inception at 77%. | Append stops rows (raised) for each raise; correct the stop row by an append-only note. See delivery-report D-7. |
+
+## Checks that hold (verified this refresh)
+
+- Replay: every QA dispatch from step 1 to step 17 is present and ordered in audit.log (rows 135–196), except the E2E/build-fixer runs listed in Q-9.
+- Step 1: six reviewer dimensions (incl. `delta`) plus Security Auditor (rows 135–142); step 3 four adversarial verifiers (145–151); step 5 eight test categories (152–163, critical = all 8).
+- Ledger arithmetic for the QA segment: `cost/ledger.md:108–146` cumulative sums consistent (sampled rows 135, 140–146: 7130731 = 7049263 + 81468; 7554653 = 7378533 + 176120; 7886586 = 7816216 + 70370).
+- `by_phase.qa` gap flagged in `state.yaml:26`: VERIFIED RESOLVED. `by_phase.qa` 2473351 tok / 1547.7 min = spent − inception − construction (7886586 − 2694542 − 2718693; 2175.6 − 102.0 − 525.9). Stale NOTE comment should be removed.
+- No quarantined test is cited as evidence: `ac-matrix.md` contains zero references to `minified.test` / `lint-rules.test` / QUARANTINED (grep count 0).
+- Interrogation budgets: `audit.interrogation.max 2`, `audit.negotiation.max 2`, `audit.debate.max 6` equal the critical row of `rigor-modes.md` §Seeded audit budgets.
+- No `na` gate justified by cost; no `source: not measured` row carries 0; the three `not measured` rows (`cost/ledger.md:76, 80, 142`) are correctly unmeasured.
+- Steps 13–14: no DISPUTED AC in `qa-final-verdict.md`, so no negotiation log entries were required (the absence of `audit/negotiation-log.md` is compliant by the playbook's own condition).
+- Critic's 3 conditions and the receipts-v1 platform gap are recorded verbatim (`qa/critic-verdict.md`); the Critic's input (step 7 verification) is itself affected by Q-1, so the Critic verdict should be re-confirmed after the re-run.
+
+## Observation (not a violation)
+
+Build-fixer commits were made directly to the branch during the fix loop (history:360 self-discloses this). The supervision protocol contains no explicit single-writer rule that this breaches; recorded for the dispatch-protocol owner.
+
+## Required remediation (phase cannot be treated as closed)
+
+Re-run step 7 (Q-1), then steps 8–17 downstream of it; write the missing monitor and debate records (Q-5, Q-6); reconcile counters and fix-loop accounting (Q-4, Q-7); obtain the forced-human G3 decision for the budget overrun and the re-binding (Q-4, Q-8); append audit/ledger rows (Q-9) and cost stops (Q-10). Then re-run this audit.

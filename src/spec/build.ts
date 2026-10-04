@@ -2,7 +2,7 @@
 // Express, no IO, no `zod`, no `src/registry/registry.ts` import (ADR-21).
 // Dedupes with precedence typed = describe > plain (AC-031), applies
 // include/exclude through the in-house glob (AC-030/AC-041), self-excludes
-// specPath/docsPath (AC-033), applies naming defaults/strategies (A-3/A-4,
+// specPath (AC-033), applies naming defaults/strategies (A-3/A-4,
 // AC-042), the auto-400 ProblemDetails `$ref` (AC-011), security inheritance
 // (AC-039), `detectedDefaultResponse` (AC-041) and info/servers/tags
 // (AC-038). Output goes through the canonical key sort (AC-034).
@@ -27,6 +27,8 @@ interface ExtendedMeta extends OperationMeta {
   query?: unknown;
   body?: unknown;
   response?: unknown;
+  /** Extra documented responses, keyed by status code, e.g. `{ 500: { description: 'Server error' } }`. */
+  responses?: Record<string, { description: string; content?: Record<string, unknown> }>;
   adapter?: SchemaAdapter<unknown>;
   security?: Array<Record<string, string[]>>;
   operationId?: string;
@@ -95,7 +97,8 @@ function applyAutoDetectFilter(ops: SpecOperation[], config: ApiDocsOptions): Sp
 function selfExcludePaths(ops: SpecOperation[], config: ApiDocsOptions): SpecOperation[] {
   const specPath = config.specPath ?? (DEFAULT_OPTIONS.specPath as string);
   const docsPath = config.docsPath ?? (DEFAULT_OPTIONS.docsPath as string);
-  return ops.filter((op) => op.path !== specPath && op.path !== docsPath);
+  const docsAssetsPrefix = `${docsPath.replace(/\/$/, '')}/assets/`;
+  return ops.filter((op) => op.path !== specPath && op.path !== docsPath && !op.path.startsWith(docsAssetsPrefix));
 }
 
 interface JsonObjectSchema {
@@ -104,10 +107,113 @@ interface JsonObjectSchema {
   required?: string[];
 }
 
-function pathParameters(op: SpecOperation, adapter: SchemaAdapter<unknown>): Record<string, unknown>[] {
+interface JsonSchemaWithDefs extends JsonObjectSchema {
+  $defs?: Record<string, JSONSchema>;
+}
+
+/** A shared bag `pathParameters`/`queryParameters` hoist `$defs` into, keyed by def name (F-01 fix). */
+type DefsCollector = Record<string, JSONSchema>;
+
+/**
+ * Recursively rewrites `$ref: '#/$defs/Name'` to `$ref: '#/components/schemas/Name'`
+ * so a hoisted def bag stays internally consistent once moved to `components.schemas`.
+ */
+function rewriteDefsRefs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => rewriteDefsRefs(item)) as unknown as T;
+  }
+  if (value !== null && typeof value === 'object') {
+    const input = value as Record<string, unknown>;
+    const output: Record<string, unknown> = {};
+    for (const [key, item] of Object.entries(input)) {
+      if (key === '$ref' && typeof item === 'string' && item.startsWith('#/$defs/')) {
+        output[key] = `#/components/schemas/${item.slice('#/$defs/'.length)}`;
+      } else {
+        output[key] = rewriteDefsRefs(item);
+      }
+    }
+    return output as unknown as T;
+  }
+  return value;
+}
+
+/**
+ * F-01 fix: `adapter.toJSONSchema()` output for a `.meta({id})`-tagged (or otherwise
+ * named/reused) Zod/Standard-Schema schema carries the named subschema in a sibling
+ * `$defs` bag with a `$ref` in its place. `pathParameters`/`queryParameters` only ever
+ * extracted `schema.properties[name]`, silently dropping `$defs` and leaving a dangling,
+ * unresolvable `$ref` (confirmed via the default `standardSchemaAdapter` too, not just
+ * the opt-in `zodAdapter`). This hoists any `$defs` into the shared `defs` collector
+ * (merged into `components.schemas` by `buildSpec`) and rewrites refs to point there,
+ * returning the schema with `$defs` stripped.
+ */
+/**
+ * Ignores `additionalProperties` at every level before comparing two schemas
+ * for the collision check below. Zod's `toJSONSchema` (and Standard Schema's
+ * `~standard.jsonSchema`) add `additionalProperties: false` for `io: 'output'`
+ * but not `io: 'input'` - so the SAME named schema, reused for both a request
+ * body ('input') and a response ('output') (an ordinary, common pattern),
+ * produces genuinely different JSON for the identical logical schema. That
+ * is adapter-driven io variance, not a developer naming two different
+ * schemas the same thing, and must not trip the collision guard below.
+ */
+function stripAdditionalProperties(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripAdditionalProperties);
+  if (value !== null && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (k === 'additionalProperties') continue;
+      out[k] = stripAdditionalProperties(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+function hoistSchemaDefs(schema: JsonSchemaWithDefs, defs: DefsCollector): JsonObjectSchema {
+  const { $defs, ...rest } = schema;
+  if ($defs) {
+    for (const [name, defSchema] of Object.entries($defs)) {
+      const rewritten = rewriteDefsRefs(defSchema);
+      if (name in defs) {
+        // Two different .meta({id}) schemas sharing the same name would
+        // otherwise collide silently: first-writer-wins while every $ref
+        // still points at the surviving entry, producing a structurally
+        // valid but semantically wrong document (e.g. a route documented
+        // as a string when its real schema is a number) with no warning.
+        // Benign re-registration of the *same* schema (the common case -
+        // one named schema reused across many routes, or the same schema
+        // used for both a request body and a response) must stay a no-op,
+        // so only a genuine content mismatch - after normalizing away known
+        // adapter io-direction variance - fails fast.
+        const existingNorm = JSON.stringify(stripAdditionalProperties(defs[name]));
+        const newNorm = JSON.stringify(stripAdditionalProperties(rewritten));
+        if (existingNorm !== newNorm) {
+          throw new Error(
+            `express-api-contract: two different schemas both use the name "${name}" ` +
+              `(via .meta({ id: '${name}' }) or an equivalent named/reused schema). ` +
+              `Named schemas must be unique per name across the whole app - rename one ` +
+              'of them, or reuse the exact same schema instance/definition.',
+          );
+        }
+        continue;
+      }
+      defs[name] = rewritten;
+    }
+  }
+  return rewriteDefsRefs(rest) as JsonObjectSchema;
+}
+
+function pathParameters(
+  op: SpecOperation,
+  adapter: SchemaAdapter<unknown>,
+  defs: DefsCollector,
+): Record<string, unknown>[] {
   const meta = metaOf(op);
   const schema =
-    meta.params !== undefined ? (adapter.toJSONSchema(meta.params, 'input') as JsonObjectSchema) : undefined;
+    meta.params !== undefined
+      ? hoistSchemaDefs(adapter.toJSONSchema(meta.params, 'input') as JsonSchemaWithDefs, defs)
+      : undefined;
   return op.pathParams.map((name) => ({
     name,
     in: 'path',
@@ -116,10 +222,14 @@ function pathParameters(op: SpecOperation, adapter: SchemaAdapter<unknown>): Rec
   }));
 }
 
-function queryParameters(op: SpecOperation, adapter: SchemaAdapter<unknown>): Record<string, unknown>[] {
+function queryParameters(
+  op: SpecOperation,
+  adapter: SchemaAdapter<unknown>,
+  defs: DefsCollector,
+): Record<string, unknown>[] {
   const meta = metaOf(op);
   if (meta.query === undefined) return [];
-  const schema = adapter.toJSONSchema(meta.query, 'input') as JsonObjectSchema;
+  const schema = hoistSchemaDefs(adapter.toJSONSchema(meta.query, 'input') as JsonSchemaWithDefs, defs);
   const properties = schema.properties ?? {};
   const required = new Set(schema.required ?? []);
   return Object.keys(properties).map((name) => ({
@@ -130,10 +240,20 @@ function queryParameters(op: SpecOperation, adapter: SchemaAdapter<unknown>): Re
   }));
 }
 
-function requestBodyOf(op: SpecOperation, adapter: SchemaAdapter<unknown>): Record<string, unknown> | undefined {
+function requestBodyOf(
+  op: SpecOperation,
+  adapter: SchemaAdapter<unknown>,
+  defs: DefsCollector,
+): Record<string, unknown> | undefined {
   const meta = metaOf(op);
   if (meta.body === undefined) return undefined;
-  const schema = adapter.toJSONSchema(meta.body, 'input');
+  // F-01 (widened): a $ref like '#/$defs/X' resolves relative to the whole
+  // OpenAPI document, not to wherever it happens to be nested - embedding
+  // the adapter's raw $defs bag inline here does NOT make the $ref
+  // self-contained, it leaves a dangling reference exactly like the
+  // params/query case did. Hoist here too, same as pathParameters/
+  // queryParameters.
+  const schema = hoistSchemaDefs(adapter.toJSONSchema(meta.body, 'input') as JsonSchemaWithDefs, defs);
   return { required: true, content: { 'application/json': { schema } } };
 }
 
@@ -146,12 +266,14 @@ function responsesOf(
   op: SpecOperation,
   adapter: SchemaAdapter<unknown>,
   config: ApiDocsOptions,
+  defs: DefsCollector,
 ): Record<string, unknown> {
   const meta = metaOf(op);
   const responses: Record<string, unknown> = {};
 
   if (meta.response !== undefined) {
-    const schema = adapter.toJSONSchema(meta.response, 'output');
+    // F-01 (widened): same dangling-$ref risk as requestBody - hoist here too.
+    const schema = hoistSchemaDefs(adapter.toJSONSchema(meta.response, 'output') as JsonSchemaWithDefs, defs);
     responses['200'] = { description: 'OK', content: { 'application/json': { schema } } };
   } else if (op.source === 'plain' && config.detectedDefaultResponse) {
     const { status, description } = config.detectedDefaultResponse;
@@ -165,6 +287,13 @@ function responsesOf(
       description: 'Bad Request',
       content: { [PROBLEM_CONTENT_TYPE]: { schema: { $ref: PROBLEM_REF } } },
     };
+  }
+
+  // User-declared responses (e.g. error statuses) pass through with an optional raw `content` map.
+  for (const [status, declared] of Object.entries(meta.responses ?? {})) {
+    responses[status] = declared.content
+      ? { description: declared.description, content: declared.content }
+      : { description: declared.description };
   }
 
   return responses;
@@ -195,16 +324,17 @@ function buildOperation(
   operationId: string,
   adapter: SchemaAdapter<unknown>,
   config: ApiDocsOptions,
+  defs: DefsCollector,
 ): Record<string, unknown> {
   const meta = metaOf(op);
-  const parameters = [...pathParameters(op, adapter), ...queryParameters(op, adapter)];
-  const requestBody = requestBodyOf(op, adapter);
+  const parameters = [...pathParameters(op, adapter, defs), ...queryParameters(op, adapter, defs)];
+  const requestBody = requestBodyOf(op, adapter, defs);
   const security = securityOf(op, config);
 
   const operation: Record<string, unknown> = {
     operationId,
     tags: tagsOf(op, config),
-    responses: responsesOf(op, adapter, config),
+    responses: responsesOf(op, adapter, config, defs),
   };
   if (meta.summary !== undefined) operation.summary = meta.summary;
   if (meta.description !== undefined) operation.description = meta.description;
@@ -254,17 +384,18 @@ export function buildSpec(
   }));
   const resolvedIds = assignOperationIds(idInputs);
 
+  const defs: DefsCollector = {};
   const paths: Record<string, Record<string, unknown>> = {};
   for (const [index, op] of filtered.entries()) {
     const id = op.id ?? index;
     const operationId = resolvedIds.get(id) as string;
     const opAdapter = resolveAdapter(op, adapter);
     const pathEntry = (paths[op.path] ??= {});
-    pathEntry[op.method as HttpMethod] = buildOperation(op, operationId, opAdapter, merged);
+    pathEntry[op.method as HttpMethod] = buildOperation(op, operationId, opAdapter, merged, defs);
   }
 
   const components: Record<string, unknown> = {
-    schemas: { [PROBLEM_SCHEMA_NAME]: PROBLEM_DETAILS_SCHEMA },
+    schemas: { [PROBLEM_SCHEMA_NAME]: PROBLEM_DETAILS_SCHEMA, ...defs },
   };
   if (merged.securitySchemes) components.securitySchemes = merged.securitySchemes;
 

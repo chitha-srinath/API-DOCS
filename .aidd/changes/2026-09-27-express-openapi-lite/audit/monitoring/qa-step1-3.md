@@ -21,7 +21,7 @@ adapter output into the per-parameter schema or into `components.schemas`. `requ
 `responsesOf` (lines 133-171), by contrast, pass the *whole* `adapter.toJSONSchema(...)`
 result through untouched (`content: { 'application/json': { schema } }`), which is
 consistent with the report's own claim that the bug is scoped to `params`/`query` only.
-The finding's evidence (a live `SwaggerParser.validate()` repro against a `.meta({id})`-
+The finding's evidence (a live `OpenApiParser.validate()` repro against a `.meta({id})`-
 tagged zod schema) is claimed, not independently re-run by me here (no shell tool in this
 constrained spot-check), but the **code-level mechanism** the finding depends on — the
 missing `$defs` propagation at exactly the cited lines — is real and directly observable

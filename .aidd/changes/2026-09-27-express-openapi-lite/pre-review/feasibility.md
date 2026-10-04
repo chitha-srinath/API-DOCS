@@ -27,7 +27,7 @@ Every new pin exists. `esbuild ~0.27.7` falls inside tsup 8.5.1's `^0.27.0` and 
 |---|---|---|---|
 | F-1 | HIGH | **RESOLVED** (unchanged) | ADR-22. ADR-46 hardens it: ST-001:152,240 assert `matrix.node` deep-equals `[22, 24]`. |
 | F-2 | MEDIUM | **RESOLVED** (unchanged) | ADR-22 and ST-001 pre-declare vite and @types/node. |
-| F-3 | HIGH | **RESOLVED**, strengthened | ADR-20 plus ADR-43 (versioned `express-api-docs.v1.*` keys), ADR-42 (error brand) and ADR-44 (`[META]` is load-bearing for the cross-copy walk). The dual-load test is owned by S-07. |
+| F-3 | HIGH | **RESOLVED**, strengthened | ADR-20 plus ADR-43 (versioned `express-api-contract.v1.*` keys), ADR-42 (error brand) and ADR-44 (`[META]` is load-bearing for the cross-copy walk). The dual-load test is owned by S-07. |
 | F-4 | MEDIUM | **RESOLVED** | ADR-24 plus ADR-40. The install call exists only in `dist/auto-record.{js,cjs}`, which matches the `sideEffects` list, and `test/dist/build-shape.test.ts` checks this (ST-001:137). |
 | F-5 | MEDIUM | **RESOLVED** (unchanged); ADR-34 refines it | ADR-23. ADR-34 pins the warn cardinality and the fate of sub-apps on unpatched copies. |
 | F-6 | LOW | **RESOLVED** (unchanged) | ADR-29, ST-005. |

@@ -35,10 +35,6 @@ export interface OpenApiOptions {
   tags?: OpenApiTag[];
 }
 
-export interface DocsOptions {
-  specUrl?: string;
-}
-
 export interface AutoDetectFilter {
   include?: string[];
   exclude?: string[];
@@ -64,12 +60,9 @@ export type OnValidationError = (error: unknown) => { status: number; body: unkn
 
 export interface ApiDocsOptions {
   specPath?: string;
-  docsPath?: string;
-  ui?: 'scalar' | 'swagger-ui';
-  cdnUrl?: string;
   serveSpec?: boolean;
+  docsPath?: string;
   serveDocs?: boolean;
-  docs?: DocsOptions;
   openapi?: OpenApiOptions;
   securitySchemes?: Record<string, unknown>;
   security?: SecurityRequirement[];
@@ -88,14 +81,14 @@ export type RouteOptions = Partial<ApiDocsOptions>;
 
 /**
  * The top-level keys whose value is a "group": a plain namespacing object
- * expanded one level into dotted `OptionPath` entries (`docs.specUrl`,
- * `openapi.info`, ...). Every other key — including object-shaped leaves like
- * `schemaAdapter` or `securitySchemes` — is a path in its own right. This is a
- * closed, hand-maintained list (not a structural check) because a structural
+ * expanded one level into dotted `OptionPath` entries (`openapi.info`, ...).
+ * Every other key — including object-shaped leaves like `schemaAdapter` or
+ * `securitySchemes` — is a path in its own right. This is a closed,
+ * hand-maintained list (not a structural check) because a structural
  * "is this a plain data object" test cannot reliably tell a namespacing
  * object apart from a dictionary-shaped leaf like `securitySchemes`.
  */
-type GroupKeyNames = 'docs' | 'openapi';
+type GroupKeyNames = 'openapi';
 
 /**
  * ADR-04: dotted-path union over every leaf of `ApiDocsOptions`. `OPTION_SPEC`

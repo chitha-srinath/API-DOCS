@@ -1,18 +1,18 @@
 // ST-007 (S-07, component C9): the composition root. `createApiDocs(opts)`
 // validates synchronously before building anything, then builds the Router
-// (spec and docs GETs, gated by `serveSpec`/`serveDocs`), resolves the app
+// (spec GET, gated by `serveSpec`), resolves the app
 // lazily through `req.app`, and wires the cache. Per ADR-38, the default
 // adapter (`standardSchemaAdapter`) is injected here, never in `src/config/**`.
 import { Router } from 'express';
 import type { Request, Response, Router as ExpressRouter } from 'express';
 
+import { memoizeAdapter } from '../adapter/memo.js';
 import { standardSchemaAdapter } from '../adapter/standard.js';
 import type { SchemaAdapter } from '../adapter/types.js';
 import { DEFAULT_OPTIONS } from '../config/defaults.js';
 import { mergeOptions } from '../config/merge.js';
 import type { ApiDocsOptions } from '../config/types.js';
 import { validateOptions } from '../config/validate.js';
-import { renderDocsHtml } from '../docs/render.js';
 import { introspect } from '../introspect/index.js';
 import { noopLogger } from '../introspect/recorder.js';
 import { createRegistry } from '../registry/registry.js';
@@ -23,6 +23,7 @@ import { createRoute } from '../route/typed.js';
 import type { OpenApiDocument, SpecOperation } from '../spec/build.js';
 import { buildSpec, specOperationsFromRegistry } from '../spec/build.js';
 import { createSpecCache } from '../spec/cache.js';
+import { getDocsAsset, renderDocsPage } from './docs-page.js';
 
 export interface GetSpecContext {
   readonly app?: unknown;
@@ -47,13 +48,18 @@ export function createApiDocs(rawOptions?: unknown): ApiDocsInstance {
   const validated = validateOptions(rawOptions);
   const options = mergeOptions(DEFAULT_OPTIONS as ApiDocsOptions, validated, {}) as ApiDocsOptions;
 
-  const adapter: SchemaAdapter<unknown> =
+  const logger = noopLogger;
+
+  const resolvedAdapter: SchemaAdapter<unknown> =
     (options.schemaAdapter as SchemaAdapter<unknown> | null | undefined) ??
     (standardSchemaAdapter as unknown as SchemaAdapter<unknown>);
+  // ADR-03 (F-04 fix): wrap the resolved adapter in `memoizeAdapter` before it's used to
+  // build the spec, so repeated `toJSONSchema` calls for the same schema identity across
+  // multiple spec rebuilds are cached, not re-derived from scratch.
+  const adapter: SchemaAdapter<unknown> = memoizeAdapter(resolvedAdapter, logger);
 
   const registry = createRegistry();
   const cache = createSpecCache<OpenApiDocument>();
-  const logger = noopLogger;
 
   const route = createRoute({ registry, options, logger });
   const describe = createDescribe({ registry });
@@ -85,15 +91,20 @@ export function createApiDocs(rawOptions?: unknown): ApiDocsInstance {
     });
   }
 
+  // The rendered UI is a fixed page that loads the spec from `specPath` on the same origin.
+  // Only the paths are configurable; the page itself has no user-supplied markup.
   if (options.serveDocs) {
-    router.get(docsPath, (req: Request, res: Response) => {
-      const specUrl = options.docs?.specUrl ?? specPath;
-      const html = renderDocsHtml({
-        specUrl,
-        ui: (options.ui as 'scalar' | 'swagger-ui') ?? 'scalar',
-        cdnUrl: options.cdnUrl,
-      });
+    const html = renderDocsPage(docsPath, specPath);
+    router.get(docsPath, (_req: Request, res: Response) => {
       res.type('html').send(html);
+    });
+    router.get(`${docsPath.replace(/\/$/, '')}/assets/:file`, (req: Request, res: Response) => {
+      const asset = getDocsAsset(docsPath, String(req.params.file));
+      if (!asset) {
+        res.status(404).end();
+        return;
+      }
+      res.type(asset.type).send(asset.body);
     });
   }
 

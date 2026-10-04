@@ -40,9 +40,9 @@ export interface RouteRegistry {
 }
 
 // ADR-20 + ADR-43 + ADR-49: versioned Symbol.for identities, BRAND and BRAND_KEY.
-export const META: unique symbol = Symbol.for('express-api-docs.v1.meta') as never;
-export const MOUNT: unique symbol = Symbol.for('express-api-docs.v1.mount') as never;
-export const CHILD: unique symbol = Symbol.for('express-api-docs.v1.child') as never;
-export const RECORDER: unique symbol = Symbol.for('express-api-docs.v1.recorder') as never;
-export const BRAND: unique symbol = Symbol.for('express-api-docs.v1.brand') as never;
-export const BRAND_KEY: unique symbol = Symbol.for('express-api-docs.v1.brandKey') as never;
+export const META: unique symbol = Symbol.for('express-api-contract.v1.meta') as never;
+export const MOUNT: unique symbol = Symbol.for('express-api-contract.v1.mount') as never;
+export const CHILD: unique symbol = Symbol.for('express-api-contract.v1.child') as never;
+export const RECORDER: unique symbol = Symbol.for('express-api-contract.v1.recorder') as never;
+export const BRAND: unique symbol = Symbol.for('express-api-contract.v1.brand') as never;
+export const BRAND_KEY: unique symbol = Symbol.for('express-api-contract.v1.brandKey') as never;

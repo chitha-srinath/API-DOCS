@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Removed
+
+- The built-in `/docs` page is removed, along with the `docsPath`, `ui`, `cdnUrl`,
+  `serveDocs` and `docs.specUrl` options. The OpenAPI document at `specPath`
+  (default `/openapi.json`) is unchanged.
+
 ## [0.1.0] - 2026-09-28
 
 Initial release.
@@ -9,7 +17,7 @@ Initial release.
 ### Added
 
 - `createApiDocs(options?)` — zero-config OpenAPI 3.1 document generation and
-  a `/docs` UI (Scalar by default, Swagger UI opt-in) for Express 4 and 5.
+  a `/docs` UI for Express 4 and 5.
 - Typed routes via `route(method, localPath, meta, handler)`: request
   validation (`validateRequests`) and optional response validation
   (`validateResponses: 'warn' | 'error'`) against a `SchemaAdapter`.
@@ -21,10 +29,10 @@ Initial release.
 - `standardSchemaAdapter` (the core default, works with any
   [Standard Schema](https://standardschema.dev) library) and the global
   `schemaAdapter` option / per-route `meta.adapter` resolution order.
-- `express-api-docs/zod` subpath export: `zodAdapter`, for typed `z.infer` and
+- `express-api-contract/zod` subpath export: `zodAdapter`, for typed `z.infer` and
   `unrepresentable: 'any'` JSON Schema conversion. `zod` is an **optional
   peer**, `^4.2.0` (Node >= 22).
-- `express-api-docs/manual` subpath export: the identical public API without
+- `express-api-contract/manual` subpath export: the identical public API without
   the import-time Express patch, for callers who need to control exactly when
   `installRecorder()` runs.
 - `installRecorder(express)` for patching a second copy of Express (pnpm,
@@ -38,4 +46,4 @@ Initial release.
 - `examples/basic`, a runnable example app covered by an automated smoke test.
 - Node.js **>= 22** required (CI matrix: Node {22, 24} x Express {4, 5}).
 
-[0.1.0]: https://github.com/example/express-api-docs/releases/tag/v0.1.0
+[0.1.0]: https://github.com/example/express-api-contract/releases/tag/v0.1.0

@@ -64,7 +64,7 @@ Mode-independent, from `cost-governance.md`. Recompute with
   budget, tokens, time, or spend is a VIOLATION; the only legitimate `na` reason vocabulary is
   `reason: rigor:<mode>` (plus `reason: cost:no-dispatches` for `within_cost_budget` itself).
   The reason is read from the gate's **object form**, `{status: na, reason: ...}`
-  (`gates.md` §The `na` encoding) — an `na` recorded as a bare scalar carries no reason at
+  (`gates.md` §The `na` encoding) — an `na` recorded as a bare single-value carries no reason at
   all and is itself the VIOLATION.
 - Every `cost.stops` row has a terminal `disposition`; none is still `pending` past the phase
   boundary that recorded it.

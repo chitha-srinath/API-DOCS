@@ -61,6 +61,8 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
+      # Stryker's dry run imports dist/ (tests resolve the package entry), so build first.
+      - run: npm run build
       - uses: actions/cache@v4
         with:
           path: reports/stryker-incremental.json

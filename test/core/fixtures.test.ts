@@ -25,7 +25,7 @@ describe('test/fixtures/fresh-express', () => {
     expect(express).not.toBe(cachedBefore);
 
     const proto = (express as { Router: { prototype: { use: unknown } } }).Router.prototype;
-    expect(Object.getOwnPropertyDescriptor(proto, Symbol.for('express-api-docs.v1.recorder'))).toBeUndefined();
+    expect(Object.getOwnPropertyDescriptor(proto, Symbol.for('express-api-contract.v1.recorder'))).toBeUndefined();
 
     restore();
     const cachedAfter = req(EXPRESS4);

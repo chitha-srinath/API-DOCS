@@ -6,3 +6,4 @@ reports/
 .stryker-tmp/
 *.tsbuildinfo
 .env
+examples/docs-ui/dist/

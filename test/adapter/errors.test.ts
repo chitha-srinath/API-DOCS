@@ -8,10 +8,10 @@ describe('ApiDocsSchemaError (ADR-41, ADR-49)', () => {
     expect(err.name).toBe('ApiDocsSchemaError');
     expect(err.code).toBe('EAD_ASYNC_SCHEMA');
     expect((ApiDocsSchemaError as unknown as Record<PropertyKey, unknown>)[BRAND_KEY]).toBe(
-      'express-api-docs.v1.ApiDocsSchemaError',
+      'express-api-contract.v1.ApiDocsSchemaError',
     );
     expect(Array.isArray((err as unknown as Record<PropertyKey, unknown>)[BRAND])).toBe(true);
-    expect((err as unknown as Record<PropertyKey, unknown>)[BRAND]).toContain('express-api-docs.v1.ApiDocsSchemaError');
+    expect((err as unknown as Record<PropertyKey, unknown>)[BRAND]).toContain('express-api-contract.v1.ApiDocsSchemaError');
   });
 
   it('is instanceof ApiDocsSchemaError and Error', () => {
@@ -21,9 +21,9 @@ describe('ApiDocsSchemaError (ADR-41, ADR-49)', () => {
   });
 
   it('brand-checks plain objects structurally', () => {
-    const branded = { [BRAND]: ['express-api-docs.v1.ApiDocsSchemaError'] };
-    const wrongBrand = { [BRAND]: ['express-api-docs.v1.ApiDocsConfigError'] };
-    const nonArrayBrand = { [BRAND]: 'express-api-docs.v1.ApiDocsSchemaError' };
+    const branded = { [BRAND]: ['express-api-contract.v1.ApiDocsSchemaError'] };
+    const wrongBrand = { [BRAND]: ['express-api-contract.v1.ApiDocsConfigError'] };
+    const nonArrayBrand = { [BRAND]: 'express-api-contract.v1.ApiDocsSchemaError' };
 
     const nullish: unknown = null;
     const notDefined: unknown = undefined;
@@ -43,7 +43,7 @@ describe('ApiDocsSchemaError (ADR-41, ADR-49)', () => {
     expect(err instanceof ApiDocsSchemaError).toBe(true);
     expect(err instanceof MyErr).toBe(true);
     const plainInstance: unknown = new ApiDocsSchemaError('acme');
-    const brandedObject: unknown = { [BRAND]: ['express-api-docs.v1.ApiDocsSchemaError'] };
+    const brandedObject: unknown = { [BRAND]: ['express-api-contract.v1.ApiDocsSchemaError'] };
     expect(plainInstance instanceof MyErr).toBe(false);
     expect(brandedObject instanceof MyErr).toBe(false);
   });
@@ -55,7 +55,7 @@ describe('ApiDocsSchemaError (ADR-41, ADR-49)', () => {
     const instance = new Branded('acme');
     const brands = (instance as unknown as Record<PropertyKey, unknown>)[BRAND] as string[];
 
-    expect(brands).toContain('express-api-docs.v1.ApiDocsSchemaError');
+    expect(brands).toContain('express-api-contract.v1.ApiDocsSchemaError');
     expect(brands).toContain('x.Branded');
     expect(instance instanceof ApiDocsSchemaError).toBe(true);
     expect(instance instanceof Branded).toBe(true);

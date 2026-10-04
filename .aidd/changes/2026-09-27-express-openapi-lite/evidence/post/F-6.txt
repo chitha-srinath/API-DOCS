@@ -1,0 +1,19 @@
+examples/basic/app.ts registers a plain unannotated route with no typed helper and no describe():
+  app.get("/widgets-plain", (_req, res) => { res.json([]); });
+
+$ curl -s http://localhost:4123/openapi.json -o spec2.json
+$ node -e "console.log(JSON.stringify(require(spec2.json).paths[\"/widgets-plain\"], null, 2))"
+{
+  "get": {
+    "operationId": "getWidgets-plain",
+    "responses": {
+      "200": {
+        "description": "OK"
+      }
+    },
+    "tags": [
+      "widgets-plain"
+    ]
+  }
+}
+EXIT:0

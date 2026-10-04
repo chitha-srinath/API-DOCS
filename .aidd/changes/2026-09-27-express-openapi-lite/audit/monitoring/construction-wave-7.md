@@ -43,7 +43,7 @@ Read `README.md` (365 lines) end to end against `src/config/spec-table.ts`,
   Requires zod >= 4.2", no below-4.2 advice, no `^4.0.0`. `package.json:78,80-83`
   confirms `peerDependencies.zod: "^4.2.0"` with `peerDependenciesMeta.zod.optional:
   true`. Matches ADR-52 exactly. Grepped the README text for the literal
-  `import { zodAdapter } from 'express-api-docs'` anti-pattern the Builder Report
+  `import { zodAdapter } from 'express-api-contract'` anti-pattern the Builder Report
   says it had to remove after a red run — confirmed absent from the current file.
 - **Public exports (ADR-41)**: `src/index.ts:6-11` exports exactly
   `ApiDocsConfigError, ApiDocsSchemaError, DEFAULT_OPTIONS, standardSchemaAdapter,
@@ -52,7 +52,7 @@ Read `README.md` (365 lines) end to end against `src/config/spec-table.ts`,
   read `src/manual.ts`/`src/zod.ts` line-by-line (time-boxed), but the Builder
   Report's specific claim about `src/zod.ts` exporting only `zodAdapter` +
   re-exporting `ApiDocsSchemaError` is consistent with the README's own wording
-  ("`zodAdapter` is only exported from the `express-api-docs/zod` subpath").
+  ("`zodAdapter` is only exported from the `express-api-contract/zod` subpath").
 - **SchemaAdapter member names (ADR-53)**: README.md:87-93 names `isSchema`,
   `validate`, `toJSONSchema` — never `parse`/`toJsonSchema`. `src/config/spec-table.ts:14-21`'s
   `isDuckTypedSchemaAdapter` checks exactly those three function members under
@@ -60,11 +60,11 @@ Read `README.md` (365 lines) end to end against `src/config/spec-table.ts`,
 - **Error brand / matching (ADR-49)**: README.md:173-190 recommends `err.code` as
   most portable, `instanceof` as the cross-build/minification-safe alternative,
   and explicitly tells readers not to match on `err.name`/`constructor.name`. This
-  is consistent with the Builder Report's description of `Symbol.for('express-api-docs.v1.brand')`
+  is consistent with the Builder Report's description of `Symbol.for('express-api-contract.v1.brand')`
   + `Symbol.hasInstance` in `src/adapter/errors.ts`/`src/config/errors.ts`; I did
   not open those two files myself to confirm the brand symbol's exact string, so
   this one line item rests on the Builder Report's own citation, not my own read.
-- **Internals protocol note**: README.md:310-321 names `express-api-docs.v1.meta`,
+- **Internals protocol note**: README.md:310-321 names `express-api-contract.v1.meta`,
   `.v1.mount`, `.v1.child`, `.v1.recorder` (no `.v1.error` — the story text at
   line 88 of ST-008 lists `.v1.error` too, but the README omits it). This is a
   minor discrepancy between the story's prose and the shipped README; it's not
@@ -100,7 +100,7 @@ doesn't violate AC-029's literal text (which only requires the example to serve
   `server.ts` separately calls `.listen()`, matching the story's constraint
   that `example-smoke.test.ts` imports `createApp()` from `app.ts` and never
   invokes `server.ts`'s `listen()` path.
-- Import order is correct: `createApiDocs` is imported from `express-api-docs`
+- Import order is correct: `createApiDocs` is imported from `express-api-contract`
   at the top of `app.ts`, before `express` and before any router construction —
   satisfies ADR-18 and the file's own comment about it.
 - As noted above, it demonstrates typed routes and `describe()` but not

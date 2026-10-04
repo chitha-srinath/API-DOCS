@@ -8,5 +8,4 @@ const port = Number(process.env.PORT ?? 3000);
 app.listen(port, () => {
   console.log(`Example listening on http://localhost:${port}`);
   console.log(`OpenAPI document: http://localhost:${port}/openapi.json`);
-  console.log(`Docs UI:          http://localhost:${port}/docs`);
 });

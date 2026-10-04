@@ -38,7 +38,7 @@ file_scope:
 
 ## Context
 
-Epic id mapping: epic row **S-06** is story id **ST-006** (the schema requires `ST-NNN`). Wave 5. Depends on S-02 (ST-002, config), S-03 (ST-003, adapter and `test/fixtures/stub-adapter.ts`) and S-05 (ST-005, introspection); S-05 itself depends on S-01 and S-04 (ADR-27b), so the S-01 `RouteRegistry` contract, `test/fixtures/majors.ts`, and the S-04 implementation are all on disk when this story starts. Risk (epic, verbatim): "medium | Byte determinism; dedupe; swagger-parser validity".
+Epic id mapping: epic row **S-06** is story id **ST-006** (the schema requires `ST-NNN`). Wave 5. Depends on S-02 (ST-002, config), S-03 (ST-003, adapter and `test/fixtures/stub-adapter.ts`) and S-05 (ST-005, introspection); S-05 itself depends on S-01 and S-04 (ADR-27b), so the S-01 `RouteRegistry` contract, `test/fixtures/majors.ts`, and the S-04 implementation are all on disk when this story starts. Risk (epic, verbatim): "medium | Byte determinism; dedupe; openapi-parser validity".
 
 Epic story-table row (verbatim): "S-06 | ST-006-spec-builder.md | Spec builder: dedupe, glob, naming, canonical sort and fingerprint cache | 5 | S-02, S-03, S-05 | AC-005 (the stub schema appears in the spec), AC-011, AC-015, AC-016, AC-017, AC-023 (spec half, ADR-32), AC-030, AC-031, AC-032, AC-033, AC-034 (byte identity), AC-038, AC-039, AC-041, AC-042, AC-047 (spec test) | Yes (5)".
 
@@ -93,7 +93,7 @@ Five source files total (`build.ts`, `naming.ts`, `glob.ts`, `canonical.ts`, `ca
 
 ### Upstream contracts you consume (architecture.md, verbatim; current, non-superseded text)
 
-- C0 (`src/core/types.ts`, S-01): "`HttpMethod`, `OperationMeta` (the per-route declaration), `DetectedOperation {method, path, pathParams[], source: 'typed'|'describe'|'plain', meta?}`, `Logger` (with stable `EAD_*` warn codes), the pinned `RegistryEntry`/`RouteRegistry` interfaces (ADR-27c, see Pinned seams)". Symbol keys are versioned per ADR-43: "`express-api-docs.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder` and `.v1.error`". Never create a local `Symbol()` (lint-banned, ADR-20).
+- C0 (`src/core/types.ts`, S-01): "`HttpMethod`, `OperationMeta` (the per-route declaration), `DetectedOperation {method, path, pathParams[], source: 'typed'|'describe'|'plain', meta?}`, `Logger` (with stable `EAD_*` warn codes), the pinned `RegistryEntry`/`RouteRegistry` interfaces (ADR-27c, see Pinned seams)". Symbol keys are versioned per ADR-43: "`express-api-contract.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder` and `.v1.error`". Never create a local `Symbol()` (lint-banned, ADR-20).
 - C1 (`src/config/**`, S-02): "`DEFAULT_OPTIONS` is built from the table and deep-frozen. [...] `mergeOptions(defaults, global, route)`: plain objects recurse; arrays, functions and primitives replace."
 - C2 (`src/adapter/**`, S-03): "`SchemaAdapter<S> { name; isSchema(x): x is S; validate(s, input): {ok:true,data}|{ok:false,issues:{path,message}[]}; toJSONSchema(s, io:'input'|'output'); }` [...] **Core default:** `standardSchemaAdapter` [...] **Subpath only:** `zodAdapter` [...] it is the only file allowed to import `zod`." `buildSpec` receives the adapter as a parameter and must not import `zod` (ADR-21).
 - C3 (`src/route/problem.ts`, S-04): "Request errors produce RFC 9457 `problem+json` with `errors[{in: path|query|body, path, message}]`". Reuse its ProblemDetails shape for `components.schemas` and the auto-400 `$ref`.
@@ -102,7 +102,7 @@ Five source files total (`build.ts`, `naming.ts`, `glob.ts`, `canonical.ts`, `ca
 ### Relevant decisions (architecture.md, verbatim excerpts)
 
 - ADR-32 (owner S-06): "S-06 owns the spec-side half of AC-023, in `test/spec/ac023.test.ts`. For each entry of `majors` (ADR-39) it builds the nested fixture `app.use('/api', router)` with plain `router.get('/users/:id')` and `router.post('/users/:id')` from `test/fixtures/apps.ts`, then runs the full pipeline (walk, then `buildSpec`). It asserts the **whole Then-clause**: exactly path `/api/users/{id}`; exactly one `get` and one `post`; each with an `operationId`; a required `path` param `id` with schema `{type:'string'}`; a generic `200` response; tag `api`. That last check derives the tag from the **mounted** path, never the router-local path."
-- ADR-38: "Resolution order is `meta.adapter ?? options.schemaAdapter ?? standardSchemaAdapter`. The last is injected by the S-07 composition root [...] **Fixture:** `test/fixtures/stub-adapter.ts` (S-03) is a non-Zod adapter over plain `{kind:'str'|'obj',…}` descriptors. [...] S-06 `test/spec/stub-adapter.test.ts`: the spec contains the stub's converted schema in `requestBody` and passes swagger-parser." Consequence for `buildSpec`: a typed operation whose `meta.adapter` is set is converted with that adapter; otherwise the `adapter` parameter is used.
+- ADR-38: "Resolution order is `meta.adapter ?? options.schemaAdapter ?? standardSchemaAdapter`. The last is injected by the S-07 composition root [...] **Fixture:** `test/fixtures/stub-adapter.ts` (S-03) is a non-Zod adapter over plain `{kind:'str'|'obj',…}` descriptors. [...] S-06 `test/spec/stub-adapter.test.ts`: the spec contains the stub's converted schema in `requestBody` and passes openapi-parser." Consequence for `buildSpec`: a typed operation whose `meta.adapter` is set is converted with that adapter; otherwise the `adapter` parameter is used.
 - ADR-39: "S-04, S-05, S-06 and S-07 **import** `majors.ts`. Local copies or parameterizers are forbidden, and a lint `no-restricted-syntax` rule flags `require('express4')` outside `test/fixtures/**`."
 - ADR-27(c): "The `RouteRegistry` interface is **pinned in `src/core/types.ts` (S-01)**. S-04 implements it in `src/registry/registry.ts`, and S-05 and S-06 consume it".
 - ADR-27(d): "The Stryker `mutate` scope from ADR-05 is widened to [...] `src/spec/**` [...]. `thresholds.break` stays at 70." Write tests that kill mutants (assert exact values).
@@ -112,7 +112,7 @@ Five source files total (`build.ts`, `naming.ts`, `glob.ts`, `canonical.ts`, `ca
 - ADR-02: "The nested fingerprint still misses a layer replaced in place with equal counts".
 - ADR-03 (rejected): "the ETag/304 layer, the per-operation fragment cache, structural-hash component hoisting [...] hash hoisting endangers AC-016 output shape and AC-034 byte identity."
 - ADR-10: "**Glob matcher is in-house**, supporting `*` and `**` only [...] There is no `picomatch`."
-- ADR-14: "every spec-producing test calls `@apidevtools/swagger-parser` 13.1.0 `validate()`."
+- ADR-14: "every spec-producing test calls `@readme/openapi-parser` 13.1.0 `validate()`."
 - ADR-17: "A registry entry that the walk cannot locate is still emitted with its local path, plus one `warn` (ADR-19). `getSpec()` before any request returns the registry at local paths."
 - ADR-19: "Only the AC-034 skips stay at `debug`".
 - ADR-08: "The default is the static `{ title: 'API', version: '0.0.0' }`."
@@ -139,7 +139,7 @@ Five source files total (`build.ts`, `naming.ts`, `glob.ts`, `canonical.ts`, `ca
 |---|---|
 | AC-005 | Given a `SchemaAdapter` interface exported from the package, When a test implements it with a non-Zod stub adapter, Then routes defined with the stub validate requests and appear in the generated spec without any change to core code. (S-06 scope: appear in the spec.) |
 | AC-011 | Given any typed route with a request schema, When the spec is generated, Then that operation includes a `400` response that references the problem-details schema with media type `application/problem+json`. |
-| AC-015 | Given registered routes, When `GET` is called on the spec endpoint (default `/openapi.json`), Then the response is 200 JSON with `openapi` starting `3.1.` and passes validation by `@apidevtools/swagger-parser` (or an equivalent OpenAPI 3.1 validator). |
+| AC-015 | Given registered routes, When `GET` is called on the spec endpoint (default `/openapi.json`), Then the response is 200 JSON with `openapi` starting `3.1.` and passes validation by `@readme/openapi-parser` (or an equivalent OpenAPI 3.1 validator). |
 | AC-016 | Given a route `/users/:id` with params, query, body and response schemas, When the spec is generated, Then the path appears as `/users/{id}` with a `path` parameter `id` (required), query parameters, a `requestBody` and response schemas derived from the Zod schemas. |
 | AC-017 | Given bearer, apiKey and oauth2 security schemes declared once in the config, and a route that references one, When the spec is generated, Then `components.securitySchemes` contains all three and that operation's `security` lists the referenced scheme. |
 | AC-023 | Given plain routes registered without the typed helper or `describe()`, on Express 4 and on Express 5 (tested separately), including a nested router mounted with `app.use('/api', router)` that has `router.get('/users/:id')` and `router.post('/users/:id')`, When the spec is generated, Then auto-detection walks the router stack and the spec contains path `/api/users/{id}` with exactly one `get` and one `post` operation. Each has an `operationId`, a required `path` parameter `id` with schema `type: string`, a generic `200` response, and the tag `api`. (S-06 scope: spec half, ADR-32.) |
@@ -156,7 +156,7 @@ Five source files total (`build.ts`, `naming.ts`, `glob.ts`, `canonical.ts`, `ca
 
 ## Test plan
 
-Write these tests FIRST and capture the failing (red) run before any `src/spec/**` code. Every spec-producing test calls `await SwaggerParser.validate(structuredClone(spec))` and asserts it resolves (ADR-14). Unit tests feed `buildSpec` hand-built `DetectedOperation[]` plus an adapter; registry-backed cases use an object typed as `RouteRegistry` from `src/core/types.ts`. Integration cases import `majors` from `test/fixtures/majors.ts` (S-01; no local copies, ADR-39), `test/fixtures/apps.ts` and `test/fixtures/logger.ts` (S-05), and `test/fixtures/stub-adapter.ts` (S-03).
+Write these tests FIRST and capture the failing (red) run before any `src/spec/**` code. Every spec-producing test calls `await OpenApiParser.validate(structuredClone(spec))` and asserts it resolves (ADR-14). Unit tests feed `buildSpec` hand-built `DetectedOperation[]` plus an adapter; registry-backed cases use an object typed as `RouteRegistry` from `src/core/types.ts`. Integration cases import `majors` from `test/fixtures/majors.ts` (S-01; no local copies, ADR-39), `test/fixtures/apps.ts` and `test/fixtures/logger.ts` (S-05), and `test/fixtures/stub-adapter.ts` (S-03).
 
 Expected red: module-resolution errors (`Cannot find module '../../src/spec/build'` etc.) because `src/spec/` does not exist yet.
 
@@ -319,7 +319,7 @@ underlying cause was a local piping artifact, not a real stale sandbox.
 |---|---|---|
 | AC-005 | stub-adapter.test.ts: stub schema appears in requestBody | ✅ |
 | AC-011 | build.test.ts: auto-400 ProblemDetails $ref present with a request schema, absent without one | ✅ |
-| AC-015 | build.test.ts + ac023.test.ts: openapi `3.1.0`, swagger-parser validates every spec-producing test | ✅ |
+| AC-015 | build.test.ts + ac023.test.ts: openapi `3.1.0`, openapi-parser validates every spec-producing test | ✅ |
 | AC-016 | build.test.ts: `/users/{id}` path param, query param, requestBody, response schemas from adapter | ✅ |
 | AC-017 | build.test.ts: bearer/apiKey/oauth2 schemes present; op security references one | ✅ |
 | AC-023 | ac023.test.ts (both majors): `/api/users/{id}` get+post, operationId, path param, 200, tag `api` | ✅ |
@@ -369,3 +369,217 @@ independently reproduced the ADR-50 scoped mutation claim from the raw
 `reports/stryker-incremental.json` (376 Killed + 7 Timeout + 0 Survived = 383, only the 5
 `src/spec/**` files present), corroborating the console summary despite the builder's
 self-disclosed tail-buffering/kill/rerun incident. No negotiation entries filed.
+
+## QA Fix Loop — Iteration 1 (QA step 6)
+
+Two CONFIRMED findings from QA (`qa/verdicts.md`), both owned by this story (`src/spec/**`). Fix both, TDD (reproducing test first for each), then re-run this story's full test suite, lint, typecheck, and the ADR-50(a) scoped mutation command before reporting done.
+
+### Defect 1 — F-01 (CRITICAL): dangling `$ref` for named/reused schemas
+
+`src/spec/build.ts:107-131` (`pathParameters`, `queryParameters`): when a schema's `toJSONSchema()` output includes a `$defs` bag (produced whenever a Zod schema carries `.meta({id})` — an ordinary, spec-sanctioned pattern for naming/reusing schemas), only `schema.properties[name]` is extracted and the sibling `$defs` bag is dropped, leaving a dangling, unresolvable `$ref`. Confirmed reachable through BOTH the opt-in `zodAdapter` and the DEFAULT `standardSchemaAdapter` (ADR-21's zero-config default) — this is not an opt-in-only defect. Reproduced end-to-end: `OpenApiParser.validate()` throws `Missing $ref pointer` on the generated `/openapi.json`, falsifying AC-015/AC-016.
+
+**Fix requirement:** whenever `adapter.toJSONSchema(...)` returns a `$defs` bag alongside the extracted property schema, that `$defs` bag must be hoisted into `components.schemas` (with appropriate naming/collision handling, consistent with the existing `dedupe`/canonicalization logic) so the `$ref` resolves. This applies to `pathParameters` and `queryParameters` specifically — `requestBodyOf`/`responsesOf` already pass the whole adapter output through untouched and are NOT affected.
+
+**Required regression test:** a route with a `.meta({id})`-tagged Zod schema (or an equivalent Standard-Schema-compatible schema) used in `params`/`query`, spec generated, and the result validated with `@readme/openapi-parser`'s `validate()` — must pass. Test both the default adapter path and the `./zod` subpath explicitly, since both were confirmed broken.
+
+### Defect 2 — F-02 (HIGH, widened scope): glob escaping shared-state bug, including a crash path
+
+`src/spec/glob.ts:5-9`: `REGEXP_METACHARS` is a module-level `/g`-flagged regex; `escapeChar`'s `.test()` calls share its `lastIndex` across every invocation, causing:
+(a) every other consecutive metacharacter in a pattern to be silently left unescaped (can cause `autoDetect.include`/`exclude` globs to over- or under-match routes), AND
+(b) — a NEW aspect found during exhaustive testing (`qa/tests/boundary-edge.md`, TC-EDGE-010) — certain metacharacter combinations cause `toRegExp` to construct a syntactically invalid regex, throwing an uncaught `SyntaxError: Invalid regular expression ... Unterminated character class`. This is a crash path, not just a silent mismatch.
+
+**Fix requirement:** remove the `g` flag from `REGEXP_METACHARS` (a stateless per-character `.test()` needs no global flag) — this should resolve both the escaping-alternation bug and the crash, but BOTH must be verified, not assumed.
+
+**Required regression tests** (both must pass):
+1. A pattern with 2+ consecutive metacharacters (e.g. `/a..b`) — every metacharacter escapes correctly, no alternation.
+2. A pattern containing one of every metacharacter class member in a balanced arrangement — `toRegExp` does not throw; the resulting regex is syntactically valid and behaves as intended.
+
+Existing tests to re-confirm green after the fix: `test/spec/glob.test.ts`, `test/aidd-exhaustive/boundary-edge/aidd_exhaustive_boundary.test.ts` (TC-EDGE-005, TC-EDGE-010, TC-EDGE-020 must all pass).
+
+## Fix Loop Iteration 1 Report
+
+Both CONFIRMED findings owned by this story (`src/spec/**`) fixed via TDD, reproducing test
+first for each.
+
+### F-01 (CRITICAL): dangling `$ref` for named/reused schemas — fixed
+
+**Root cause:** `pathParameters`/`queryParameters` in `src/spec/build.ts` extracted only
+`schema.properties[name]` from `adapter.toJSONSchema(...)` output and silently dropped any
+sibling `$defs` bag (produced whenever a schema carries `.meta({id})`), leaving a dangling
+`#/$defs/...` `$ref` that `OpenApiParser.validate()` cannot resolve. Confirmed via both the
+default `standardSchemaAdapter` and the opt-in `zodAdapter` subpath.
+
+**Fix:** added `hoistSchemaDefs()` + `rewriteDefsRefs()` in `src/spec/build.ts`. Both
+`pathParameters` and `queryParameters` now hoist any `$defs` bag into a shared `defs`
+collector threaded through `buildOperation` → `buildSpec`, rewriting `$ref: '#/$defs/X'` to
+`$ref: '#/components/schemas/X'`. `buildSpec` merges the collected defs into
+`components.schemas` alongside `ProblemDetails`. `requestBodyOf`/`responsesOf` were left
+untouched per the finding's scoping (they already pass the whole adapter output through,
+`$defs`-sibling-and-all, which is valid at that nesting level).
+
+**Red** (regression test run against the pre-fix `src/spec/build.ts` from `HEAD`, restored
+immediately after):
+```
+$ npx vitest run test/spec/defs-hoist.test.ts test/spec/glob.test.ts
+ ❯ test/spec/defs-hoist.test.ts (3 tests | 3 failed)
+   × default standardSchemaAdapter: params with a .meta({id})-tagged schema resolves and validates
+     AssertionError: expected undefined to be defined   (components.schemas.UserId)
+   × default standardSchemaAdapter: query with a .meta({id})-tagged schema resolves and validates
+     AssertionError: expected undefined to be defined   (components.schemas.Status)
+   × opt-in zodAdapter subpath: params with a .meta({id})-tagged schema resolves and validates
+     AssertionError: expected undefined to be defined   (components.schemas.UserIdZod)
+ Test Files  1 failed | (defs-hoist.test.ts)
+```
+Matches the finding: no hoisted def, dangling `$ref`, `OpenApiParser.validate()` would throw
+"Missing $ref pointer" (the test fails before even reaching the `validates()` assertion,
+which is the stronger/prior failure).
+
+**Green** (after restoring the fix):
+```
+$ npx vitest run test/spec/defs-hoist.test.ts
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+```
+All three tests — default adapter + params, default adapter + query, opt-in `zodAdapter` +
+params — assert the def lands in `components.schemas`, no `#/$defs/` ref remains anywhere in
+the parameter schema, and `OpenApiParser.validate()` resolves.
+
+### F-02 (HIGH, widened): glob `escapeChar` shared-`lastIndex` bug — fixed
+
+**Root cause:** `src/spec/glob.ts`'s module-level `REGEXP_METACHARS` carried the `/g` flag;
+`escapeChar`'s `.test()` calls shared its `lastIndex` across invocations, so every other
+consecutive metacharacter went unescaped (silent glob mismatch), and certain balanced
+metacharacter runs made `toRegExp` build a syntactically invalid regex, throwing an
+uncaught `SyntaxError` (TC-EDGE-010, a crash path).
+
+**Fix:** removed the `g` flag — `REGEXP_METACHARS = /[.+?^${}()|[\]\\]/` — so each
+`escapeChar` call is a fresh, stateless per-character test.
+
+**Red** (regression tests run against the pre-fix `src/spec/glob.ts` from `HEAD`, restored
+immediately after):
+```
+$ npx vitest run test/spec/glob.test.ts
+ ❯ test/spec/glob.test.ts (7 tests | 1 failed)
+   × a balanced run of every metacharacter class member does not throw and matches literally (F-02b, TC-EDGE-010)
+     AssertionError: expected [Function] to not throw an error but 'SyntaxError: Invalid regular expressi…' was thrown
+     "SyntaxError: Invalid regular expression: /^/a\\.+\\?^\\${\\}(\\)|\\[]\\\\b$/: Unterminated group"
+```
+Reproduces the exact crash class TC-EDGE-010 identified. (The "2+ consecutive
+metacharacters" test happened to pass against this particular `/a..b` input pre-fix too —
+the alternation bug is input-dependent on which positions land on odd/even `lastIndex`
+parity across the whole matching session — but the crash test above is an unambiguous,
+deterministic red for the same root cause.)
+
+**Green** (after restoring the fix):
+```
+$ npx vitest run test/spec/glob.test.ts
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+```
+Both new tests pass: consecutive-metacharacter escaping (`/a..b`, `/a...b`) and the
+TC-EDGE-010 balanced-metacharacter-run case (no throw, matches literally, non-matching
+input correctly rejected).
+
+### Full verification
+
+```
+$ npx vitest run test/spec
+ Test Files  7 passed (7)
+      Tests  40 passed (40)
+Type Errors  no errors
+```
+
+```
+$ npm run lint
+> eslint . && prettier --check .
+✖ 3 problems (0 errors, 3 warnings)   — all 3 warnings in test/aidd-exhaustive/performance-smoke/perf-smoke.perf.test.ts (unrelated file, not owned by this story)
+Checking formatting...
+[warn] 5 files                        — all outside src/spec/** and test/spec/**, not owned by this story
+```
+0 lint errors; no formatting/lint issues in any owned file.
+
+```
+$ npx tsc --noEmit
+(no output — success)
+```
+
+```
+$ npx vitest run --coverage --coverage.reportsDirectory=coverage-st006-fix1d --exclude "**/performance-smoke/**"
+ Test Files  78 passed (78)  [excluding one known pre-existing flaky perf file, see below]
+Coverage summary
+Statements   : 98.54% ( 810/822 )
+Branches     : 93.04% ( 495/532 )
+Functions    : 99.45% ( 182/183 )
+Lines        : 99.33% ( 743/748 )
+```
+All four thresholds (90/90/90/90) met.
+
+**Note on `test/aidd-exhaustive/performance-smoke/perf-smoke.perf.test.ts`:** two of its
+percentile-budget tests (TC-PERF-001, TC-PERF-007) intermittently time out
+(`Test timed out in 20000ms`/`5000ms`) in this environment, reproducing identically
+whether run against my fixed `src/spec/{build,glob}.ts` or against the pre-fix versions
+restored verbatim from `HEAD` — confirmed by temporarily swapping the files back, rerunning,
+and restoring the fix (`git diff --stat -- src/spec` unchanged afterward, confirming no
+stray edits). This is a pre-existing, environment-sensitive flake in a file outside this
+story's ownership (`test/aidd-exhaustive/**`, not `test/spec/**`), unrelated to the F-01/F-02
+fixes. Concurrent `node.exe` processes were observed running throughout this session
+(shared machine), consistent with CPU-contention-driven timeouts against a hard 200ms/5s
+budget.
+
+### Mutation (ADR-50 scoped run) — BLOCKED, pre-existing unrelated failure
+
+```
+$ npx stryker run --mutate "src/spec/**" --incremental
+...
+FAIL test/aidd-exhaustive/performance-smoke/perf-smoke.perf.test.ts (same TC-PERF-001/007 timeouts as above, under vitest.stryker.config.ts's default 5000ms test timeout)
+ConfigError: There were failed tests in the initial test run.
+```
+Stryker's dry run executes the full suite selected by `vitest.stryker.config.ts` (owned by
+S-01), which does not exclude `test/aidd-exhaustive/performance-smoke/**` the way it excludes
+`test/perf/**`. That perf-smoke file's hard timing budgets fail the dry run before any
+mutant is generated — this reproduces identically against the pre-fix `src/spec/**` restored
+from `HEAD` (see above), so it is **not** a regression introduced by this fix loop, and it is
+outside this story's file ownership (`src/spec/**`, `test/spec/**`) to resolve — fixing it
+would require editing `vitest.stryker.config.ts` (S-01-owned) or the perf test itself
+(neither owned by S-06). I could not obtain a fresh ADR-50(a) mutation score in this
+environment as a result. Flagging for Master/QA: either re-run mutation once the shared
+environment is quiet, or route a follow-up to add `test/aidd-exhaustive/performance-smoke/**`
+to `vitest.stryker.config.ts`'s exclude list (same treatment as `test/perf/**`) under S-01's
+ownership.
+
+### Ownership-scoped diff
+
+```
+$ git diff --stat -- src/spec test/spec
+ src/spec/build.ts       | 78 +++++++++++++++++++++++++++++++++++++++++++++-----
+ src/spec/glob.ts        |  2 +-
+ test/spec/glob.test.ts  | 28 ++++++++++++++++++
+ 3 files changed, 100 insertions(+), 8 deletions(-)
+```
+Plus new file `test/spec/defs-hoist.test.ts` (untracked, within `test/spec/**`). Confirmed
+confined to `src/spec/**` and `test/spec/**`; no other tracked files touched by this fix
+loop (other unrelated in-progress changes visible in `git status` — `src/route/typed.ts`,
+`src/serve/router.ts`, `test/route/stub-adapter.test.ts`, `test/serve/adapter-memo.test.ts`
+— belong to a concurrent fix-loop dispatch for F-04, not this story, and were not touched).
+
+### Status: built (both F-01 and F-02 fixed and verified; ADR-50(a) mutation re-run blocked by a pre-existing, out-of-scope environmental test failure — see above)
+
+## Auditor Report (QA step 12 — final audit)
+
+Interrogated AC-005, AC-011, AC-015, AC-016, AC-017, AC-023, AC-030..AC-034, AC-038,
+AC-039, AC-041, AC-042, AC-047 (this story's share). Independently re-ran
+`npx vitest run test/spec/build.test.ts test/spec/glob.test.ts` (both green) and
+`node test/aidd-exhaustive/api-contract/run.mjs` (28/28 PASS) to confirm the F-01
+($defs hoisting, including the requestBody/response widening) and F-02 (glob
+escapeChar lastIndex) fixes owned by this story hold live on this host, not just as
+recorded in `qa/verdicts.md`.
+
+**Verdict: all of this story's claimed ACs — PROVEN.** No DISPUTED ACs.
+Full matrix: `audit/interrogation/qa-final-verdict.md`.
+
+## Test Report (QA step 14 — g_test_report approved 2026-09-30)
+
+Approved by human (let-me-look). Consolidated `qa/test-report.md`: 237+3 exhaustive cases,
+all PASS, 0 open FAILs. Full suite 79/79 files, 644/649 tests (5 legit skips), coverage
+98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `ac-matrix.md` and
+this story's `## Auditor Report` section above for per-AC verdicts.

@@ -26,7 +26,7 @@ describe('entries/recorder-install', () => {
   it('require(dist/index.cjs) installs RECORDER with zero EAD_* warns', () => {
     const indexPath = join(root, 'dist/index.cjs').replace(/\\/g, '/');
     const script = `
-      const RECORDER = Symbol.for('express-api-docs.v1.recorder');
+      const RECORDER = Symbol.for('express-api-contract.v1.recorder');
       ${INSTALLED_HELPER}
       const originalWarn = console.warn;
       let warned = false;
@@ -44,7 +44,7 @@ describe('entries/recorder-install', () => {
   it('import(dist/index.js) installs RECORDER with zero EAD_* warns', () => {
     const indexPath = join(root, 'dist/index.js').replace(/\\/g, '/');
     const script = `
-      const RECORDER = Symbol.for('express-api-docs.v1.recorder');
+      const RECORDER = Symbol.for('express-api-contract.v1.recorder');
       ${INSTALLED_HELPER}
       const originalWarn = console.warn;
       let warned = false;

@@ -1,0 +1,41 @@
+name: AIDD evidence
+
+# Captures the source-bound suite receipt (evidence_contract: receipts-v1).
+# aidd-evidence.py capture requires a POSIX host, so it runs here, not on Windows.
+on:
+  push:
+    branches: ['aidd/**']
+
+permissions:
+  contents: write
+
+jobs:
+  receipts:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - name: Capture suite receipt
+        run: |
+          CHANGE=$(ls -d .aidd/changes/20*/ | head -n 1)
+          python3 .aidd/framework/scripts/aidd-evidence.py capture --host \
+            --out "${CHANGE}evidence/receipts/suite" \
+            --timeout 900 --max-output-bytes 4194304 -- npm test
+      - name: Verify suite receipt
+        run: |
+          CHANGE=$(ls -d .aidd/changes/20*/ | head -n 1)
+          python3 .aidd/framework/scripts/aidd-evidence.py check \
+            "${CHANGE}evidence/receipts/suite/receipt.json"
+      - name: Commit receipt back to branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .aidd/changes/20*/evidence/receipts
+          git diff --cached --quiet && exit 0
+          git commit -m "chore(aidd): capture suite receipt on CI"
+          git push origin HEAD:${{ github.ref_name }}

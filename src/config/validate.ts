@@ -5,7 +5,7 @@ import { OPTION_SPEC } from './spec-table.js';
 import type { ApiDocsOptions, OptionRow } from './types.js';
 
 const SPEC = OPTION_SPEC as Record<string, OptionRow>;
-const GROUP_KEYS = new Set(['docs', 'openapi']);
+const GROUP_KEYS = new Set(['openapi']);
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -48,13 +48,5 @@ export function validateOptions(options: unknown): ApiDocsOptions {
     }
   }
 
-  const opts = candidate as ApiDocsOptions;
-  if (opts.serveSpec === false && opts.serveDocs !== false && opts.docs?.specUrl === undefined) {
-    throw new ApiDocsConfigError(
-      'serveSpec',
-      'docs.specUrl to be set explicitly when serveSpec is false and serveDocs is true (A-9)',
-    );
-  }
-
-  return opts;
+  return candidate as ApiDocsOptions;
 }

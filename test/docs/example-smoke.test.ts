@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import SwaggerParser from '@apidevtools/swagger-parser';
+import * as OpenApiParser from '@readme/openapi-parser';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 
@@ -19,7 +19,7 @@ describe('examples/basic smoke test (AC-029)', () => {
     const res = await request(app).get('/openapi.json').expect(200);
     expect(typeof res.body.openapi).toBe('string');
     expect(res.body.openapi.startsWith('3.1.')).toBe(true);
-    await expect(SwaggerParser.validate(structuredClone(res.body))).resolves.toBeDefined();
+    await expect(OpenApiParser.validate(structuredClone(res.body))).resolves.toBeDefined();
   });
 
   it('exercises route auto-detection with a plain Express route (no route()/describe())', async () => {
@@ -36,9 +36,9 @@ describe('examples/basic smoke test (AC-029)', () => {
     expect(plainRouteBlock).not.toMatch(/\.\.\.route\(/);
   });
 
-  it('imports express-api-docs before creating a Router or calling app.use', () => {
-    const importIdx = appSource.search(/from\s+['"]express-api-docs['"]/);
-    expect(importIdx, 'app.ts must import express-api-docs').toBeGreaterThanOrEqual(0);
+  it('imports express-api-contract before creating a Router or calling app.use', () => {
+    const importIdx = appSource.search(/from\s+['"]express-api-contract['"]/);
+    expect(importIdx, 'app.ts must import express-api-contract').toBeGreaterThanOrEqual(0);
 
     const routerIdx = appSource.search(/Router\s*\(/);
     const useIdx = appSource.search(/\.use\(/);

@@ -1,4 +1,4 @@
-Flow F-5: GET /docs renders Scalar/Swagger UI
+Flow F-5: GET /docs renders the docs UI
 No example app / server exists yet on this branch (no src/, no package.json).
 $ curl -sv http://localhost:3000/docs
 *   Trying 127.0.0.1:3000...

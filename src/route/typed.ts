@@ -4,6 +4,7 @@
 // be spread straight into an Express method: `router.post(path, ...route(...))`.
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
+import { memoizeAdapter } from '../adapter/memo.js';
 import { standardSchemaAdapter } from '../adapter/standard.js';
 import type { Infer, SchemaAdapter } from '../adapter/types.js';
 import { DEFAULT_OPTIONS } from '../config/defaults.js';
@@ -58,13 +59,20 @@ function resolveRouteOptions(
   return mergeOptions(DEFAULT_OPTIONS as ApiDocsOptions, globalOptions, routeOverrides);
 }
 
-function resolveAdapter(
+// F-04 fix (QA fix loop iteration 1): the resolved adapter is wrapped in
+// `memoizeAdapter` (ADR-03) so repeated `toJSONSchema` calls on the same
+// schema identity (e.g. across spec rebuilds) hit the adapter at most once.
+export function resolveAdapter(
   globalOptions: ApiDocsOptions,
   meta: RouteMeta<unknown, unknown, unknown, unknown>,
+  logger?: Logger,
 ): SchemaAdapter<unknown> {
-  if (meta.adapter) return meta.adapter;
-  if (globalOptions.schemaAdapter) return globalOptions.schemaAdapter as unknown as SchemaAdapter<unknown>;
-  return standardSchemaAdapter as unknown as SchemaAdapter<unknown>;
+  const raw: SchemaAdapter<unknown> = meta.adapter
+    ? meta.adapter
+    : globalOptions.schemaAdapter
+      ? (globalOptions.schemaAdapter as unknown as SchemaAdapter<unknown>)
+      : (standardSchemaAdapter as unknown as SchemaAdapter<unknown>);
+  return memoizeAdapter(raw, logger);
 }
 
 function tagMeta(fn: RequestHandler, tag: { source: 'typed'; method: HttpMethod; meta: OperationMeta }): void {
@@ -87,7 +95,7 @@ export function createRoute(deps: RouteFactoryDeps): RouteFn {
   ): [RequestHandler, RequestHandler] {
     const metaUnknown = meta as unknown as RouteMeta<unknown, unknown, unknown, unknown>;
     const effective = resolveRouteOptions(deps.options, metaUnknown);
-    const adapter = resolveAdapter(deps.options, metaUnknown);
+    const adapter = resolveAdapter(deps.options, metaUnknown, deps.logger);
 
     const validator = createRequestValidator({
       schemas: { params: meta.params, query: meta.query, body: meta.body },

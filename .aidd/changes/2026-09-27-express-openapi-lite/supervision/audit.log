@@ -149,3 +149,50 @@
 2026-09-28T20:28:23Z | qa | adversarial-verifier | F-04 | returned | adversarial verification
 2026-09-28T20:28:23Z | qa | master-agent | qa-review-batch | returned | adversarial verification
 2026-09-28T20:28:23Z | qa | orchestrator | step 3 verdicts | returned | F-01 CONFIRMED (widened: default-adapter reachable too), F-02 CONFIRMED, F-04 CONFIRMED (3 blocking), F-03 REFUTED at HIGH/demoted to LOW advisory; qa/verdicts.md persisted (write-guard applied to all 4 dispatches too)
+2026-09-28T21:04:05Z | qa | orchestrator | step 4-5 dispatch plan | dispatched | 8 test-engineer categories (2 waves of 6+2, cap 6), design+execute combined one-shot per category
+2026-09-28T21:04:05Z | qa | test-engineer | functional-happy-path | returned | exhaustive testing
+2026-09-28T21:04:05Z | qa | test-engineer | negative-error-handling | returned | exhaustive testing
+2026-09-28T21:04:05Z | qa | test-engineer | boundary-edge | returned | exhaustive testing
+2026-09-28T21:04:05Z | qa | test-engineer | impossible-abuse | returned | exhaustive testing
+2026-09-28T21:04:05Z | qa | test-engineer | api-contract | returned | exhaustive testing
+2026-09-28T21:04:05Z | qa | test-engineer | performance-smoke | returned | exhaustive testing
+2026-09-28T21:04:05Z | qa | test-engineer | regression-compat | returned | exhaustive testing
+2026-09-28T21:04:05Z | qa | test-engineer | state-concurrency-idempotency | returned | exhaustive testing
+2026-09-28T21:04:05Z | qa | orchestrator | cross-category fixes | returned | fixed 3 rounds of tsc errors in new exhaustive test files (mechanical, non-product), 1 false-positive manifest-name match, 1 flaky memory-threshold test (missing --expose-gc guard); full suite now exactly 3 expected F-02 failures
+2026-09-28T21:04:05Z | qa | orchestrator | step 5 consolidate | returned | qa/test-report.md: 237 cases, 230 PASS, 5 legitimate FAIL (F-01x2, F-02x3), F-02 scope widened (crash path), new F-21 LOW/advisory
+2026-09-28T21:07:54Z | qa | master-agent | qa-test-batch | returned | accepted, F-02 widening confirmed accurate, F-21 severity defensible; no shell in this dispatch, orchestrator's own earlier full-suite run stands as independent execution
+2026-09-28T21:07:54Z | qa | orchestrator | step 6 fix loop, iteration 1 | dispatched | 3 findings grouped by ownership: F-01+F-02 -> ST-006, F-04 -> ST-004 and ST-007 (split call sites)
+2026-09-28T21:35:27Z | qa | builder | ST-006 fix loop 1 | returned | fix loop iteration 1
+2026-09-28T21:35:27Z | qa | builder | ST-004 fix loop 1 | returned | fix loop iteration 1
+2026-09-28T21:35:27Z | qa | builder | ST-007 fix loop 1 | returned | fix loop iteration 1
+2026-09-28T21:35:27Z | qa | orchestrator | cross-cutting infra fix | returned | fixed vitest.stryker.config.ts (missing perf-smoke exclude + testTimeout), independently found by 2 of 3 fix-loop builders; re-verified full suite 79/79 files, 639/644 tests, coverage 98.54/93.04/99.45/99.33
+2026-09-29T05:55:25Z | qa | orchestrator | ST-006 mutation re-verify | returned | 86.96% overall (src/spec 84.43%, build.ts 82.46%, glob.ts 100%), threshold 70 met, 89m52s
+2026-09-29T06:06:08Z | qa | orchestrator | ST-004 mutation re-verify | returned | 86.51% overall (typed.ts 71.43%, registry.ts 95.45%), threshold 70 met, 9m52s
+2026-09-29T06:07:02Z | qa | orchestrator | ST-007 mutation re-verify | returned | 86.54% overall (router.ts 100%), threshold 70 met, 29s (incremental cache warm)
+2026-09-29T06:07:02Z | qa | orchestrator | step 6 re-check dispatch | dispatched | re-run ONLY the 3 affected reviewer dimensions (correctness, performance, spec-compliance) against the fixed code, per playbook step 6
+2026-09-29T06:14:25Z | qa | reviewer | correctness closure re-check | returned | fix loop closure: CLOSED
+2026-09-29T06:14:25Z | qa | reviewer | performance closure re-check | returned | fix loop closure: CLOSED
+2026-09-29T06:14:25Z | qa | reviewer | spec-compliance closure re-check | returned | fix loop closure: CLOSED
+2026-09-29T06:14:25Z | qa | orchestrator | F-22 found+fixed | returned | spec-compliance closure re-check surfaced a new MEDIUM finding (silent \$defs id collision); fixed same iteration (hoistSchemaDefs throws on genuine mismatch), 2 new regression tests, full suite re-verified 79/79 files
+2026-09-29T06:37:36Z | qa | orchestrator | F-01 widened, found+fixed | returned | re-running api-contract's exhaustive suite (TC-CONTRACT-019/020) after F-01's first fix found the SAME defect in requestBody/response (original finding's 'not affected' assumption was wrong: #/\$defs refs resolve relative to the whole document, not local nesting); hoistSchemaDefs now applied to requestBodyOf/responsesOf too; also fixed a false-positive F-22 collision on same-schema-both-io-directions (additionalProperties normalization); 3 new regression tests; api-contract 28/28 (was 26/28), full suite 79/79 files/644 tests
+2026-09-29T06:44:50Z | qa | orchestrator | ST-006 final mutation re-verify | returned | 86.18% overall, build.ts 82.08%, threshold 70 met, 6m27s; fix loop iterations 1-2 fully closed, exhaustive_tests_passed gate PASSED
+2026-09-29T18:26:08Z | qa | orchestrator | step 7 dispatch | dispatched | E2E Verifier, critical rigor; human-approved scope exception: full project mutation run once not twice (cost), all other canonical commands reproduced twice per protocol
+2026-09-29T20:07:17Z | qa | human | cost | returned | budget_minutes raised 1200->2500 mid-e2e-verification
+2026-09-29T23:50:20Z | qa | e2e-verifier | step 7 | returned | ALL GREEN: clean-state build/test/lint/typecheck (79/79 files, 644/649), coverage 98.56/93.35/99.45/99.34, full-project mutation 84.39% (once, human-approved scope exception, 262m29s incl. one disclosed transient infra interruption at 18%%), determinism reproduced twice with zero disagreements
+2026-09-29T23:59:29Z | qa | evidence-capturer | step 8 post | returned | all 7 affected flows + 4 benches captured with real transcripts; vitest bench API mismatch degraded explicitly (ADR-26's real gate, npm run perf, passed cleanly); removed a leftover mutation sandbox causing duplicate test counting (78 not 79 files, both correct at their respective times)
+2026-09-30T12:20:00Z | qa | orchestrator | step 9 dispatch | dispatched | AC Assessor, critical rigor, re-execute every owning test file per AC rather than trust prior reports
+2026-09-30T12:20:00Z | qa | ac-assessor | step 9 | returned | 47/47 ACs PASS with directly re-executed evidence; BLOCKING infra gap disclosed: aidd-evidence.py capture requires POSIX process groups, hard-fails on this native Windows host, no usable WSL distro with python3 found; receipts-v1 artifacts (evidence/receipts/**, evidence/acceptance.json) outstanding, semantic AC verdicts unaffected
+2026-09-30T12:20:00Z | qa | human | decision | returned | record documented platform gap and proceed on substantive AC evidence; receipts-v1 mechanical artifacts to be produced on a POSIX host (CI/WSL) before delivery can claim full receipts-v1 compliance
+2026-09-30T12:50:00Z | qa | orchestrator | step 11 dispatch | dispatched | Tally, no Jira ticket for this change, work from PRD ACs + story frontmatter only
+2026-09-30T12:50:00Z | qa | tally | step 11 | returned | 47/47 ACs RECONCILED, 0 GAP, 0 orphans, 1 routed note (receipts-v1 env gap, no AC verdict affected); tally_reconciled PASSED
+2026-09-30T13:05:00Z | qa | orchestrator | step 12 dispatch | dispatched | Auditor final audit, critical rigor, 2-round budget, interrogates ac-matrix.md row by row
+2026-09-30T13:05:00Z | qa | auditor | step 12 | returned | 47/47 PROVEN, 0 DISPUTED, settled round 1, independent re-execution corroborated ac-matrix.md; auditor_approved PASSED
+2026-09-30T13:05:00Z | qa | orchestrator | stale gate fix | returned | evidence_reproduced was stuck at failed from an earlier RED e2e cycle despite history recording it PASSED at the final green e2e dispatch; corrected to passed
+2026-09-30T13:20:00Z | qa | human | gate | returned | g_test_report approved (let-me-look), 0 open FAILs
+2026-09-30T13:35:00Z | qa | orchestrator | step 15 cost close-out | returned | corrected 2 ledger rows wrongly recorded 0 tokens/min; spent_tokens 7622244->7778911, spent_minutes 2168.7->2173.2; within_cost_budget PASSED (39% tokens, 87% minutes); qa_findings_resolved PASSED
+2026-09-30T13:50:00Z | qa | orchestrator | step 16 dispatch | dispatched | Critic, synthesizes existing evidence, no re-run
+2026-09-30T13:50:00Z | qa | critic | step 16 | returned | APPROVE WITH CONDITIONS (receipts-v1 CI follow-up, quarantine tracking, npm audit fix); critic_approved PASSED
+2026-09-30T14:05:00Z | qa | orchestrator | step 17 dispatch | dispatched | Supervisor final audit over full QA super-context, feeds gate G3
+2026-09-30T14:05:00Z | qa | supervisor | step 17 | returned | COMPLIANT; explicit review of receipts-v1 gap, quarantine citations, step-15 cost correction all COMPLIANT; 1 non-blocking staleness observation fixed
+2026-09-30T14:20:00Z | qa | human | gate | returned | G3 approved (let-me-look); PR decision: close/supersede PR #1, open fresh PR from rebuild branch
+2026-10-01T00:00:00Z | delivery | orchestrator | PR-relationship correction | returned | discovered main already has PR #2 merged from this branch at an early QA snapshot (pre-fix-loop); corrected the G3-approval-time framing; human decided a forward-fix PR, no history rewrite

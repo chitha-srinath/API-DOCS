@@ -22,7 +22,6 @@ describe('README sections (AC-029)', () => {
     'Quick start',
     'SchemaAdapter',
     'Security',
-    'Docs UI',
     'Response validation',
     'Error shape',
     'Incremental adoption',
@@ -51,7 +50,7 @@ describe('README sections (AC-029)', () => {
   });
 
   it('documents the /manual opt-out entry', () => {
-    expect(readme).toContain('express-api-docs/manual');
+    expect(readme).toContain('express-api-contract/manual');
   });
 
   it('documents the APM before/after result', () => {
@@ -59,10 +58,10 @@ describe('README sections (AC-029)', () => {
   });
 
   it('documents the /zod subpath and the optional ^4.2.0 peer, without a below-4.2 workaround', () => {
-    expect(readme).toContain('express-api-docs/zod');
+    expect(readme).toContain('express-api-contract/zod');
     expect(readme).toMatch(/optional peer/i);
     expect(readme).toContain('^4.2.0');
-    expect(readme).not.toContain("import { zodAdapter } from 'express-api-docs'");
+    expect(readme).not.toContain("import { zodAdapter } from 'express-api-contract'");
     expect(readme).not.toMatch(/zod[^\n]*\^4\.0\.0/);
   });
 
@@ -91,14 +90,14 @@ describe('README sections (AC-029)', () => {
   });
 
   it('Internals note documents all 6 versioned protocol keys', () => {
-    expect(readme).toContain('express-api-docs.v1.meta');
-    expect(readme).toContain('express-api-docs.v1.mount');
-    expect(readme).toContain('express-api-docs.v1.child');
-    expect(readme).toContain('express-api-docs.v1.recorder');
-    expect(readme).toContain('express-api-docs.v1.brand');
-    expect(readme).toContain('express-api-docs.v1.brandKey');
+    expect(readme).toContain('express-api-contract.v1.meta');
+    expect(readme).toContain('express-api-contract.v1.mount');
+    expect(readme).toContain('express-api-contract.v1.child');
+    expect(readme).toContain('express-api-contract.v1.recorder');
+    expect(readme).toContain('express-api-contract.v1.brand');
+    expect(readme).toContain('express-api-contract.v1.brandKey');
     expect(readme.toLowerCase()).toContain('protocol');
-    expect(readme).not.toMatch(/Symbol\.for\(['"]express-api-docs\.meta['"]\)/);
+    expect(readme).not.toMatch(/Symbol\.for\(['"]express-api-contract\.meta['"]\)/);
   });
 
   it('documents the Node >= 22 floor', () => {

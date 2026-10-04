@@ -1,6 +1,6 @@
 {
-  "name": "express-api-docs",
-  "version": "0.1.0",
+  "name": "express-api-contract",
+  "version": "0.2.0",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -63,6 +63,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "build:docs-ui": "node scripts/build-docs-ui.mjs",
     "test": "vitest run --coverage --typecheck",
     "test:v4": "vitest run --coverage && npm run typecheck:v4",
     "typecheck:v4": "tsc --noEmit -p tsconfig.v4.json && vitest run --config vitest.typecheck.v4.config.ts",
@@ -86,8 +87,8 @@
     }
   },
   "devDependencies": {
-    "@apidevtools/swagger-parser": "13.1.0",
     "@arethetypeswrong/cli": "0.18.5",
+    "@readme/openapi-parser": "^9.0.0",
     "@stryker-mutator/core": "10.0.0",
     "@types/express": "5.0.6",
     "@types/node": "~22.20.4",

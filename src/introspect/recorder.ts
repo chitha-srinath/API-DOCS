@@ -50,7 +50,7 @@ function findUseOwner(start: object): Owner {
     proto = Object.getPrototypeOf(proto);
   }
   if (!proto) {
-    throw new Error('express-api-docs: could not locate the prototype that owns `use`');
+    throw new Error('express-api-contract: could not locate the prototype that owns `use`');
   }
   return proto as Owner;
 }

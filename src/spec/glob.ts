@@ -2,7 +2,7 @@
 // `*` (matches exactly one path segment, no `/`) and `**` (matches zero or
 // more segments). There is no `picomatch` dependency.
 
-const REGEXP_METACHARS = /[.+?^${}()|[\]\\]/g;
+const REGEXP_METACHARS = /[.+?^${}()|[\]\\]/;
 
 function escapeChar(char: string): string {
   return REGEXP_METACHARS.test(char) ? `\\${char}` : char;

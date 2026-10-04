@@ -8,7 +8,7 @@
 |---|---|
 | rigor_mode | critical |
 | budget_tokens | 20000000 |
-| budget_minutes | 1200 |
+| budget_minutes | 2500 |
 | derived_by | raised (stops row 1) |
 
 ## Dispatches
@@ -117,3 +117,30 @@
 | 2026-09-28T20:28:23Z | qa | qa3-adversarial | adversarial-verifier | F-03 | not measured | 36078 | 2.1 | 5992572 | 664.2 | measured |
 | 2026-09-28T20:28:23Z | qa | qa3-adversarial | adversarial-verifier | F-04 | not measured | 20772 | 0.6 | 6013344 | 664.8 | measured |
 | 2026-09-28T20:28:23Z | qa | con2c-monitor | master-agent | qa-review-batch | not measured | 52682 | 1.4 | 6066026 | 666.2 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | functional-happy-path | not measured | 102714 | 11.5 | 6168740 | 677.7 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | negative-error-handling | not measured | 78131 | 3.5 | 6246871 | 681.2 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | boundary-edge | not measured | 80152 | 3.7 | 6327023 | 684.9 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | impossible-abuse | not measured | 76943 | 3.5 | 6403966 | 688.4 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | api-contract | not measured | 91940 | 4.8 | 6495906 | 693.2 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | performance-smoke | not measured | 51370 | 4.6 | 6547276 | 697.8 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | regression-compat | not measured | 73373 | 7.0 | 6620649 | 704.8 | measured |
+| 2026-09-28T21:04:05Z | qa | qa5-test | test-engineer | state-concurrency-idempotency | not measured | 66559 | 3.5 | 6687208 | 708.3 | measured |
+| 2026-09-28T21:07:54Z | qa | con2c-monitor | master-agent | qa-test-batch | not measured | 39237 | 1.9 | 6726445 | 710.2 | measured |
+| 2026-09-28T21:35:27Z | qa | con2a-builder | builder | ST-006 fix loop 1 | not measured | 98818 | 17.4 | 6825263 | 727.6 | measured |
+| 2026-09-28T21:35:27Z | qa | con2a-builder | builder | ST-004 fix loop 1 | not measured | 82857 | 20.6 | 6908120 | 748.2 | measured |
+| 2026-09-28T21:35:27Z | qa | con2a-builder | builder | ST-007 fix loop 1 | not measured | 68078 | 14.7 | 6976198 | 762.9 | measured |
+| 2026-09-29T06:14:25Z | qa | qa1-dim | reviewer | correctness closure re-check | not measured | 16146 | 0.5 | 6992344 | 763.4 | measured |
+| 2026-09-29T06:14:25Z | qa | qa1-dim | reviewer | performance closure re-check | not measured | 25442 | 0.8 | 7017786 | 764.2 | measured |
+| 2026-09-29T06:14:25Z | qa | qa1-dim | reviewer | spec-compliance closure re-check | not measured | 31477 | 1.8 | 7049263 | 766.0 | measured |
+| 2026-09-30T00:20:00Z | qa | e2e-verifier | e2e-verifier | step 7 E2E verification (critical, clean-state, determinism repeats) | not measured | 81468 | 43.1 | 7130731 | 809.1 | measured |
+| 2026-09-30T00:40:00Z | qa | build-fixer | build-fixer | fix loop iter: pack.test.ts + perf-smoke timeout config | not measured | 45195 | 17.1 | 7175926 | 826.2 | measured |
+| 2026-09-30T01:10:00Z | qa | e2e-verifier | e2e-verifier | step 7 E2E re-verification (2nd dispatch, critical, clean-state, determinism repeats) | not measured | 90373 | 33.3 | 7266299 | 859.5 | measured |
+| 2026-09-30T01:35:00Z | qa | build-fixer | build-fixer | fix loop iter 2: vitest maxWorkers concurrency fix | not measured | 46536 | 22.4 | 7312835 | 881.9 | measured |
+| 2026-09-30T02:05:00Z | qa | e2e-verifier | e2e-verifier | step 7 E2E re-verification (3rd dispatch, critical, clean-state, determinism repeats) | not measured | 65698 | 26.7 | 7378533 | 908.6 | measured |
+| 2026-09-29T23:50:20Z | qa | con2e-integration | e2e-verifier | step 7 e2e+determinism | not measured | 176120 | 1252.6 | 7554653 | 2161.2 | measured |
+| 2026-09-29T23:59:29Z | qa | con1-evidence-post | evidence-capturer | step 8 | not measured | 67591 | 7.5 | 7622244 | 2168.7 | measured |
+| 2026-09-30T12:20:00Z | qa | ac-assessor | ac-assessor | step 9 AC matrix (47/47 PASS) | not measured | not measured | not measured | 7622244 | 2168.7 | not measured (dispatch predates this session segment's usage tracking) |
+| 2026-09-30T12:50:00Z | qa | tally | tally | step 11 tally reconciliation | not measured | 103957 | 2.4 | 7726201 | 2171.1 | measured |
+| 2026-09-30T13:05:00Z | qa | auditor | auditor | step 12 final audit | not measured | 52710 | 2.1 | 7778911 | 2173.2 | measured |
+| 2026-09-30T13:50:00Z | qa | critic | critic | step 16 critic verdict | not measured | 37305 | 0.8 | 7816216 | 2174.0 | measured |
+| 2026-09-30T14:05:00Z | qa | supervisor | supervisor | step 17 final audit | not measured | 70370 | 1.6 | 7886586 | 2175.6 | measured |

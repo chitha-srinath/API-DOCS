@@ -1,0 +1,26 @@
+
+ RUN  v5.0.2 C:/sai/code practice/Package/API-DOCS
+
+stdout | test/perf/docs-endpoint.perf.test.ts > perf: docs endpoint > p95 < 200ms
+[perf] docs-endpoint p95 rounds (ms): 5.98, 6.85, 4.98
+
+ ✓ test/perf/docs-endpoint.perf.test.ts > perf: docs endpoint > p95 < 200ms 4484ms
+stdout | test/perf/spec-endpoint.perf.test.ts > perf: spec endpoint (warm cache) > p95 < 200ms
+[perf] spec-endpoint p95 rounds (ms): 6.23, 6.91, 5.37
+
+ ✓ test/perf/spec-endpoint.perf.test.ts > perf: spec endpoint (warm cache) > p95 < 200ms 4575ms
+stdout | test/perf/typed-route.perf.test.ts > perf: typed route request validation > p95 < 200ms
+[perf] typed-route p95 rounds (ms): 6.27, 7.66, 5.28
+
+ ✓ test/perf/typed-route.perf.test.ts > perf: typed route request validation > p95 < 200ms 4598ms
+stdout | test/perf/spec-cold.perf.test.ts > perf: spec endpoint (cold cache each request) > p95 < 200ms
+[perf] spec-cold p95 rounds (ms): 6.18, 7.36, 5.32
+
+ ✓ test/perf/spec-cold.perf.test.ts > perf: spec endpoint (cold cache each request) > p95 < 200ms 4659ms
+
+ Test Files  4 passed (4)
+      Tests  4 passed (4)
+   Start at  05:27:19
+   Duration  5.57s (tests 87%, import 9%, transform 4%)
+
+EXIT:0

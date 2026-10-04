@@ -71,7 +71,7 @@ Wave 1, runs solo, no dependencies. Risk: **high** (epic.md): "Many package-shap
 **The repo is greenfield.** There is no `package.json` and no `src/` (context pack `.aidd/context/snapshot.md`; nothing was re-crawled). This story creates components **C0** and **C10** from `architecture.md`.
 
 **C0 (architecture.md, current row, quoted):**
-> | C0 | `core/types.ts` | The shared contracts only: `HttpMethod`, `OperationMeta`, `DetectedOperation {method, path, pathParams[], source: 'typed'\|'describe'\|'plain', meta?}`, `Logger` (with stable `EAD_*` warn codes), the pinned `RegistryEntry`/`RouteRegistry` interfaces (ADR-27c, see Pinned seams), and the four cross-copy symbols `META`, `MOUNT`, `CHILD`, `RECORDER`, all `Symbol.for('express-api-docs.*')` (ADR-20). There is no logic here. | — | Hexagonal "ports" module (zod-to-openapi's `types.ts`) | S-01 scaffold |
+> | C0 | `core/types.ts` | The shared contracts only: `HttpMethod`, `OperationMeta`, `DetectedOperation {method, path, pathParams[], source: 'typed'\|'describe'\|'plain', meta?}`, `Logger` (with stable `EAD_*` warn codes), the pinned `RegistryEntry`/`RouteRegistry` interfaces (ADR-27c, see Pinned seams), and the four cross-copy symbols `META`, `MOUNT`, `CHILD`, `RECORDER`, all `Symbol.for('express-api-contract.*')` (ADR-20). There is no logic here. | — | Hexagonal "ports" module (zod-to-openapi's `types.ts`) | S-01 scaffold |
 
 The key names in that row are superseded by ADR-43 (versioned `v1` keys), and ADR-49 (superseding ADR-42) adds the `BRAND` and `BRAND_KEY` symbols; see below.
 
@@ -85,12 +85,12 @@ ADR-20 (still in force for the mechanism):
 > Local `Symbol()` is **banned** for any value that crosses module boundaries. An ESLint `no-restricted-syntax` rule on `src/**` enforces this, with an allow-list comment for purely local symbols.
 
 ADR-43 (supersedes ADR-20 key names):
-> All `Symbol.for` keys are **protocol-versioned**: `express-api-docs.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder` and `.v1.error`.
+> All `Symbol.for` keys are **protocol-versioned**: `express-api-contract.v1.meta`, `.v1.mount`, `.v1.child`, `.v1.recorder` and `.v1.error`.
 
 ADR-49 (supersedes ADR-42's brand comparison and, for the brand, the `.v1.error` key):
-> `core/types.ts` exports `BRAND = Symbol.for('express-api-docs.v1.brand')` (the instance key) and `BRAND_KEY = Symbol.for('express-api-docs.v1.brandKey')` (the class key). Each class declares `static readonly [BRAND_KEY] = 'express-api-docs.v1.ApiDocsConfigError'` (respectively `…ApiDocsSchemaError`).
+> `core/types.ts` exports `BRAND = Symbol.for('express-api-contract.v1.brand')` (the instance key) and `BRAND_KEY = Symbol.for('express-api-contract.v1.brandKey')` (the class key). Each class declares `static readonly [BRAND_KEY] = 'express-api-contract.v1.ApiDocsConfigError'` (respectively `…ApiDocsSchemaError`).
 
-So `src/core/types.ts` exports exactly six constants: `META = Symbol.for('express-api-docs.v1.meta')`, `MOUNT = Symbol.for('express-api-docs.v1.mount')`, `CHILD = Symbol.for('express-api-docs.v1.child')`, `RECORDER = Symbol.for('express-api-docs.v1.recorder')`, `BRAND = Symbol.for('express-api-docs.v1.brand')`, `BRAND_KEY = Symbol.for('express-api-docs.v1.brandKey')`. `Symbol.for(...)` returns `symbol`; declare each as `export const META: unique symbol = Symbol.for('express-api-docs.v1.meta') as never;` so they type as `unique symbol`. The `RECORDER` payload `{protocol: 1, packageVersion}`, `collectBrands`, the error classes and their `static [BRAND_KEY]` codes belong to S-05, S-02 and S-03, not here. S-01 ships the symbols only; no logic.
+So `src/core/types.ts` exports exactly six constants: `META = Symbol.for('express-api-contract.v1.meta')`, `MOUNT = Symbol.for('express-api-contract.v1.mount')`, `CHILD = Symbol.for('express-api-contract.v1.child')`, `RECORDER = Symbol.for('express-api-contract.v1.recorder')`, `BRAND = Symbol.for('express-api-contract.v1.brand')`, `BRAND_KEY = Symbol.for('express-api-contract.v1.brandKey')`. `Symbol.for(...)` returns `symbol`; declare each as `export const META: unique symbol = Symbol.for('express-api-contract.v1.meta') as never;` so they type as `unique symbol`. The `RECORDER` payload `{protocol: 1, packageVersion}`, `collectBrands`, the error classes and their `static [BRAND_KEY]` codes belong to S-05, S-02 and S-03, not here. S-01 ships the symbols only; no logic.
 
 ### ADR-27c: pinned RouteRegistry contract (copy verbatim into `src/core/types.ts`)
 ```ts
@@ -129,12 +129,12 @@ export interface RouteRegistry {
 - ADR-51: "`typecheck:v4` = `tsc --noEmit -p tsconfig.v4.json && vitest run --config vitest.typecheck.v4.config.ts`; `test:v4` = `vitest run --coverage && npm run typecheck:v4`, which is the runtime suite without `--typecheck`, followed by the v4 type suite."
 
 Required shape:
-- `"name": "express-api-docs"`, `"license": "MIT"`, `"type": "module"`, `"main": "./dist/index.cjs"`, `"types": "./dist/index.d.cts"`, **no `module` field**.
+- `"name": "express-api-contract"`, `"license": "MIT"`, `"type": "module"`, `"main": "./dist/index.cjs"`, `"types": "./dist/index.d.cts"`, **no `module` field**.
 - `"exports"`: `.`, `./manual`, `./zod`, each `{"import": {"types": "./dist/<e>.d.ts", "default": "./dist/<e>.js"}, "require": {"types": "./dist/<e>.d.cts", "default": "./dist/<e>.cjs"}}`, plus `"./package.json": "./package.json"`.
 - `"files": ["dist", "LICENSE", "README.md"]`, `"engines": {"node": ">=22"}`, `"sideEffects"` as above.
 - `"peerDependencies": {"express": "^4.21.0 || ^5.0.0", "zod": "^4.2.0", "@types/express": "^4.17.21 || ^5.0.0"}`, `"peerDependenciesMeta": {"zod": {"optional": true}, "@types/express": {"optional": true}}`. No `dependencies` (ADR-10: zero runtime deps).
-- Pre-declared devDependencies (S-01 is the only `package.json` owner): `typescript ~5.9.3` (ADR-12), `tsup 8.5.1`, `publint 0.3.24`, `@arethetypeswrong/cli 0.18.5` (ADR-11), `vitest 5.0.2`, `@vitest/coverage-v8 5.0.2`, `supertest 7.3.0` (ADR-15), `vite ^8.3.1`, `@types/node ~22.20.4` (ADR-22), `@types/supertest 7.2.1`, `@types/express 5.0.6`, `express ^5.2.1`, `express4: npm:express@^4.22.3` (ADR-13), `zod ^4.6.5` (ADR-47), `@apidevtools/swagger-parser 13.1.0` (ADR-14), `eslint 10.11.0`, `typescript-eslint 8.70.1`, `prettier 3.9.9` (ADR-16), `@stryker-mutator/core 10.0.0`, `esbuild ~0.27.7` (ADR-45), `yaml` (workflow test). **`@stryker-mutator/vitest-runner` is NOT a dependency (ADR-35).** The v4 `@types` packages are NOT devDependencies; they are installed `--no-save` in the Express 4 CI cells only (ADR-51).
-- `@scalar/api-reference` and `swagger-ui-dist` are CDN pins only and must NOT appear in any dependency field (AC-004, AC-020).
+- Pre-declared devDependencies (S-01 is the only `package.json` owner): `typescript ~5.9.3` (ADR-12), `tsup 8.5.1`, `publint 0.3.24`, `@arethetypeswrong/cli 0.18.5` (ADR-11), `vitest 5.0.2`, `@vitest/coverage-v8 5.0.2`, `supertest 7.3.0` (ADR-15), `vite ^8.3.1`, `@types/node ~22.20.4` (ADR-22), `@types/supertest 7.2.1`, `@types/express 5.0.6`, `express ^5.2.1`, `express4: npm:express@^4.22.3` (ADR-13), `zod ^4.6.5` (ADR-47), `@readme/openapi-parser 13.1.0` (ADR-14), `eslint 10.11.0`, `typescript-eslint 8.70.1`, `prettier 3.9.9` (ADR-16), `@stryker-mutator/core 10.0.0`, `esbuild ~0.27.7` (ADR-45), `yaml` (workflow test). **`@stryker-mutator/vitest-runner` is NOT a dependency (ADR-35).** The v4 `@types` packages are NOT devDependencies; they are installed `--no-save` in the Express 4 CI cells only (ADR-51).
+- `docs-ui-package` and `docs-ui-dist` are CDN pins only and must NOT appear in any dependency field (AC-004, AC-020).
 - Scripts exactly as in Verification commands: `build`, `test`, `test:v4`, `typecheck:v4`, `lint`, `check:pack`, `mutation`, `perf`, `audit`.
 
 ### ADR-40: tsup build shape (`tsup.config.ts`)
@@ -203,7 +203,7 @@ ADR-34:
 
 ### Conventions and gotchas
 - Coverage `include: ['src/**']`; thresholds apply to the code that exists at the end of each wave. Exclude the handover stubs only if they drag coverage (they contain no statements).
-- The package name is `express-api-docs`. The old name must appear in NO file outside `.aidd/`, including tests: build it at runtime (`['express','openapi','lite'].join('-')`).
+- The package name is `express-api-contract`. The old name must appear in NO file outside `.aidd/`, including tests: build it at runtime (`['express','openapi','lite'].join('-')`).
 - LICENSE: MIT, copyright line naming `chitha_srinath`.
 - `release.yml`: only `on: workflow_dispatch`. No workflow runs `npm publish` on push or tag. Do not run `npm publish`.
 - Node floor is 22 everywhere; no Node 20 anywhere (ADR-22, ADR-46). Dev tooling needs Node >= 22.19.
@@ -213,7 +213,7 @@ ADR-34:
 
 | id | Criterion |
 |---|---|
-| AC-001 | Given the package is built, When `package.json` is inspected, Then `name` is `express-api-docs`, `license` is `MIT`, a LICENSE file with copyright chitha_srinath exists, and the string `express-openapi-lite` appears in no file outside `.aidd/`. |
+| AC-001 | Given the package is built, When `package.json` is inspected, Then `name` is `express-api-contract`, `license` is `MIT`, a LICENSE file with copyright chitha_srinath exists, and the string `express-openapi-lite` appears in no file outside `.aidd/`. |
 | AC-002 | Given `npm run build`, When it finishes, Then it exits 0 and emits ESM (`.js`/`.mjs`), CJS (`.cjs`) and `.d.ts` outputs, and `exports` maps `import`, `require` and `types` to those files. |
 | AC-004 | Given `package.json`, When it is inspected, Then `peerDependencies` contains `express` `^4.21.0 \|\| ^5.0.0` and `zod` `^4.2.0`, `peerDependenciesMeta.zod.optional` is `true`, `engines.node` is `>=22`, and the package has no runtime dependency on any UI asset package. `exports` has a `./zod` subpath that exports the Zod adapter, and the main entry does not export it. Given a project without `zod` installed, When the main entry is loaded with `import` (ESM) and with `require` (CJS), Then both loads succeed. |
 | AC-020 | Given the published file list (`npm pack --dry-run`), When it is inspected, Then it contains no bundled UI JS/CSS assets. |
@@ -235,22 +235,22 @@ Write these tests FIRST. Run `npm test` and capture the red output before writin
 
 1. **`test/dist/global-setup.ts`** (ADR-29 #5). Runs `npm run build` unconditionally; registered as `globalSetup` in `vitest.config.ts` for the whole suite, and NOT in `vitest.stryker.config.ts`. *Red:* no `package.json`.
 2. **`test/dist/manifest.test.ts`** (AC-001, AC-004, ADR-45, ADR-48).
-   - `pkg.name === 'express-api-docs'`, `pkg.license === 'MIT'`; `LICENSE` contains `MIT License` and matches `/Copyright \(c\) \d{4} chitha_srinath/`.
+   - `pkg.name === 'express-api-contract'`, `pkg.license === 'MIT'`; `LICENSE` contains `MIT License` and matches `/Copyright \(c\) \d{4} chitha_srinath/`.
    - `peerDependencies.express === '^4.21.0 || ^5.0.0'`, `peerDependencies.zod === '^4.2.0'`, `peerDependenciesMeta.zod.optional === true`, `peerDependencies['@types/express'] === '^4.17.21 || ^5.0.0'`, `peerDependenciesMeta['@types/express'].optional === true`.
    - `engines.node === '>=22'`.
    - `Object.keys(exports)` deep-equals `['.', './manual', './zod', './package.json']` (order-insensitive); each of the first three has `import` and `require`, each with `types` and `default`; `exports['./package.json'] === './package.json'`.
    - `pkg.types === './dist/index.d.cts'` and `'module' in pkg === false`.
    - `devDependencies.esbuild` matches `/^~0\.27\./`; `devDependencies.zod === '^4.6.5'`; `'@stryker-mutator/vitest-runner' in devDependencies === false`.
-   - `dependencies` is absent or empty; no key in `dependencies` or `peerDependencies` matches `/scalar|swagger-ui|redoc/i`.
+   - `dependencies` is absent or empty; no key in `dependencies` or `peerDependencies` matches `/single-value|docs-ui|redoc/i`.
    - A recursive walk of the repo root (skipping `.aidd/`, `.git/`, `node_modules/`, `dist/`, `coverage/`, `reports/`, `.stryker-tmp/`) finds no file containing the old name, built with `join`.
    *Red:* `package.json` and `LICENSE` missing.
 3. **`test/dist/pack.test.ts`** (AC-002, AC-020, ADR-21, ADR-24, ADR-48). Parse `files[].path` from `npm pack --dry-run --json`.
    - The list contains `dist/{index,manual,zod,auto-record}.{js,cjs}` and `dist/{index,manual,zod}.{d.ts,d.cts}`.
    - Every `exports` target is in the pack list.
-   - No path matches `/\.css$/` or `/(scalar|swagger-ui|redoc)/i`; no `.js`/`.cjs` outside `dist/`.
+   - No path matches `/\.css$/` or `/(single-value|docs-ui|redoc)/i`; no `.js`/`.cjs` outside `dist/`.
    - `pkg.sideEffects` deep-equals `["./dist/auto-record.js","./dist/auto-record.cjs"]`.
    - `dist/index.js` and `dist/index.cjs` do not match `/\bzod\b/`.
-   - `npm pack` to a temp dir, extract the tarball into `<tmp>/node_modules/express-api-docs`, and assert `createRequire(<tmp>/x.cjs).resolve('express-api-docs/package.json')` resolves and `require(...)` returns `name === 'express-api-docs'`.
+   - `npm pack` to a temp dir, extract the tarball into `<tmp>/node_modules/express-api-contract`, and assert `createRequire(<tmp>/x.cjs).resolve('express-api-contract/package.json')` resolves and `require(...)` returns `name === 'express-api-contract'`.
    *Red:* no `package.json`, so `npm pack` exits non-zero.
 4. **`test/dist/build-shape.test.ts`** (ADR-40, static half only).
    - No file in `dist/` matches `/^chunk-/`.
@@ -294,11 +294,11 @@ Write these tests FIRST. Run `npm test` and capture the red output before writin
    - `RegistryEntry['source']` equals `'typed' | 'describe'`; `RouteRegistry['entries']` returns `readonly RegistryEntry[]`; the `register` parameter is `Omit<RegistryEntry,'id'>`.
    Uses only types shared by `@types/express` 4 and 5 (ADR-36), so it runs under both `npm test` and `typecheck:v4`.
 
-   **`test/core/types.test.ts`** (runtime): `META === Symbol.for('express-api-docs.v1.meta')`, and likewise `MOUNT` (`.v1.mount`), `CHILD` (`.v1.child`), `RECORDER` (`.v1.recorder`), `BRAND` (`.v1.brand`), `BRAND_KEY` (`.v1.brandKey`); `BRAND !== BRAND_KEY`; and no unversioned key (`Symbol.for('express-api-docs.meta')`) equals any export.
+   **`test/core/types.test.ts`** (runtime): `META === Symbol.for('express-api-contract.v1.meta')`, and likewise `MOUNT` (`.v1.mount`), `CHILD` (`.v1.child`), `RECORDER` (`.v1.recorder`), `BRAND` (`.v1.brand`), `BRAND_KEY` (`.v1.brandKey`); `BRAND !== BRAND_KEY`; and no unversioned key (`Symbol.for('express-api-contract.meta')`) equals any export.
    *Red:* `src/core/types.ts` missing.
 9. **`test/core/fixtures.test.ts`** (ADR-34, ADR-39).
    - `majors` is non-empty, has unique `major` values, and its first entry is the root `express` copy (`alias === 'express'`); when both installed copies share a major, only the root survives.
-   - `freshExpress('express4')` returns an `express` that is `!==` the cached `require('express4')`, whose owner prototype of `use` has no `Symbol.for('express-api-docs.v1.recorder')` property; after `restore()`, `require('express4')` returns the original cached instance again.
+   - `freshExpress('express4')` returns an `express` that is `!==` the cached `require('express4')`, whose owner prototype of `use` has no `Symbol.for('express-api-contract.v1.recorder')` property; after `restore()`, `require('express4')` returns the original cached instance again.
    *Red:* fixtures missing.
 10. **Mutation smoke (ADR-35 AC).** Add `test/meta/mutation-smoke/seed.ts` (a small function, for example `add(a,b){ return a + b }`) and `test/meta/mutation-smoke/seed.test.ts` asserting its result. Run `npm run mutation -- --mutate test/meta/mutation-smoke/seed.ts` and record that Stryker reports at least one **killed** mutant (the emptied-body `BlockStatement` mutant). Record the command, exit code and the killed count in the Builder Report. This is a manual evidence step, not part of `npm test`.
 11. **Gates** for AC-025 and AC-026: `npm test` (90/90/90/90), `npm run lint`, `npx tsc --noEmit`, and the v4 path `npm run test:v4` (see Additional S-01 checks).
@@ -448,7 +448,7 @@ Done in 6 seconds.                # incremental ~9.3s wall clock
 | AC-001 | met | `test/dist/manifest.test.ts` (name/license/LICENSE/old-name-walk) passes; `npm test` green. |
 | AC-002 | met | `npm run build` exits 0, emits `.js`/`.cjs`/`.d.ts`/`.d.cts` for all 4 entries; `test/dist/pack.test.ts` and `build-shape.test.ts` pass; exports map verified by `manifest.test.ts`. |
 | AC-004 | met | `peerDependencies`/`peerDependenciesMeta`/`engines`/`./zod` subpath asserted by `manifest.test.ts`; ESM+CJS load of the main entry without zod verified indirectly (index has no zod import; `pack.test.ts` asserts `dist/index.{js,cjs}` don't match `/\bzod\b/`) and directly by `npm run build` + `node -e "require('./dist/index.cjs')"`-style pack round-trip test. |
-| AC-020 | met | `pack.test.ts` asserts no `.css` or scalar/swagger-ui/redoc paths in `npm pack --dry-run --json`. |
+| AC-020 | met | `pack.test.ts` asserts no `.css` or single-value/docs-ui/redoc paths in `npm pack --dry-run --json`. |
 | AC-025 | met | `npm test` → 52/52 passing, coverage 100/100/100/100 (≥90 threshold). |
 | AC-026 | met | `npm run lint` exit 0; `npx tsc --noEmit` exit 0. |
 | AC-027 | met | `test/meta/workflows.test.ts` asserts matrix `{node:[22,24], express:[4,5]}`, typecheck in every cell (v4 via `test:v4`, v5 via `npm test`+`tsc --noEmit`), `peer-floor`, `mutation-scoped`, `mutation-full`, perf job, caching. Manually ran the v4 and v5 command paths locally (see Green evidence) since GitHub Actions itself does not execute in this sandbox. |
@@ -558,3 +558,20 @@ No AC required a challenge round. No AC is DISPUTED. Nothing routes to
 `negotiation.md`.
 
 Full per-AC evidence: `audit/interrogation/ST-001-verdict.md`.
+
+## Auditor Report (QA step 12 — final audit)
+
+Interrogated `ac-matrix.md` rows for AC-001, AC-002, AC-004, AC-020, AC-025, AC-026,
+AC-027, AC-028 against this story's `ac_ids`. Independently re-ran `npm run build`
+(exit 0, ESM/CJS/DTS emitted) and `npx vitest run test/meta/workflows.test.ts`
+(16/16 passed) rather than trusting the matrix's citation alone.
+
+**Verdict: AC-001, AC-002, AC-004, AC-020, AC-025, AC-026, AC-027, AC-028 — all PROVEN.**
+No DISPUTED ACs for this story. Full matrix: `audit/interrogation/qa-final-verdict.md`.
+
+## Test Report (QA step 14 — g_test_report approved 2026-09-30)
+
+Approved by human (let-me-look). Consolidated `qa/test-report.md`: 237+3 exhaustive cases,
+all PASS, 0 open FAILs. Full suite 79/79 files, 644/649 tests (5 legit skips), coverage
+98.56/93.35/99.45/99.34%. This story's claimed ACs are covered — see `ac-matrix.md` and
+this story's `## Auditor Report` section above for per-AC verdicts.

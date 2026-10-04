@@ -21,7 +21,7 @@ linear growth, well under budget). Effective counts after verification: 1 CRITIC
 
 | # | Source dim | file:line | Claim |
 |---|---|---|---|
-| F-01 | spec-compliance #1 | `src/spec/build.ts:107-131` | `.meta({id})`-tagged (named/reused) Zod schemas in `params`/`query` produce a dangling `$ref` to a dropped `$defs` bag — the resulting `/openapi.json` fails `SwaggerParser.validate()`, falsifying AC-015/AC-016 for an ordinary, spec-sanctioned Zod pattern. |
+| F-01 | spec-compliance #1 | `src/spec/build.ts:107-131` | `.meta({id})`-tagged (named/reused) Zod schemas in `params`/`query` produce a dangling `$ref` to a dropped `$defs` bag — the resulting `/openapi.json` fails `OpenApiParser.validate()`, falsifying AC-015/AC-016 for an ordinary, spec-sanctioned Zod pattern. |
 
 ## HIGH (3) — requires adversarial verification (step 3)
 
@@ -48,13 +48,25 @@ linear growth, well under budget). Effective counts after verification: 1 CRITIC
 | # | Source dim | file:line | Claim |
 |---|---|---|---|
 | F-12 | correctness #3 | `src/spec/build.ts:56-70` | `dedupe()`'s equal-rank tie-break silently degrades from `id`-based to array-position ordering when `id` is absent, contradicting its own doc comment's intent. |
-| F-13 | security #3 | `src/docs/render.ts:36` | Unquoted `data-url=` HTML attribute in the Scalar template; `encodeSpecUrl` escapes quotes but not spaces, allowing attribute injection via a crafted `docs.specUrl`. |
-| F-14 | security #4 | `src/docs/cdn.ts:8-10`, `src/docs/render.ts:37,53` | No Subresource Integrity (`integrity=`) on version-pinned CDN `<script>`/`<link>` tags for Scalar/Swagger UI. |
+| F-13 | security #3 | `src/docs/render.ts:36` | Unquoted `data-url=` HTML attribute in the docs UI template; `encodeSpecUrl` escapes quotes but not spaces, allowing attribute injection via a crafted `docs.specUrl`. |
+| F-14 | security #4 | `src/docs/cdn.ts:8-10`, `src/docs/render.ts:37,53` | No Subresource Integrity (`integrity=`) on version-pinned CDN `<script>`/`<link>` tags for the docs UI. |
 | F-15 | spec-compliance #2 | `src/adapter/zod.ts:30` | Zod's raw output (including its own top-level `$schema` keyword) is embedded unstripped into nested `requestBody`/`response` sub-schemas — unusual, not proven to break validation. |
 | F-16 | test-coverage #2 | `src/config/merge.ts:31` vs `:36-40` | Explicit `null` override vs. `undefined` distinction is untested in a three-layer merge. |
 | F-17 | test-coverage #6 | `src/adapter/standard.ts:50` | `out ?? NO_JSON_SCHEMA` fallback for a Standard Schema adapter that returns `null`/`undefined` from `jsonSchema[io]` is untested; matters for `memo.ts`'s reference-equality warn-once logic. |
 | F-18 | test-coverage #7 | `src/adapter/errors.ts:28-29` | `ApiDocsSchemaError`'s optional `route` constructor argument and its message-template branch are never exercised by any test. |
 | F-19 | test-coverage #8 | `src/route/typed.ts:55` | Per-route `meta.validateRequests` override (unlike its `validateResponses`/`onValidationError` siblings) has zero test coverage. |
+
+## New from exhaustive testing (QA step 5)
+
+| # | Source | file:line | Claim | Severity |
+|---|---|---|---|---|
+| F-21 | state-concurrency-idempotency (`qa/tests/state-concurrency-idempotency.md`) | `src/registry/registry.ts:11-16`, `src/spec/build.ts:55-72` | `RouteRegistry.register()` has no dedup; `dedupe()`'s first-registration-wins tie-break silently discards a developer's accidental duplicate `route()`/`describe()` call for the same method+path with no `EAD_*`-style warning. No AC violated. | LOW/advisory |
+
+## New from step 6 fix-loop closure re-check
+
+| # | Source | file:line | Claim | Severity |
+|---|---|---|---|---|
+| F-22 | spec-compliance closure re-check | `src/spec/build.ts` `hoistSchemaDefs` (~line 151, `if (!(name in defs))`) | Two different schemas sharing the same `.meta({id})` name silently collide: first-writer-wins, the second schema's actual definition is discarded, but both operations' `$ref`s point at the surviving entry — a structurally-valid but semantically-wrong OpenAPI doc (e.g. a route documented as accepting a `string` when its real schema is a `number`), with no error or warning. Independently reproduced via probe: `OpenApiParser.validate()` passes (so this does NOT reopen F-01), but the mismatch is silent. | MEDIUM |
 
 ## Delta (0 findings, 2 degradations)
 

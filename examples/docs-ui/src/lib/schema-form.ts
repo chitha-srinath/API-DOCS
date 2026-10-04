@@ -308,3 +308,37 @@ export function buildRequest(path: string, sections: Section[], values: Record<s
   }
   return { url: qs ? `${url}?${qs}` : url, body: bodyText };
 }
+
+function textOf(field: Field, value: unknown): string {
+  if (value === undefined || value === null) return '';
+  return field.kind === 'json' ? JSON.stringify(value, null, 2) : String(value);
+}
+
+/** Pretty-printed JSON for the body editor, derived from the form values. */
+export function bodyEditorText(path: string, sections: Section[], values: Record<string, string>): string {
+  const { body } = buildRequest(path, sections, values);
+  return body === undefined ? '' : JSON.stringify(JSON.parse(body), null, 2);
+}
+
+/** Maps JSON body text onto the body form fields. Returns the message when the text is not a usable body. */
+export function valuesFromBodyText(sections: Section[], text: string): { values: Record<string, string> } | { error: string } {
+  const body = sections.find((s) => s.key === 'body');
+  if (!body) return { values: {} };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch (err) {
+    return { error: `Invalid JSON: ${(err as Error).message}` };
+  }
+  if (body.rawBody) {
+    const [field] = body.fields;
+    return { values: { [fieldId('body', field.name)]: textOf(field, parsed) } };
+  }
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return { error: 'Body must be a JSON object' };
+  }
+  const object = parsed as Record<string, unknown>;
+  const values: Record<string, string> = {};
+  for (const field of body.fields) values[fieldId('body', field.name)] = textOf(field, object[field.name]);
+  return { values };
+}

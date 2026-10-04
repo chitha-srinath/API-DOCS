@@ -10,12 +10,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  bodyEditorText,
   buildRequest,
   buildSections,
   checkAll,
   fieldId,
   hintFor,
   initialValues,
+  valuesFromBodyText,
   type Components,
   type Field,
   type JsonSchema,
@@ -469,17 +471,32 @@ function TryIt({ op, auth, components }: { op: SpecOperation; auth: Auth; compon
     [op, components],
   );
   const [values, setValues] = useState<Record<string, string>>(() => initialValues(sections));
+  const [bodyText, setBodyText] = useState(() => bodyEditorText(op.path, sections, initialValues(sections)));
   const [attempted, setAttempted] = useState(false);
   const [result, setResult] = useState<{ status: number; body: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const hasBody = sections.some((s) => s.key === 'body');
+  const bodySections = sections.filter((s) => s.key === 'body');
   const errors = checkAll(sections, values);
-  const errorCount = Object.keys(errors).length;
+  // The JSON editor only adds an error when its text cannot be read as a body; field errors come from the form.
+  const parsed = hasBody && bodyText.trim() !== '' ? valuesFromBodyText(bodySections, bodyText) : null;
+  const parseError = parsed && 'error' in parsed ? parsed.error : null;
+  const errorCount = Object.keys(errors).length + (parseError ? 1 : 0);
   const preview = buildRequest(op.path, sections, values).url;
   const method = op.method.toUpperCase();
 
+  // Form edits regenerate the JSON; JSON edits that parse flow back into the form fields.
   function setValue(id: string, next: string) {
-    setValues((prev) => ({ ...prev, [id]: next }));
+    const nextValues = { ...values, [id]: next };
+    setValues(nextValues);
+    setBodyText(bodyEditorText(op.path, sections, nextValues));
+  }
+
+  function onBodyTextChange(text: string) {
+    setBodyText(text);
+    const next = valuesFromBodyText(bodySections, text);
+    if (text.trim() !== '' && 'values' in next) setValues((prev) => ({ ...prev, ...next.values }));
   }
 
   async function send() {
@@ -487,11 +504,13 @@ function TryIt({ op, auth, components }: { op: SpecOperation; auth: Auth; compon
     if (errorCount > 0) return;
     setLoading(true);
     try {
-      const { url, body } = buildRequest(op.path, sections, values);
-      const hasBody = body !== undefined && method !== 'GET' && method !== 'HEAD';
+      const { url, body: formBody } = buildRequest(op.path, sections, values);
+      // With a body section, the JSON editor is the source of truth so keys the form does not show are still sent.
+      const body = hasBody ? (bodyText.trim() === '' ? undefined : JSON.stringify(JSON.parse(bodyText))) : formBody;
+      const sendsBody = body !== undefined && method !== 'GET' && method !== 'HEAD';
       const headers: Record<string, string> = { ...authHeaders(auth) };
-      if (hasBody) headers['content-type'] = 'application/json';
-      const res = await fetch(url, { method, headers, body: hasBody ? body : undefined });
+      if (sendsBody) headers['content-type'] = 'application/json';
+      const res = await fetch(url, { method, headers, body: sendsBody ? body : undefined });
       setResult({ status: res.status, body: await res.text() });
     } catch (err) {
       setResult({ status: 0, body: String(err) });
@@ -502,29 +521,62 @@ function TryIt({ op, auth, components }: { op: SpecOperation; auth: Auth; compon
 
   return (
     <div className="space-y-4">
-      {sections.map((section) => (
-        <fieldset key={section.key} className="space-y-4 rounded-lg border p-4">
-          <legend className="px-1 text-sm font-medium">{SECTION_TITLE[section.key]}</legend>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {section.fields.map((field) => {
-              const id = fieldId(section.key, field.name);
-              const raw = values[id] ?? '';
-              // Required-but-empty is only flagged after a send attempt; anything typed is checked live.
-              const error = errors[id] && (attempted || raw.trim() !== '') ? errors[id] : undefined;
-              return (
-                <FieldControl
-                  key={id}
-                  id={id}
-                  field={field}
-                  value={raw}
-                  error={error}
-                  onChange={(next) => setValue(id, next)}
-                />
-              );
-            })}
+      {sections.map((section) => {
+        const fieldset = (
+          <fieldset key={section.key} className="space-y-4 rounded-lg border p-4">
+            <legend className="px-1 text-sm font-medium">{SECTION_TITLE[section.key]}</legend>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {section.fields.map((field) => {
+                const id = fieldId(section.key, field.name);
+                const raw = values[id] ?? '';
+                // Required-but-empty is only flagged after a send attempt; anything typed is checked live.
+                const error = errors[id] && (attempted || raw.trim() !== '') ? errors[id] : undefined;
+                return (
+                  <FieldControl
+                    key={id}
+                    id={id}
+                    field={field}
+                    value={raw}
+                    error={error}
+                    onChange={(next) => setValue(id, next)}
+                  />
+                );
+              })}
+            </div>
+          </fieldset>
+        );
+        if (section.key !== 'body') return fieldset;
+        return (
+          <div key="body" className="grid gap-4 xl:grid-cols-2">
+            {fieldset}
+            <div className="space-y-2 rounded-lg border p-4">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium">JSON body</span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={parseError !== null || bodyText.trim() === ''}
+                  onClick={() => onBodyTextChange(JSON.stringify(JSON.parse(bodyText), null, 2))}
+                >
+                  Format
+                </Button>
+              </div>
+              <Textarea
+                rows={14}
+                spellCheck={false}
+                className="font-mono text-xs"
+                aria-label="JSON request body"
+                aria-invalid={parseError !== null || undefined}
+                value={bodyText}
+                onChange={(e) => onBodyTextChange(e.target.value)}
+              />
+              <p className={`text-xs ${parseError ? 'text-destructive' : 'text-muted-foreground'}`} role={parseError ? 'alert' : undefined}>
+                {parseError ?? (bodyText.trim() === '' ? 'Empty body' : 'Valid JSON. Edits sync to the form fields.')}
+              </p>
+            </div>
           </div>
-        </fieldset>
-      ))}
+        );
+      })}
       <div className="flex flex-wrap items-center gap-3">
         <Button onClick={send} disabled={loading}>
           {loading ? 'Sending…' : `Send ${method}`}

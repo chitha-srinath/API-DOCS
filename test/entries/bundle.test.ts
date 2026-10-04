@@ -1,12 +1,11 @@
 // ST-007 (S-07): ADR-24 — bundling a fixture that imports dist/index.js with
 // esbuild keeps the Express 5 `/api/users/{id}` prefix intact.
 import { describe, expect, it } from 'vitest';
+import { buildSync } from 'esbuild';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { join } from 'node:path';
 
-const require = createRequire(import.meta.url);
 const root = process.cwd();
 
 describe('entries/bundle', () => {
@@ -42,19 +41,16 @@ describe('entries/bundle', () => {
       `,
     );
     const bundlePath = join(tmp, 'bundle.mjs');
-    execFileSync(
-      process.execPath,
-      [
-        require.resolve('esbuild/bin/esbuild'),
-        fixturePath,
-        '--bundle',
-        '--platform=node',
-        '--format=esm',
-        '--external:express',
-        `--outfile=${bundlePath}`,
-      ],
-      { cwd: root, stdio: 'pipe' },
-    );
+    // JS API, not the bin/esbuild CLI: that file is a native binary on Linux.
+    buildSync({
+      entryPoints: [fixturePath],
+      bundle: true,
+      platform: 'node',
+      format: 'esm',
+      external: ['express'],
+      outfile: bundlePath,
+      logLevel: 'silent',
+    });
     const out = execFileSync(process.execPath, [bundlePath], { cwd: root, stdio: 'pipe' }).toString();
     expect(out).toContain('OK');
     rmSync(scratch, { recursive: true, force: true });

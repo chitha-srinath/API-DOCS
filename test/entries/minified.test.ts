@@ -5,7 +5,7 @@
 // dynamic `import()`); bundle B is built from the CJS output (kept as CJS,
 // loaded via `require()`) so neither bundle needs an `import.meta.url` shim.
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
-import { execFileSync } from 'node:child_process';
+import { buildSync } from 'esbuild';
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
@@ -35,37 +35,30 @@ beforeAll(async () => {
   tmp = mkdtempSync(join(scratchDir, 'run-'));
   bundleAPath = join(tmp, 'a.mjs');
   bundleBPath = join(tmp, 'b.cjs');
-  const esbuild = require.resolve('esbuild/bin/esbuild');
-  execFileSync(
-    process.execPath,
-    [
-      esbuild,
-      join(root, 'dist/index.js'),
-      '--bundle',
-      '--minify',
-      '--keep-names=false',
-      '--platform=node',
-      '--format=esm',
-      '--external:express',
-      `--outfile=${bundleAPath}`,
-    ],
-    { cwd: root, stdio: 'pipe' },
-  );
-  execFileSync(
-    process.execPath,
-    [
-      esbuild,
-      join(root, 'dist/index.cjs'),
-      '--bundle',
-      '--minify',
-      '--keep-names=false',
-      '--platform=node',
-      '--format=cjs',
-      '--external:express',
-      `--outfile=${bundleBPath}`,
-    ],
-    { cwd: root, stdio: 'pipe' },
-  );
+  // JS API, not the bin/esbuild CLI: on Linux that file is a native binary that
+  // `node` cannot execute, so the CLI path only worked on Windows.
+  buildSync({
+    entryPoints: [join(root, 'dist/index.js')],
+    bundle: true,
+    minify: true,
+    keepNames: false,
+    platform: 'node',
+    format: 'esm',
+    external: ['express'],
+    outfile: bundleAPath,
+    logLevel: 'silent',
+  });
+  buildSync({
+    entryPoints: [join(root, 'dist/index.cjs')],
+    bundle: true,
+    minify: true,
+    keepNames: false,
+    platform: 'node',
+    format: 'cjs',
+    external: ['express'],
+    outfile: bundleBPath,
+    logLevel: 'silent',
+  });
   bundleA = (await import(bundleAPath)) as unknown as Bundle;
   bundleB = require(bundleBPath) as Bundle;
 });

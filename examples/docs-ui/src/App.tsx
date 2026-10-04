@@ -475,6 +475,7 @@ function TryIt({ op, auth, components }: { op: SpecOperation; auth: Auth; compon
   const [attempted, setAttempted] = useState(false);
   const [result, setResult] = useState<{ status: number; body: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [bodyView, setBodyView] = useState<'form' | 'json'>('form');
 
   const hasBody = sections.some((s) => s.key === 'body');
   const bodySections = sections.filter((s) => s.key === 'body');
@@ -546,34 +547,71 @@ function TryIt({ op, auth, components }: { op: SpecOperation; auth: Auth; compon
           </fieldset>
         );
         if (section.key !== 'body') return fieldset;
+        // One view at a time. Both stay in sync, so switching only changes what is shown.
+        const bodyErrors = Object.entries(errors)
+          .filter(([id]) => id.startsWith('body:'))
+          .map(([id, message]) => `${id.slice('body:'.length)}: ${message}`);
         return (
-          <div key="body" className="grid gap-4 xl:grid-cols-2">
-            {fieldset}
-            <div className="space-y-2 rounded-lg border p-4">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">JSON body</span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={parseError !== null || bodyText.trim() === ''}
-                  onClick={() => onBodyTextChange(JSON.stringify(JSON.parse(bodyText), null, 2))}
-                >
-                  Format
-                </Button>
-              </div>
-              <Textarea
-                rows={14}
-                spellCheck={false}
-                className="font-mono text-xs"
-                aria-label="JSON request body"
-                aria-invalid={parseError !== null || undefined}
-                value={bodyText}
-                onChange={(e) => onBodyTextChange(e.target.value)}
-              />
-              <p className={`text-xs ${parseError ? 'text-destructive' : 'text-muted-foreground'}`} role={parseError ? 'alert' : undefined}>
-                {parseError ?? (bodyText.trim() === '' ? 'Empty body' : 'Valid JSON. Edits sync to the form fields.')}
-              </p>
+          <div key="body" className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant={bodyView === 'form' ? 'default' : 'outline'}
+                disabled={bodyView === 'json' && parseError !== null}
+                onClick={() => setBodyView('form')}
+              >
+                Form
+              </Button>
+              <Button
+                size="sm"
+                variant={bodyView === 'json' ? 'default' : 'outline'}
+                onClick={() => setBodyView('json')}
+              >
+                JSON
+              </Button>
+              {bodyView === 'json' && (
+                <span className="text-xs text-muted-foreground">Edits here fill the form fields.</span>
+              )}
             </div>
+            {bodyView === 'form' ? (
+              fieldset
+            ) : (
+              <div className="space-y-2 rounded-lg border p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium">Request body (JSON)</span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={parseError !== null || bodyText.trim() === ''}
+                    onClick={() => onBodyTextChange(JSON.stringify(JSON.parse(bodyText), null, 2))}
+                  >
+                    Format
+                  </Button>
+                </div>
+                <Textarea
+                  rows={14}
+                  spellCheck={false}
+                  className="font-mono text-xs"
+                  aria-label="JSON request body"
+                  aria-invalid={parseError !== null || undefined}
+                  value={bodyText}
+                  onChange={(e) => onBodyTextChange(e.target.value)}
+                />
+                <p
+                  className={`text-xs ${parseError ? 'text-destructive' : 'text-muted-foreground'}`}
+                  role={parseError ? 'alert' : undefined}
+                >
+                  {parseError ?? (bodyText.trim() === '' ? 'Empty body' : 'Valid JSON')}
+                </p>
+                {attempted && bodyErrors.length > 0 && (
+                  <ul className="list-inside list-disc text-xs text-destructive">
+                    {bodyErrors.map((message) => (
+                      <li key={message}>{message}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         );
       })}

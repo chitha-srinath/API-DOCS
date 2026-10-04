@@ -324,35 +324,22 @@ async function main() {
     );
   }
 
-  // TC-CONTRACT-014: GET /docs returns 200 text/html loading Scalar
+  // TC-CONTRACT-015: default spec path 404s when a custom specPath is configured (AC-037)
   {
-    const r = await get(server, '/docs');
-    const ok = r.status === 200 && /text\/html/.test(r.headers['content-type'] || '') && /scalar/i.test(r.body);
-    record(
-      'TC-CONTRACT-014',
-      ok ? 'PASS' : 'FAIL',
-      ok ? 'GET /docs -> 200 text/html referencing Scalar' : `status=${r.status} ct=${r.headers['content-type']}`,
-      `GET /docs -> ${r.status}, content-type=${r.headers['content-type']}, bodyHasScalar=${/scalar/i.test(r.body)}`,
-    );
-  }
-
-  // TC-CONTRACT-015: default spec/docs paths 404 when custom paths configured (AC-037)
-  {
-    const apiDocs2 = createApiDocs({ specPath: '/spec.json', docsPath: '/reference' });
+    const apiDocs2 = createApiDocs({ specPath: '/spec.json' });
     const app2 = express();
     app2.use(apiDocs2.router);
     const server2 = await listen(app2);
     const rDefaultSpec = await get(server2, '/openapi.json');
-    const rDefaultDocs = await get(server2, '/docs');
     const rCustomSpec = await get(server2, '/spec.json');
-    const ok = rDefaultSpec.status === 404 && rDefaultDocs.status === 404 && rCustomSpec.status === 200;
+    const ok = rDefaultSpec.status === 404 && rCustomSpec.status === 200;
     record(
       'TC-CONTRACT-015',
       ok ? 'PASS' : 'FAIL',
       ok
-        ? 'default paths 404 once custom specPath/docsPath configured; custom path 200'
-        : `defaultSpec=${rDefaultSpec.status} defaultDocs=${rDefaultDocs.status} customSpec=${rCustomSpec.status}`,
-      `GET /openapi.json=${rDefaultSpec.status}, GET /docs=${rDefaultDocs.status}, GET /spec.json=${rCustomSpec.status}`,
+        ? 'default spec path 404s once a custom specPath is configured; custom path 200'
+        : `defaultSpec=${rDefaultSpec.status} customSpec=${rCustomSpec.status}`,
+      `GET /openapi.json=${rDefaultSpec.status}, GET /spec.json=${rCustomSpec.status}`,
     );
     server2.close();
   }
@@ -665,12 +652,12 @@ async function main() {
   {
     let threw = null;
     try {
-      createApiDocs({ ui: 'redoc' });
+      createApiDocs({ validateRequests: 'yes' });
     } catch (e) {
       threw = e;
     }
     const { ApiDocsConfigError } = await importFile(path.join(pkgRoot, 'dist/index.js'));
-    const ok = threw instanceof ApiDocsConfigError && /ui/.test(threw.message);
+    const ok = threw instanceof ApiDocsConfigError && /validateRequests/.test(threw.message);
     record(
       'TC-CONTRACT-028',
       ok ? 'PASS' : 'FAIL',

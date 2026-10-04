@@ -1,6 +1,6 @@
 // ST-007 (S-07, component C9): the composition root. `createApiDocs(opts)`
 // validates synchronously before building anything, then builds the Router
-// (spec and docs GETs, gated by `serveSpec`/`serveDocs`), resolves the app
+// (spec GET, gated by `serveSpec`), resolves the app
 // lazily through `req.app`, and wires the cache. Per ADR-38, the default
 // adapter (`standardSchemaAdapter`) is injected here, never in `src/config/**`.
 import { Router } from 'express';
@@ -13,7 +13,6 @@ import { DEFAULT_OPTIONS } from '../config/defaults.js';
 import { mergeOptions } from '../config/merge.js';
 import type { ApiDocsOptions } from '../config/types.js';
 import { validateOptions } from '../config/validate.js';
-import { renderDocsHtml } from '../docs/render.js';
 import { introspect } from '../introspect/index.js';
 import { noopLogger } from '../introspect/recorder.js';
 import { createRegistry } from '../registry/registry.js';
@@ -65,12 +64,11 @@ export function createApiDocs(rawOptions?: unknown): ApiDocsInstance {
   const describe = createDescribe({ registry });
 
   const specPath = options.specPath as string;
-  const docsPath = options.docsPath as string;
 
   function buildFromApp(app: unknown): OpenApiDocument {
     const ops = introspect(app, registry, logger, {
       autoDetect: options.autoDetect !== false,
-      ownPaths: [specPath, docsPath],
+      ownPaths: [specPath],
     });
     return buildSpec(ops, options, adapter);
   }
@@ -88,18 +86,6 @@ export function createApiDocs(rawOptions?: unknown): ApiDocsInstance {
   if (options.serveSpec) {
     router.get(specPath, (req: Request, res: Response) => {
       res.json(getSpec({ app: req.app }));
-    });
-  }
-
-  if (options.serveDocs) {
-    router.get(docsPath, (req: Request, res: Response) => {
-      const specUrl = options.docs?.specUrl ?? specPath;
-      const html = renderDocsHtml({
-        specUrl,
-        ui: (options.ui as 'scalar' | 'swagger-ui') ?? 'scalar',
-        cdnUrl: options.cdnUrl,
-      });
-      res.type('html').send(html);
     });
   }
 

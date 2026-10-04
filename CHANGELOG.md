@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Removed
+
+- The Scalar and Swagger UI docs page. `GET /docs` is no longer mounted, and the
+  `docsPath`, `ui`, `cdnUrl`, `serveDocs` and `docs.specUrl` options are removed.
+  The OpenAPI document at `specPath` (default `/openapi.json`) is unchanged.
+
 ## [0.1.0] - 2026-09-28
 
 Initial release.

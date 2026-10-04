@@ -34,14 +34,6 @@ describe('TC-NEG: config validation errors (ApiDocsConfigError)', () => {
     expect((caught as ApiDocsConfigError).message).toContain('specPth');
   });
 
-  it('TC-NEG-002 (AC-045): invalid enum value (ui) throws naming allowed values', () => {
-    expect(() => createApiDocs({ ui: 'redoc' })).toThrow(ApiDocsConfigError);
-    try {
-      createApiDocs({ ui: 'redoc' });
-    } catch (e) {
-      expect((e as ApiDocsConfigError).message).toMatch(/scalar/);
-    }
-  });
 
   it('TC-NEG-003 (AC-045): invalid validateResponses value throws', () => {
     expect(() => createApiDocs({ validateResponses: 'maybe' })).toThrow(ApiDocsConfigError);
@@ -51,9 +43,6 @@ describe('TC-NEG: config validation errors (ApiDocsConfigError)', () => {
     expect(() => createApiDocs({ specPath: 'no-slash' })).toThrow(ApiDocsConfigError);
   });
 
-  it('TC-NEG-005 (AC-045): docsPath missing leading slash throws', () => {
-    expect(() => createApiDocs({ docsPath: 'no-slash' })).toThrow(ApiDocsConfigError);
-  });
 
   it('TC-NEG-006 (AC-045): wrong type for boolean option (serveSpec) throws', () => {
     expect(() => createApiDocs({ serveSpec: 'yes' as unknown as boolean })).toThrow(ApiDocsConfigError);
@@ -79,11 +68,11 @@ describe('TC-NEG: config validation errors (ApiDocsConfigError)', () => {
 
   it('TC-NEG-011 (AC-045): unknown nested key inside a group throws naming the dotted path', () => {
     try {
-      createApiDocs({ docs: { specUrlX: '/x' } as unknown as { specUrl?: string } });
+      createApiDocs({ openapi: { infoX: {} } } as never);
       throw new Error('should have thrown');
     } catch (e) {
       expect(e).toBeInstanceOf(ApiDocsConfigError);
-      expect((e as ApiDocsConfigError).message).toContain('docs.specUrlX');
+      expect((e as ApiDocsConfigError).message).toContain('openapi.infoX');
     }
   });
 
@@ -153,29 +142,12 @@ describe('TC-NEG: config validation errors (ApiDocsConfigError)', () => {
     expect(() => createApiDocs(null as unknown as object)).toThrow(ApiDocsConfigError);
   });
 
-  it('TC-NEG-024 (AC-043/A-9): serveSpec false + serveDocs true + no docs.specUrl throws naming both', () => {
-    let caught: unknown;
-    try {
-      createApiDocs({ serveSpec: false, serveDocs: true });
-    } catch (e) {
-      caught = e;
-    }
-    expect(caught).toBeInstanceOf(ApiDocsConfigError);
-    const msg = (caught as ApiDocsConfigError).message;
-    expect(msg).toContain('serveSpec');
-    expect(msg).toContain('docs.specUrl');
-  });
 
-  it('TC-NEG-025 (AC-043/A-9): serveSpec false + serveDocs true + docs.specUrl set does NOT throw', () => {
-    expect(() =>
-      createApiDocs({ serveSpec: false, serveDocs: true, docs: { specUrl: 'https://example.com/openapi.json' } }),
-    ).not.toThrow();
-  });
 
   it('TC-NEG-026 (AC-045): config errors thrown synchronously before any route is mounted (no partial mount)', () => {
     let instance: ReturnType<typeof createApiDocs> | undefined;
     try {
-      instance = createApiDocs({ ui: 'redoc' });
+      instance = createApiDocs({ validateRequests: 'yes' });
     } catch {
       // expected
     }
@@ -186,7 +158,7 @@ describe('TC-NEG: config validation errors (ApiDocsConfigError)', () => {
 describe('TC-NEG: ApiDocsConfigError brand semantics (ADR-49)', () => {
   it('TC-NEG-027: error carries stable code and is instanceof its own class', () => {
     try {
-      createApiDocs({ ui: 'redoc' });
+      createApiDocs({ validateRequests: 'yes' });
       throw new Error('expected throw');
     } catch (e) {
       expect(e).toBeInstanceOf(ApiDocsConfigError);
@@ -445,30 +417,8 @@ describe('TC-NEG: adapter-level schema errors (ApiDocsSchemaError, async schema 
 });
 
 describe('TC-NEG: serve-level 404s and partial mounting (AC-043)', () => {
-  it('TC-NEG-046 (AC-043): serveDocs:false -> docs path 404s, spec still served', async () => {
-    const instance = createApiDocs({ serveDocs: false });
-    const app = freshApp();
-    app.use(instance.router);
-    await request(app).get('/docs').expect(404);
-    await request(app).get('/openapi.json').expect(200);
-  });
 
-  it('TC-NEG-047 (AC-043): serveSpec:false and serveDocs:false -> spec path 404s, getSpec() still works programmatically', async () => {
-    const instance = createApiDocs({ serveSpec: false, serveDocs: false });
-    const app = freshApp();
-    app.use(instance.router);
-    await request(app).get('/openapi.json').expect(404);
-    expect(() => instance.getSpec()).not.toThrow();
-  });
 
-  it('TC-NEG-048 (AC-037): requesting the DEFAULT spec/docs paths after they were customized away -> 404', async () => {
-    const instance = createApiDocs({ specPath: '/spec.json', docsPath: '/reference' });
-    const app = freshApp();
-    app.use(instance.router);
-    await request(app).get('/openapi.json').expect(404);
-    await request(app).get('/docs').expect(404);
-    await request(app).get('/spec.json').expect(200);
-  });
 
   it('TC-NEG-049: requesting a completely unregistered path on the mounted router 404s (no route swallowing)', async () => {
     const instance = createApiDocs();

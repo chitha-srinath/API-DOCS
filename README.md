@@ -3,7 +3,7 @@
 Zero-config OpenAPI 3.1 documentation for Express 4 and 5. Typed routes validate
 requests (and optionally responses) against your schemas; every route you
 write, `describe()`, or leave plain gets picked up automatically and turned
-into a spec served at `/openapi.json`, with a docs UI at `/docs`.
+into a spec served at `/openapi.json`.
 
 ## Install
 
@@ -64,7 +64,6 @@ app.post(
 app.use(apiDocs.router);
 app.listen(3000);
 // GET /openapi.json -> the generated OpenAPI 3.1 document
-// GET /docs          -> a Scalar docs UI
 ```
 
 See `examples/basic` for a complete, runnable version of this example.
@@ -127,17 +126,6 @@ export it.
 - Response validation is disabled by default (see below) so introducing
   express-api-docs into an existing service cannot change response bodies
   unless you opt in.
-
-## Docs UI
-
-`GET /docs` (configurable via `docsPath`) serves an interactive documentation
-UI that reads the generated spec from `GET /openapi.json` (configurable via
-`specPath`, or overridden per-UI via `docs.specUrl`).
-
-- `ui: 'scalar'` (default) — a [Scalar](https://scalar.com) UI.
-- `ui: 'swagger-ui'` — a Swagger UI, for teams standardized on it.
-- `cdnUrl` overrides the CDN the UI assets are loaded from (useful offline or
-  behind a strict CSP).
 
 ## Response validation
 
@@ -218,8 +206,8 @@ where possible.
 - `autoDetect: false` disables detection entirely — only `route()`/`describe()`
   routes appear in the spec.
 - `autoDetect: { include?: string[], exclude?: string[] }` scopes detection to
-  matching globs; `express-api-docs`'s own `specPath`/`docsPath` routes are
-  always excluded.
+  matching globs; `express-api-docs`'s own `specPath` route is always
+  excluded.
 - `detectedDefaultResponse` overrides the synthesized default response for
   auto-detected operations.
 
@@ -284,12 +272,7 @@ is optional and merges over `DEFAULT_OPTIONS` (a public export of `.`).
 | key | default | description |
 | --- | --- | --- |
 | `specPath` | `/openapi.json` | the path the generated OpenAPI document is served from |
-| `docsPath` | `/docs` | the path the docs UI is served from |
-| `ui` | `scalar` | which docs UI to render |
-| `cdnUrl` | `undefined` | a CDN URL override for the docs UI assets |
 | `serveSpec` | `true` | whether the spec endpoint is mounted |
-| `serveDocs` | `true` | whether the docs UI endpoint is mounted |
-| `docs.specUrl` | `undefined` | an explicit spec URL for the docs UI to fetch |
 | `openapi.info` | `undefined` | OpenAPI info overrides (default: `{ title: 'API', version: '0.0.0' }`) |
 | `openapi.servers` | `undefined` | OpenAPI servers list |
 | `openapi.tags` | `undefined` | OpenAPI tag definitions |

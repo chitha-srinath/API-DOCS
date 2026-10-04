@@ -2,7 +2,7 @@
 // Express, no IO, no `zod`, no `src/registry/registry.ts` import (ADR-21).
 // Dedupes with precedence typed = describe > plain (AC-031), applies
 // include/exclude through the in-house glob (AC-030/AC-041), self-excludes
-// specPath/docsPath (AC-033), applies naming defaults/strategies (A-3/A-4,
+// specPath (AC-033), applies naming defaults/strategies (A-3/A-4,
 // AC-042), the auto-400 ProblemDetails `$ref` (AC-011), security inheritance
 // (AC-039), `detectedDefaultResponse` (AC-041) and info/servers/tags
 // (AC-038). Output goes through the canonical key sort (AC-034).
@@ -96,8 +96,7 @@ function applyAutoDetectFilter(ops: SpecOperation[], config: ApiDocsOptions): Sp
 
 function selfExcludePaths(ops: SpecOperation[], config: ApiDocsOptions): SpecOperation[] {
   const specPath = config.specPath ?? (DEFAULT_OPTIONS.specPath as string);
-  const docsPath = config.docsPath ?? (DEFAULT_OPTIONS.docsPath as string);
-  return ops.filter((op) => op.path !== specPath && op.path !== docsPath);
+  return ops.filter((op) => op.path !== specPath);
 }
 
 interface JsonObjectSchema {

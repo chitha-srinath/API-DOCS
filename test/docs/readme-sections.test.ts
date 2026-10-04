@@ -22,7 +22,6 @@ describe('README sections (AC-029)', () => {
     'Quick start',
     'SchemaAdapter',
     'Security',
-    'Docs UI',
     'Response validation',
     'Error shape',
     'Incremental adoption',

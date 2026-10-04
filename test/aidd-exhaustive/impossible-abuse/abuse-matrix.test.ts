@@ -220,12 +220,6 @@ describe('impossible-abuse: injection strings', () => {
 });
 
 describe('impossible-abuse: contradictory / invalid config', () => {
-  // TC-ABUSE-011: serveSpec:false, serveDocs:true, no docs.specUrl -> must throw
-  // synchronously per AC-043/A-9, not silently succeed with a broken docs page.
-  it('TC-ABUSE-011: contradictory serveSpec/serveDocs config -> throws ApiDocsConfigError synchronously', () => {
-    expect(() => createApiDocs({ serveSpec: false, serveDocs: true })).toThrow(ApiDocsConfigError);
-  });
-
   // TC-ABUSE-012: unknown option key -> throws before mounting any route (AC-045).
   it('TC-ABUSE-012: unknown top-level option key -> throws ApiDocsConfigError, no partial setup', () => {
     expect(() => createApiDocs({ specPth: '/x' } as never)).toThrow(ApiDocsConfigError);
@@ -256,18 +250,7 @@ describe('impossible-abuse: contradictory / invalid config', () => {
     expect(() => createApiDocs({ specPath: 'no-slash' })).toThrow(ApiDocsConfigError);
   });
 
-  // TC-ABUSE-016: docs.specUrl set as a non-string (number) -> synchronous throw, not a
-  // runtime crash when /docs is later requested.
-  it('TC-ABUSE-016: docs group value invalid type -> throws synchronously at setup, never mounts', () => {
-    expect(() =>
-      createApiDocs({ serveSpec: false, serveDocs: true, docs: { specUrl: 12345 as unknown as string } }),
-    ).toThrow(ApiDocsConfigError);
-  });
 
-  // TC-ABUSE-017: `docs` group present but not an object.
-  it('TC-ABUSE-017: docs group is not an object -> throws ApiDocsConfigError', () => {
-    expect(() => createApiDocs({ docs: 'nope' as never })).toThrow(ApiDocsConfigError);
-  });
 });
 
 describe('impossible-abuse: replayed / reordered / duplicate registration', () => {

@@ -304,10 +304,7 @@ describe('TC-EDGE: defaults.ts setPath boundary sweep (AC-036)', () => {
   // TC-EDGE-036: DEFAULT_OPTIONS has no undefined leaf for any documented key (spot sample of top-level + nested)
   it('TC-EDGE-036 DEFAULT_OPTIONS top-level keys are all defined per OPTION_SPEC (openapi.* leaves are undefined by design)', () => {
     expect(DEFAULT_OPTIONS.specPath).toBeDefined();
-    expect(DEFAULT_OPTIONS.docsPath).toBeDefined();
-    expect(DEFAULT_OPTIONS.ui).toBeDefined();
     expect(DEFAULT_OPTIONS.serveSpec).toBeDefined();
-    expect(DEFAULT_OPTIONS.serveDocs).toBeDefined();
     expect(DEFAULT_OPTIONS.validateRequests).toBeDefined();
     expect(DEFAULT_OPTIONS.validateResponses).toBeDefined();
     expect(DEFAULT_OPTIONS.autoDetect).toBeDefined();

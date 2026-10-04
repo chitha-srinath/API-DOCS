@@ -19,17 +19,6 @@ describe('config/validate: validateOptions', () => {
     }
   });
 
-  it("rejects ui 'redoc'", () => {
-    try {
-      validateOptions({ ui: 'redoc' });
-      expect.unreachable();
-    } catch (err) {
-      const message = (err as Error).message;
-      expect(message).toContain('ui');
-      expect(message).toContain('scalar');
-      expect(message).toContain('swagger-ui');
-    }
-  });
 
   it("rejects validateResponses 'maybe'", () => {
     try {
@@ -63,26 +52,8 @@ describe('config/validate: validateOptions', () => {
     }
   });
 
-  it('A-9: serveSpec false + serveDocs true without docs.specUrl throws', () => {
-    try {
-      validateOptions({ serveSpec: false, serveDocs: true });
-      expect.unreachable();
-    } catch (err) {
-      const message = (err as Error).message;
-      expect(message).toContain('serveSpec');
-      expect(message).toContain('docs.specUrl');
-    }
-  });
 
-  it('A-9: with docs.specUrl does not throw', () => {
-    expect(() =>
-      validateOptions({ serveSpec: false, serveDocs: true, docs: { specUrl: '/openapi.json' } }),
-    ).not.toThrow();
-  });
 
-  it('A-9: serveSpec false + serveDocs false does not throw', () => {
-    expect(() => validateOptions({ serveSpec: false, serveDocs: false })).not.toThrow();
-  });
 
   it('schemaAdapter: accepts null', () => {
     expect(() => validateOptions({ schemaAdapter: null })).not.toThrow();
@@ -120,12 +91,7 @@ describe('config/validate: validateOptions', () => {
     expect(() =>
       validateOptions({
         specPath: '/openapi.json',
-        docsPath: '/docs',
-        ui: 'swagger-ui',
-        cdnUrl: 'https://cdn.example.com/x.js',
         serveSpec: true,
-        serveDocs: true,
-        docs: { specUrl: '/openapi.json' },
         openapi: {
           info: { title: 'My API', version: '1.0.0', description: 'desc' },
           servers: [{ url: 'https://api.example.com' }],
@@ -148,12 +114,12 @@ describe('config/validate: validateOptions', () => {
   it('throws synchronously (not a rejected promise) and exposes path/expected', () => {
     let threw = false;
     try {
-      validateOptions({ ui: 'redoc' });
+      validateOptions({ validateRequests: 'yes' });
     } catch (err) {
       threw = true;
       expect(err).toBeInstanceOf(ApiDocsConfigError);
       const configError = err as ApiDocsConfigError;
-      expect(configError.path).toBe('ui');
+      expect(configError.path).toBe('validateRequests');
       expect(typeof configError.expected).toBe('string');
     }
     expect(threw).toBe(true);

@@ -304,7 +304,7 @@ describe.each(majors)('functional-happy-path ($alias)', ({ major, express }) => 
   });
 
   // TC-HAPPY-033: AC-035 zero-config full flow.
-  it('TC-HAPPY-033: zero-config end-to-end: spec, docs, 400, no response validation', async () => {
+  it('TC-HAPPY-033: zero-config end-to-end: spec, 400, no response validation', async () => {
     const apiDocs = createApiDocs();
     const app = ex();
     app.use(ex.json());
@@ -321,10 +321,6 @@ describe.each(majors)('functional-happy-path ($alias)', ({ major, express }) => 
     expect(spec.status).toBe(200);
     expect((spec.body.openapi as string).startsWith('3.1.')).toBe(true);
 
-    const docs = await request(app).get('/docs');
-    expect(docs.status).toBe(200);
-    expect(docs.text).toContain('scalar');
-
     const bad = await request(app).post('/z').send({});
     expect(bad.status).toBe(400);
     expect(bad.headers['content-type']).toContain('application/problem+json');
@@ -334,29 +330,6 @@ describe.each(majors)('functional-happy-path ($alias)', ({ major, express }) => 
     expect(okBadResp.body).toEqual({ v: 1 });
   });
 
-  // TC-HAPPY-035: AC-037 custom paths, swagger-ui, custom cdn.
-  it('TC-HAPPY-035: custom specPath/docsPath/ui/cdnUrl are honored; defaults 404', async () => {
-    const apiDocs = createApiDocs({
-      specPath: '/spec.json',
-      docsPath: '/reference',
-      ui: 'swagger-ui',
-      cdnUrl: 'https://example.test/swagger-ui.js',
-    });
-    const app = ex();
-    app.use(apiDocs.router);
-
-    const spec = await request(app).get('/spec.json');
-    expect(spec.status).toBe(200);
-    const defaultSpec = await request(app).get('/openapi.json');
-    expect(defaultSpec.status).toBe(404);
-
-    const docs = await request(app).get('/reference');
-    expect(docs.status).toBe(200);
-    expect(docs.text).toContain('example.test/swagger-ui.js');
-    expect(docs.text).toContain('/spec.json');
-    const defaultDocs = await request(app).get('/docs');
-    expect(defaultDocs.status).toBe(404);
-  });
 
   // TC-HAPPY-036: AC-038 openapi.info/servers/tags overrides reflected.
   it('TC-HAPPY-036: openapi info/servers/tags overrides are reflected in the spec', async () => {
@@ -465,35 +438,6 @@ describe.each(majors)('functional-happy-path ($alias)', ({ major, express }) => 
     expect(opD.tags).toEqual(['users']);
   });
 
-  // TC-HAPPY-041: AC-043 serveDocs/serveSpec combinations.
-  it('TC-HAPPY-041: serveDocs false 404s docs but keeps spec; serveSpec+serveDocs false keeps getSpec()', async () => {
-    const noDocs = createApiDocs({ serveDocs: false });
-    const appND = ex();
-    appND.use(noDocs.router);
-    expect((await request(appND).get('/docs')).status).toBe(404);
-    expect((await request(appND).get('/openapi.json')).status).toBe(200);
-
-    const noBoth = createApiDocs({ serveSpec: false, serveDocs: false });
-    const appNB = ex();
-    appNB.use(noBoth.router);
-    expect((await request(appNB).get('/openapi.json')).status).toBe(404);
-    const programmatic = noBoth.getSpec({ app: appNB });
-    expect((programmatic.openapi as string).startsWith('3.1.')).toBe(true);
-
-    expect(() => createApiDocs({ serveSpec: false, serveDocs: true })).toThrow(ApiDocsConfigError);
-
-    const withUrl = createApiDocs({
-      serveSpec: false,
-      serveDocs: true,
-      docs: { specUrl: 'https://example.com/openapi.json' },
-    });
-    const appUrl = ex();
-    appUrl.use(withUrl.router);
-    const docsRes = await request(appUrl).get('/docs');
-    expect(docsRes.status).toBe(200);
-    expect(docsRes.text).toContain('https://example.com/openapi.json');
-    expect((await request(appUrl).get('/openapi.json')).status).toBe(404);
-  });
 
   // TC-HAPPY-042: AC-044 precedence: per-route > global > defaults, deep merge, arrays replaced.
   it('TC-HAPPY-042: option precedence per-route > global > defaults; arrays replaced not concatenated', async () => {
@@ -554,7 +498,6 @@ describe.each(majors)('functional-happy-path ($alias)', ({ major, express }) => 
     }
     expect(threw).toBe(true);
 
-    expect(() => createApiDocs({ ui: 'redoc' } as never)).toThrow(ApiDocsConfigError);
     expect(() => createApiDocs({ validateResponses: 'maybe' } as never)).toThrow(ApiDocsConfigError);
     expect(() => createApiDocs({ specPath: 'no-slash' } as never)).toThrow(ApiDocsConfigError);
   });

@@ -36,13 +36,6 @@ describe.each(majors)('serve/zero-config ($alias)', ({ express }) => {
     await expect(SwaggerParser.validate(structuredClone(res.body) as never)).resolves.toBeDefined();
   });
 
-  it('GET /docs returns 200 html loading Scalar', async () => {
-    const { app } = makeApp();
-    const res = await request(app).get('/docs');
-    expect(res.status).toBe(200);
-    expect(res.headers['content-type']).toContain('text/html');
-    expect(res.text).toContain('@scalar/api-reference');
-  });
 
   it('invalid request returns 400 problem+json', async () => {
     const { app } = makeApp();

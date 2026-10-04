@@ -37,42 +37,17 @@ describe.each(majors)('TC-REG: upgrade path zero-config -> add options ($alias)'
 
   // TC-REG-001 (ac_ids: AC-035, AC-036): baseline zero-config behavior still works
   // (re-confirms Wave A/serve/zero-config.test.ts did not regress under this dispatch's build).
-  it('TC-REG-001 zero-config baseline: spec 200/valid, docs 200 Scalar, 400 on bad body', async () => {
+  it('TC-REG-001 zero-config baseline: spec 200/valid, 400 on bad body', async () => {
     const { app } = zeroConfigApp();
     const spec = await request(app).get('/openapi.json');
     expect(spec.status).toBe(200);
     await expect(SwaggerParser.validate(structuredClone(spec.body) as never)).resolves.toBeDefined();
-    const docs = await request(app).get('/docs');
-    expect(docs.status).toBe(200);
-    expect(docs.text).toContain('@scalar/api-reference');
     const bad = await request(app).post('/users').send({});
     expect(bad.status).toBe(400);
   });
 
   // TC-REG-002 (ac_ids: AC-037, AC-021): adding options (custom paths) does not
   // resurrect the old default paths, and does not break plain-route passthrough
-  // that worked with zero config.
-  it('TC-REG-002 adding specPath/docsPath options moves endpoints; old defaults 404; plain routes still respond', async () => {
-    const app = ex();
-    app.use(ex.json());
-    const apiDocs = createApiDocs({ specPath: '/spec.json', docsPath: '/reference' });
-    app.use(apiDocs.router);
-    const router = ex.Router();
-    router.get('/plain', (_req, res) => res.json({ ok: true }));
-    app.use(router);
-
-    const spec = await request(app).get('/spec.json');
-    expect(spec.status).toBe(200);
-    const oldSpec = await request(app).get('/openapi.json');
-    expect(oldSpec.status).toBe(404);
-    const docs = await request(app).get('/reference');
-    expect(docs.status).toBe(200);
-    const oldDocs = await request(app).get('/docs');
-    expect(oldDocs.status).toBe(404);
-    const plain = await request(app).get('/plain');
-    expect(plain.status).toBe(200);
-    expect(plain.body).toEqual({ ok: true });
-  });
 
   // TC-REG-003 (ac_ids: AC-044): once a partial global `openapi.info` override is
   // layered on top of defaults, the untouched sibling default (info.version falls

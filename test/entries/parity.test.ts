@@ -51,7 +51,7 @@ describe('entries/parity', () => {
 
   it('no owned file contains the old package name', () => {
     const OLD_NAME = ['express', 'openapi', 'lite'].join('-');
-    const ownedDirs = ['src/docs', 'src/serve', 'test/docs-ui', 'test/serve', 'test/entries', 'test/perf', 'bench'];
+    const ownedDirs = ['src/serve', 'test/serve', 'test/entries', 'test/perf', 'bench'];
     const ownedFiles = ['src/index.ts', 'src/manual.ts', 'src/zod.ts'];
     const offenders: string[] = [];
 

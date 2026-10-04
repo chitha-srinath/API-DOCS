@@ -15,7 +15,6 @@ export type {
   ApiDocsOptions,
   AutoDetectFilter,
   DetectedDefaultResponse,
-  DocsOptions,
   OnValidationError,
   OpenApiInfo,
   OpenApiOptions,

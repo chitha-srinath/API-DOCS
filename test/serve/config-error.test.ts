@@ -7,7 +7,7 @@ import { createApiDocs } from '../../src/serve/router.js';
 describe('serve/config-error', () => {
   it.each([
     ['unknown key', { specPth: '/x' }, 'specPth'],
-    ['invalid ui', { ui: 'redoc' }, 'ui'],
+    ['invalid validateRequests', { validateRequests: 'yes' }, 'validateRequests'],
     ['invalid validateResponses', { validateResponses: 'maybe' }, 'validateResponses'],
     ['invalid specPath', { specPath: 'no-slash' }, 'specPath'],
   ])('%s throws ApiDocsConfigError naming the offending path', (_label, options, expectedPath) => {

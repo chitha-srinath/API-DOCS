@@ -94,7 +94,7 @@
     "@types/node": "~22.20.4",
     "@types/supertest": "7.2.1",
     "@vitest/coverage-v8": "5.0.2",
-    "esbuild": "~0.27.7",
+    "esbuild": "~0.28.2",
     "eslint": "10.11.0",
     "express": "^5.2.1",
     "express4": "npm:express@^4.22.3",
@@ -108,5 +108,9 @@
     "vitest": "5.0.2",
     "yaml": "^2.6.0",
     "zod": "^4.6.5"
+  },
+  "overrides": {
+    "esbuild": "$esbuild",
+    "qs": "^6.16.0"
   }
 }

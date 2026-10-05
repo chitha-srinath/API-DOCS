@@ -249,8 +249,6 @@ describe('impossible-abuse: contradictory / invalid config', () => {
   it('TC-ABUSE-015: specPath missing leading slash -> throws ApiDocsConfigError', () => {
     expect(() => createApiDocs({ specPath: 'no-slash' })).toThrow(ApiDocsConfigError);
   });
-
-
 });
 
 describe('impossible-abuse: replayed / reordered / duplicate registration', () => {

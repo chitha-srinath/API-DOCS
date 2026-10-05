@@ -20,8 +20,9 @@ describe('declared responses in the spec', () => {
 
   it('documents 1000 dummy endpoints, each with a 500', async () => {
     const res = await request(createApp()).get('/openapi.json').expect(200);
-    const dummy = Object.entries(res.body.paths as Record<string, Record<string, { responses: Record<string, unknown> }>>)
-      .filter(([p]) => p.startsWith('/dummy/'));
+    const dummy = Object.entries(
+      res.body.paths as Record<string, Record<string, { responses: Record<string, unknown> }>>,
+    ).filter(([p]) => p.startsWith('/dummy/'));
     expect(dummy).toHaveLength(1000);
     for (const [, methods] of dummy) expect(methods.get?.responses).toHaveProperty(['500']);
   });
@@ -62,7 +63,11 @@ describe('declared responses in the spec', () => {
     });
 
     it('answers 415 for an unsupported file type', async () => {
-      const res = await request(app).post('/uploads').set('Content-Type', 'application/x-msdownload').send(bytes).expect(415);
+      const res = await request(app)
+        .post('/uploads')
+        .set('Content-Type', 'application/x-msdownload')
+        .send(bytes)
+        .expect(415);
       expect(res.body.status).toBe(415);
     });
 

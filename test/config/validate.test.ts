@@ -19,7 +19,6 @@ describe('config/validate: validateOptions', () => {
     }
   });
 
-
   it("rejects validateResponses 'maybe'", () => {
     try {
       validateOptions({ validateResponses: 'maybe' });
@@ -51,9 +50,6 @@ describe('config/validate: validateOptions', () => {
       expect((err as Error).message).toContain('openapi.infoo');
     }
   });
-
-
-
 
   it('schemaAdapter: accepts null', () => {
     expect(() => validateOptions({ schemaAdapter: null })).not.toThrow();

@@ -60,7 +60,10 @@ export interface Section {
 /** Strings longer than this get a multi-line editor instead of a single-line input. */
 const LONG_TEXT = 120;
 
-export function resolveSchema(schema: JsonSchema | undefined, components: Components | undefined): JsonSchema | undefined {
+export function resolveSchema(
+  schema: JsonSchema | undefined,
+  components: Components | undefined,
+): JsonSchema | undefined {
   if (!schema?.$ref) return schema;
   const name = schema.$ref.replace('#/components/schemas/', '');
   return components?.schemas?.[name] ?? schema;
@@ -75,7 +78,12 @@ function kindOf(schema: JsonSchema): FieldKind {
   return 'json';
 }
 
-function fieldOf(name: string, required: boolean, prop: JsonSchema | undefined, components: Components | undefined): Field {
+function fieldOf(
+  name: string,
+  required: boolean,
+  prop: JsonSchema | undefined,
+  components: Components | undefined,
+): Field {
   const schema = resolveSchema(prop, components) ?? {};
   return { name, required, description: schema.description ?? prop?.description, kind: kindOf(schema), schema };
 }
@@ -135,8 +143,10 @@ export function initialValues(sections: Section[]): Record<string, string> {
 function rangeError(n: number, schema: JsonSchema): string | null {
   if (schema.minimum !== undefined && n < schema.minimum) return `Must be at least ${schema.minimum}`;
   if (schema.maximum !== undefined && n > schema.maximum) return `Must be at most ${schema.maximum}`;
-  if (schema.exclusiveMinimum !== undefined && n <= schema.exclusiveMinimum) return `Must be greater than ${schema.exclusiveMinimum}`;
-  if (schema.exclusiveMaximum !== undefined && n >= schema.exclusiveMaximum) return `Must be less than ${schema.exclusiveMaximum}`;
+  if (schema.exclusiveMinimum !== undefined && n <= schema.exclusiveMinimum)
+    return `Must be greater than ${schema.exclusiveMinimum}`;
+  if (schema.exclusiveMaximum !== undefined && n >= schema.exclusiveMaximum)
+    return `Must be less than ${schema.exclusiveMaximum}`;
   return null;
 }
 
@@ -257,7 +267,8 @@ export function hintFor(field: Field): string {
   const s = field.schema;
   if (field.kind === 'enum') return `one of ${(s.enum ?? []).map(String).join(' | ')}`;
   if (field.kind === 'boolean') return 'true or false';
-  if (field.kind === 'json') return s.type === 'array' ? 'JSON array' : s.type === 'object' ? 'JSON object' : 'JSON value';
+  if (field.kind === 'json')
+    return s.type === 'array' ? 'JSON array' : s.type === 'object' ? 'JSON object' : 'JSON value';
   if (field.kind === 'integer' || field.kind === 'number') {
     const kind = field.kind === 'integer' ? 'integer' : 'number';
     const min = s.minimum ?? s.exclusiveMinimum;
@@ -330,7 +341,10 @@ export function bodyEditorText(path: string, sections: Section[], values: Record
 }
 
 /** Maps JSON body text onto the body form fields. Returns the message when the text is not a usable body. */
-export function valuesFromBodyText(sections: Section[], text: string): { values: Record<string, string> } | { error: string } {
+export function valuesFromBodyText(
+  sections: Section[],
+  text: string,
+): { values: Record<string, string> } | { error: string } {
   const body = sections.find((s) => s.key === 'body');
   if (!body) return { values: {} };
   let parsed: unknown;

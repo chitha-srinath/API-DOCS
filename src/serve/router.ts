@@ -101,18 +101,21 @@ export function createApiDocs(rawOptions?: unknown): ApiDocsInstance {
         next(err);
       }
     });
-    router.get(`${docsPath.replace(/\/$/, '')}/assets/:file`, async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const asset = await getDocsAsset(docsPath, String(req.params.file));
-        if (!asset) {
-          res.status(404).end();
-          return;
+    router.get(
+      `${docsPath.replace(/\/$/, '')}/assets/:file`,
+      async (req: Request, res: Response, next: NextFunction) => {
+        try {
+          const asset = await getDocsAsset(docsPath, String(req.params.file));
+          if (!asset) {
+            res.status(404).end();
+            return;
+          }
+          res.type(asset.type).send(asset.body);
+        } catch (err) {
+          next(err);
         }
-        res.type(asset.type).send(asset.body);
-      } catch (err) {
-        next(err);
-      }
-    });
+      },
+    );
   }
 
   return {

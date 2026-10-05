@@ -34,7 +34,6 @@ describe('TC-NEG: config validation errors (ApiDocsConfigError)', () => {
     expect((caught as ApiDocsConfigError).message).toContain('specPth');
   });
 
-
   it('TC-NEG-003 (AC-045): invalid validateResponses value throws', () => {
     expect(() => createApiDocs({ validateResponses: 'maybe' })).toThrow(ApiDocsConfigError);
   });
@@ -42,7 +41,6 @@ describe('TC-NEG: config validation errors (ApiDocsConfigError)', () => {
   it('TC-NEG-004 (AC-045): specPath missing leading slash throws', () => {
     expect(() => createApiDocs({ specPath: 'no-slash' })).toThrow(ApiDocsConfigError);
   });
-
 
   it('TC-NEG-006 (AC-045): wrong type for boolean option (serveSpec) throws', () => {
     expect(() => createApiDocs({ serveSpec: 'yes' as unknown as boolean })).toThrow(ApiDocsConfigError);
@@ -141,8 +139,6 @@ describe('TC-NEG: config validation errors (ApiDocsConfigError)', () => {
     // for null under isPlainObject -> actually null fails isPlainObject (value !== null check)
     expect(() => createApiDocs(null as unknown as object)).toThrow(ApiDocsConfigError);
   });
-
-
 
   it('TC-NEG-026 (AC-045): config errors thrown synchronously before any route is mounted (no partial mount)', () => {
     let instance: ReturnType<typeof createApiDocs> | undefined;
@@ -417,9 +413,6 @@ describe('TC-NEG: adapter-level schema errors (ApiDocsSchemaError, async schema 
 });
 
 describe('TC-NEG: serve-level 404s and partial mounting (AC-043)', () => {
-
-
-
   it('TC-NEG-049: requesting a completely unregistered path on the mounted router 404s (no route swallowing)', async () => {
     const instance = createApiDocs();
     const app = freshApp();

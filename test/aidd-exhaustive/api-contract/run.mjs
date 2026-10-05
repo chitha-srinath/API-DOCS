@@ -388,7 +388,7 @@ async function main() {
 
   // TC-CONTRACT-018: OpenAPI parser validates the default-generated spec (control, expect PASS)
   {
-    const OpenApiParser = (await import('@readme/openapi-parser'));
+    const OpenApiParser = await import('@readme/openapi-parser');
     const r = await get(server, '/openapi.json');
     const doc = JSON.parse(r.body);
     try {
@@ -412,7 +412,7 @@ async function main() {
   // TC-CONTRACT-019: independent confirmation of F-01 — .meta({id})-tagged, REUSED zod schema
   // via zodAdapter (opt-in subpath) produces a spec that fails OpenAPI parser validation.
   {
-    const OpenApiParser = (await import('@readme/openapi-parser'));
+    const OpenApiParser = await import('@readme/openapi-parser');
     const Named = z.object({ id: z.string(), label: z.string() }).meta({ id: 'NamedThing' });
     const apiDocs3 = createApiDocs();
     const app3 = express();
@@ -454,7 +454,7 @@ async function main() {
   // no explicit `adapter:` override) — tests the verdict's "scope widened, reachable via the
   // default adapter, not only the opt-in zod subpath" claim.
   {
-    const OpenApiParser = (await import('@readme/openapi-parser'));
+    const OpenApiParser = await import('@readme/openapi-parser');
     const Named2 = z.object({ id: z.string(), label: z.string() }).meta({ id: 'NamedThing2' });
     const apiDocs4 = createApiDocs();
     const app4 = express();

@@ -305,7 +305,11 @@ function UploadPanel({ auth }: { auth: Auth }) {
                 </span>
               </div>
               {item.state === 'uploading' && (
-                <div className="h-2 w-full overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={item.progress}>
+                <div
+                  className="h-2 w-full overflow-hidden rounded-full bg-muted"
+                  role="progressbar"
+                  aria-valuenow={item.progress}
+                >
                   <div className="h-full bg-primary transition-[width]" style={{ width: `${item.progress}%` }} />
                 </div>
               )}
@@ -331,7 +335,9 @@ function UploadPanel({ auth }: { auth: Auth }) {
                     <pre className="overflow-x-auto rounded bg-muted/40 p-2 font-mono text-xs">{item.outcome.body}</pre>
                   )}
                   {item.outcome.kind === 'network' && (
-                    <p className="text-xs text-muted-foreground">The server could not be reached. Check the connection or that the API is running, then retry.</p>
+                    <p className="text-xs text-muted-foreground">
+                      The server could not be reached. Check the connection or that the API is running, then retry.
+                    </p>
                   )}
                 </div>
               )}
@@ -350,7 +356,17 @@ const SECTION_TITLE: Record<Section['key'], string> = {
 };
 
 /** Date field: a shadcn popover holding a calendar. Stores YYYY-MM-DD text, the form the validation expects. */
-function DateControl({ id, value, invalid, onChange }: { id: string; value: string; invalid: boolean; onChange: (next: string) => void }) {
+function DateControl({
+  id,
+  value,
+  invalid,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  invalid: boolean;
+  onChange: (next: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   const parsed = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined;
   const selected = parsed && isValid(parsed) ? parsed : undefined;
@@ -487,20 +503,25 @@ function FieldControl({
       </div>
       {field.description && <p className="text-xs text-muted-foreground">{field.description}</p>}
       {control}
-      {(field.kind === 'text' || field.kind === 'textarea') && (s.minLength !== undefined || s.maxLength !== undefined) && (
-        <p
-          className={`text-right text-xs tabular-nums ${
-            s.maxLength !== undefined && value.length > s.maxLength ? 'text-destructive' : 'text-muted-foreground'
-          }`}
-        >
-          {value.length}
-          {s.maxLength !== undefined && ` / ${s.maxLength}`}
-          {s.minLength !== undefined && ` · min ${s.minLength}`}
-        </p>
-      )}
+      {(field.kind === 'text' || field.kind === 'textarea') &&
+        (s.minLength !== undefined || s.maxLength !== undefined) && (
+          <p
+            className={`text-right text-xs tabular-nums ${
+              s.maxLength !== undefined && value.length > s.maxLength ? 'text-destructive' : 'text-muted-foreground'
+            }`}
+          >
+            {value.length}
+            {s.maxLength !== undefined && ` / ${s.maxLength}`}
+            {s.minLength !== undefined && ` · min ${s.minLength}`}
+          </p>
+        )}
       {json && (
         <div className="flex items-center justify-between gap-2 text-xs">
-          <span className={!invalid && value.trim() !== '' ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}>
+          <span
+            className={
+              !invalid && value.trim() !== '' ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'
+            }
+          >
             {!invalid && value.trim() !== '' ? 'Valid JSON' : 'JSON editor'}
           </span>
           <Button
@@ -523,10 +544,7 @@ function FieldControl({
 }
 
 function TryIt({ op, auth, components }: { op: SpecOperation; auth: Auth; components?: Components }) {
-  const sections = useMemo(
-    () => buildSections(op.parameters ?? [], op.requestBody, components),
-    [op, components],
-  );
+  const sections = useMemo(() => buildSections(op.parameters ?? [], op.requestBody, components), [op, components]);
   const [values, setValues] = useState<Record<string, string>>(() => initialValues(sections));
   const [bodyText, setBodyText] = useState(() => bodyEditorText(op.path, sections, initialValues(sections)));
   const [attempted, setAttempted] = useState(false);
@@ -827,7 +845,9 @@ export function App() {
             <CardHeader>
               <CardTitle className="text-base">Endpoints</CardTitle>
               <CardDescription>
-                {visible.length === ops.length ? `${ops.length} operations` : `${visible.length} of ${ops.length} match`}
+                {visible.length === ops.length
+                  ? `${ops.length} operations`
+                  : `${visible.length} of ${ops.length} match`}
               </CardDescription>
               <Input
                 placeholder="Filter by method, path or summary"
@@ -848,7 +868,9 @@ export function App() {
                           className="sticky top-0 z-10 flex w-full items-center justify-between rounded-md bg-card px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:bg-muted"
                           aria-expanded={isOpen}
                         >
-                          <span>{isOpen ? '▾' : '▸'} {tag}</span>
+                          <span>
+                            {isOpen ? '▾' : '▸'} {tag}
+                          </span>
                           <Badge variant="outline">{groupOps.length}</Badge>
                         </button>
                         {isOpen && (
@@ -862,7 +884,9 @@ export function App() {
                                   onClick={() => setSelected(key)}
                                   className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-muted ${active ? 'bg-muted' : ''}`}
                                 >
-                                  <span className={`rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold uppercase ${METHOD_CLASS[op.method] ?? ''}`}>
+                                  <span
+                                    className={`rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold uppercase ${METHOD_CLASS[op.method] ?? ''}`}
+                                  >
                                     {op.method}
                                   </span>
                                   <span className="truncate font-mono">{op.path}</span>
@@ -882,7 +906,9 @@ export function App() {
           <Card className="min-w-0">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <span className={`rounded px-2 py-1 font-mono text-xs font-semibold uppercase ${METHOD_CLASS[current.method] ?? ''}`}>
+                <span
+                  className={`rounded px-2 py-1 font-mono text-xs font-semibold uppercase ${METHOD_CLASS[current.method] ?? ''}`}
+                >
                   {current.method}
                 </span>
                 <code className="font-mono text-base">{current.path}</code>

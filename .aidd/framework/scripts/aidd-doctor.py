@@ -9,6 +9,11 @@ import subprocess
 import sys
 
 
+STACK_MARKERS = (('package.json', 'Node'), ('pyproject.toml', 'Python'), ('requirements.txt', 'Python'),
+                 ('go.mod', 'Go'), ('Cargo.toml', 'Rust'), ('pom.xml', 'Java/Maven'),
+                 ('build.gradle', 'Java/Gradle'), ('Gemfile', 'Ruby'))
+
+
 def inspect(root, installed=False):
     checks = []
     def add(name, status, detail):
@@ -27,17 +32,15 @@ def inspect(root, installed=False):
     framework = root / '.aidd/framework'
     if not framework.exists() and (root / 'core/scripts/aidd-ready.py').exists() and not installed:
         framework = root / 'core'
-    for filename in ['aidd-ready.py', 'aidd-evidence.py', 'aidd-report.py', 'aidd-validate.py']:
-        add(filename, 'ok' if (framework / 'scripts' / filename).is_file() else 'error',
-            'Available' if (framework / 'scripts' / filename).is_file() else 'Install or upgrade AIDD from this release')
-    runtime = next((name for name in ['podman', 'docker'] if shutil.which(name)), None)
+    for filename in ('aidd-ready.py', 'aidd-evidence.py', 'aidd-report.py', 'aidd-validate.py'):
+        present = (framework / 'scripts' / filename).is_file()
+        add(filename, 'ok' if present else 'error',
+            'Available' if present else 'Install or upgrade AIDD from this release')
+    runtime = next((name for name in ('podman', 'docker') if shutil.which(name)), None)
     add('sandbox', 'warning', (runtime + ' executable found; daemon/image availability not tested') if runtime
         else 'No container runtime found; evidence capture executes on the host only with --host')
-    stacks = [label for name, label in [('package.json', 'Node'), ('pyproject.toml', 'Python'),
-              ('requirements.txt', 'Python'), ('go.mod', 'Go'), ('Cargo.toml', 'Rust'),
-              ('pom.xml', 'Java/Maven'), ('build.gradle', 'Java/Gradle'), ('Gemfile', 'Ruby')]
-              if (root / name).is_file()]
-    add('project', 'ok', ', '.join(sorted(set(stacks))) if stacks else 'Generic repository; supply explicit verification commands')
+    stacks = {label for name, label in STACK_MARKERS if (root / name).is_file()}
+    add('project', 'ok', ', '.join(sorted(stacks)) if stacks else 'Generic repository; supply explicit verification commands')
     add('proof_scope', 'warning', 'Receipts cover Git-tracked and unignored files, excluding root .aidd; ignored dependencies and external services are outside scope')
     return {'ready': all(check['status'] != 'error' for check in checks), 'checks': checks}
 

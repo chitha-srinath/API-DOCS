@@ -7,3 +7,4 @@ reports/
 *.tsbuildinfo
 .env
 examples/docs-ui/dist/
+.playwright-mcp/

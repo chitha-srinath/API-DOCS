@@ -36,7 +36,6 @@ describe.each(majors)('serve/zero-config ($alias)', ({ express }) => {
     await expect(OpenApiParser.validate(structuredClone(res.body) as never)).resolves.toBeDefined();
   });
 
-
   it('invalid request returns 400 problem+json', async () => {
     const { app } = makeApp();
     const res = await request(app).post('/users').send({});

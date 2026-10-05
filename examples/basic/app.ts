@@ -48,7 +48,12 @@ export function createApp() {
           quantity: z.number().int().min(1).optional(),
           tags: z.array(z.string()).optional(),
           metadata: z.record(z.string(), z.unknown()).optional(),
-          sku: z.string().min(3).max(12).regex(/^[A-Z0-9-]+$/).optional(),
+          sku: z
+            .string()
+            .min(3)
+            .max(12)
+            .regex(/^[A-Z0-9-]+$/)
+            .optional(),
           externalId: z.uuid().optional(),
           releaseDate: z.iso.date().optional(),
           rating: z.number().min(0).max(5).optional(),
@@ -117,7 +122,6 @@ export function createApp() {
     ),
   );
 
-
   // Dummy endpoints that always fail with 500, so the docs UI can show documented error responses.
   const problemBody = {
     'application/problem+json': {
@@ -170,20 +174,36 @@ export function createApp() {
     express.raw({ type: () => true, limit: uploadLimit }),
     (req, res) => {
       if (req.query.fail === '1') {
-        res.status(500).json({ type: 'about:blank', title: 'Internal Server Error', status: 500, detail: 'Storage unavailable (simulated)' });
+        res.status(500).json({
+          type: 'about:blank',
+          title: 'Internal Server Error',
+          status: 500,
+          detail: 'Storage unavailable (simulated)',
+        });
         return;
       }
       const body = req.body as Buffer;
-      const type = (req.headers['content-type'] ?? '').split(';')[0].trim();
+      const [mime = ''] = (req.headers['content-type'] ?? '').split(';');
+      const type = mime.trim();
       if (!Buffer.isBuffer(body) || body.length === 0) {
         res.status(400).json({ type: 'about:blank', title: 'Bad Request', status: 400, detail: 'Empty upload' });
         return;
       }
       if (!uploadTypes.includes(type)) {
-        res.status(415).json({ type: 'about:blank', title: 'Unsupported Media Type', status: 415, detail: `${type || 'no type'} is not allowed` });
+        res.status(415).json({
+          type: 'about:blank',
+          title: 'Unsupported Media Type',
+          status: 415,
+          detail: `${type || 'no type'} is not allowed`,
+        });
         return;
       }
-      res.status(201).json({ id: `file_${Date.now()}`, name: String(req.headers['x-file-name'] ?? 'upload'), size: body.length, type });
+      res.status(201).json({
+        id: `file_${Date.now()}`,
+        name: String(req.headers['x-file-name'] ?? 'upload'),
+        size: body.length,
+        type,
+      });
     },
   );
 
@@ -196,7 +216,9 @@ export function createApp() {
     apiDocs.describe('get', '/secure/whoami', { summary: 'Who am I (bearer token required)', responses: unauthorized }),
     (req, res) => {
       if (req.headers.authorization !== 'Bearer demo-token') {
-        res.status(401).json({ type: 'about:blank', title: 'Unauthorized', status: 401, detail: 'Missing or invalid bearer token' });
+        res
+          .status(401)
+          .json({ type: 'about:blank', title: 'Unauthorized', status: 401, detail: 'Missing or invalid bearer token' });
         return;
       }
       res.json({ user: 'demo', scheme: 'bearer' });
@@ -233,7 +255,12 @@ export function createApp() {
       (req, res) => {
         const widget = widgets.find((w) => w.id === req.params.id);
         if (!widget) {
-          res.status(404).json({ type: 'about:blank', title: 'Not Found', status: 404, detail: `widget ${req.params.id} not found` });
+          res.status(404).json({
+            type: 'about:blank',
+            title: 'Not Found',
+            status: 404,
+            detail: `widget ${req.params.id} not found`,
+          });
           return;
         }
         res.json(widget);
@@ -267,7 +294,12 @@ export function createApp() {
   app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     // Errors thrown by middleware (e.g. body-parser's 413) carry their own status.
     const status = (err as { status?: number }).status ?? 500;
-    res.status(status).json({ type: 'about:blank', title: STATUS_CODES[status] ?? 'Error', status, detail: err instanceof Error ? err.message : 'Unknown error' });
+    res.status(status).json({
+      type: 'about:blank',
+      title: STATUS_CODES[status] ?? 'Error',
+      status,
+      detail: err instanceof Error ? err.message : 'Unknown error',
+    });
   });
 
   return app;

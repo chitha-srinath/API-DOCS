@@ -36,6 +36,9 @@ describe('rendered docs UI', () => {
   it('returns 404 for unknown or traversal asset names', async () => {
     const { app } = appWith();
     expect((await request(app).get('/docs/assets/nope.js')).status).toBe(404);
+    // Inherited Object.prototype names must not resolve to an asset (they used to throw a 500).
+    expect((await request(app).get('/docs/assets/constructor')).status).toBe(404);
+    expect((await request(app).get('/docs/assets/__proto__')).status).toBe(404);
   });
 
   it('serves the UI at a configured docsPath and not at /docs', async () => {

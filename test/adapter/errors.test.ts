@@ -11,7 +11,9 @@ describe('ApiDocsSchemaError (ADR-41, ADR-49)', () => {
       'express-api-contract.v1.ApiDocsSchemaError',
     );
     expect(Array.isArray((err as unknown as Record<PropertyKey, unknown>)[BRAND])).toBe(true);
-    expect((err as unknown as Record<PropertyKey, unknown>)[BRAND]).toContain('express-api-contract.v1.ApiDocsSchemaError');
+    expect((err as unknown as Record<PropertyKey, unknown>)[BRAND]).toContain(
+      'express-api-contract.v1.ApiDocsSchemaError',
+    );
   });
 
   it('is instanceof ApiDocsSchemaError and Error', () => {

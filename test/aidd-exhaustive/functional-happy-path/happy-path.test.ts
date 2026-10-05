@@ -330,7 +330,6 @@ describe.each(majors)('functional-happy-path ($alias)', ({ major, express }) => 
     expect(okBadResp.body).toEqual({ v: 1 });
   });
 
-
   // TC-HAPPY-036: AC-038 openapi.info/servers/tags overrides reflected.
   it('TC-HAPPY-036: openapi info/servers/tags overrides are reflected in the spec', async () => {
     const apiDocs = createApiDocs({
@@ -437,7 +436,6 @@ describe.each(majors)('functional-happy-path ($alias)', ({ major, express }) => 
     expect(opD.operationId).toBe('getUsersById');
     expect(opD.tags).toEqual(['users']);
   });
-
 
   // TC-HAPPY-042: AC-044 precedence: per-route > global > defaults, deep merge, arrays replaced.
   it('TC-HAPPY-042: option precedence per-route > global > defaults; arrays replaced not concatenated', async () => {

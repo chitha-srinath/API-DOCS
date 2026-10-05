@@ -4,7 +4,7 @@
 // lazily through `req.app`, and wires the cache. Per ADR-38, the default
 // adapter (`standardSchemaAdapter`) is injected here, never in `src/config/**`.
 import { Router } from 'express';
-import type { Request, Response, Router as ExpressRouter } from 'express';
+import type { NextFunction, Request, Response, Router as ExpressRouter } from 'express';
 
 import { memoizeAdapter } from '../adapter/memo.js';
 import { standardSchemaAdapter } from '../adapter/standard.js';
@@ -94,17 +94,24 @@ export function createApiDocs(rawOptions?: unknown): ApiDocsInstance {
   // The rendered UI is a fixed page that loads the spec from `specPath` on the same origin.
   // Only the paths are configurable; the page itself has no user-supplied markup.
   if (options.serveDocs) {
-    const html = renderDocsPage(docsPath, specPath);
-    router.get(docsPath, (_req: Request, res: Response) => {
-      res.type('html').send(html);
-    });
-    router.get(`${docsPath.replace(/\/$/, '')}/assets/:file`, (req: Request, res: Response) => {
-      const asset = getDocsAsset(docsPath, String(req.params.file));
-      if (!asset) {
-        res.status(404).end();
-        return;
+    router.get(docsPath, async (_req: Request, res: Response, next: NextFunction) => {
+      try {
+        res.type('html').send(await renderDocsPage(docsPath, specPath));
+      } catch (err) {
+        next(err);
       }
-      res.type(asset.type).send(asset.body);
+    });
+    router.get(`${docsPath.replace(/\/$/, '')}/assets/:file`, async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const asset = await getDocsAsset(docsPath, String(req.params.file));
+        if (!asset) {
+          res.status(404).end();
+          return;
+        }
+        res.type(asset.type).send(asset.body);
+      } catch (err) {
+        next(err);
+      }
     });
   }
 

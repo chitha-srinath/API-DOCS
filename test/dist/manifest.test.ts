@@ -46,7 +46,7 @@ describe('manifest', () => {
   });
 
   it('pins esbuild and zod devDependencies, excludes stryker vitest runner', () => {
-    expect(pkg.devDependencies.esbuild).toMatch(/^~0\.27\./);
+    expect(pkg.devDependencies.esbuild).toMatch(/^~0\.28\./);
     expect(pkg.devDependencies.zod).toBe('^4.6.5');
     expect('@stryker-mutator/vitest-runner' in pkg.devDependencies).toBe(false);
   });

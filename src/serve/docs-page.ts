@@ -37,6 +37,8 @@ export async function renderDocsPage(docsPath: string, specPath: string): Promis
 export async function getDocsAsset(docsPath: string, name: string): Promise<DocsAsset | undefined> {
   if (name.includes('/') || name.includes('\\') || name.includes('..')) return undefined;
   const { DOCS_UI_FILES } = await loadDocsUi();
+  // Own keys only: a plain lookup would resolve inherited names such as `constructor`.
+  if (!Object.hasOwn(DOCS_UI_FILES, name)) return undefined;
   const file = DOCS_UI_FILES[name];
   if (!file) return undefined;
   if (file.encoding === 'base64') {

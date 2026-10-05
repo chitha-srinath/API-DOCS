@@ -52,6 +52,9 @@ jobs:
             echo "Tag $REF_NAME does not match package.json version v$pkg_version" >&2
             exit 1
           fi
+      - name: Upgrade npm for trusted publishing
+        if: github.event_name != 'workflow_dispatch' || inputs.publish
+        run: npm install -g npm@^11.5.1 && npm -v
       - name: Publish to npm
         if: github.event_name != 'workflow_dispatch' || inputs.publish
         run: npm publish --provenance --access public

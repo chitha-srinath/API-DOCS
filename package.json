@@ -2,6 +2,10 @@
   "name": "express-api-contract",
   "version": "0.2.1",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chitha-srinath/API-DOCS.git"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.cts",

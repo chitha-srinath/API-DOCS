@@ -2,9 +2,15 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to npm (leave unticked to validate only)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
+  id-token: write # npm trusted publishing (OIDC) and provenance
 
 jobs:
   release:
@@ -31,5 +37,6 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run check:pack
-      # Publishing is intentionally not wired up yet; this workflow only
-      # validates the package. `npm publish` is added by a later story.
+      - name: Publish to npm
+        if: inputs.publish
+        run: npm publish --provenance --access public

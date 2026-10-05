@@ -127,8 +127,9 @@ describe('ci.yml', () => {
     expect(runs).toContain('npm run perf');
   });
 
-  it('no push/pull_request workflow runs npm publish', () => {
+  it('no push/pull_request workflow runs npm publish (release.yml is checked separately)', () => {
     for (const file of allWorkflowFiles()) {
+      if (file === 'release.yml') continue;
       const wf = loadWorkflow(file);
       const triggers = Object.keys(wf.on ?? {});
       if (triggers.includes('push') || triggers.includes('release')) {
@@ -175,8 +176,17 @@ describe('mutation-full workflow', () => {
 describe('release.yml', () => {
   const release = loadWorkflow('release.yml');
 
-  it('is triggered only by workflow_dispatch', () => {
-    expect(Object.keys(release.on)).toEqual(['workflow_dispatch']);
+  it('is triggered by published releases, v* tag pushes, and manual dispatch', () => {
+    expect(Object.keys(release.on).sort()).toEqual(['push', 'release', 'workflow_dispatch']);
+    expect(release.on.push.tags).toEqual(['v*']);
+    expect(release.on.release.types).toEqual(['published']);
+  });
+
+  it('publishes with provenance only on tags, releases, or an explicit manual opt-in', () => {
+    const publish = (release.jobs.release.steps as any[]).find((s) => s.name === 'Publish to npm');
+    expect(publish).toBeTruthy();
+    expect(publish.run).toContain('npm publish --provenance');
+    expect(publish.if).toContain("github.event_name != 'workflow_dispatch' || inputs.publish");
   });
 });
 

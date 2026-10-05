@@ -196,3 +196,7 @@
 2026-09-30T14:05:00Z | qa | supervisor | step 17 | returned | COMPLIANT; explicit review of receipts-v1 gap, quarantine citations, step-15 cost correction all COMPLIANT; 1 non-blocking staleness observation fixed
 2026-09-30T14:20:00Z | qa | human | gate | returned | G3 approved (let-me-look); PR decision: close/supersede PR #1, open fresh PR from rebuild branch
 2026-10-01T00:00:00Z | delivery | orchestrator | PR-relationship correction | returned | discovered main already has PR #2 merged from this branch at an early QA snapshot (pre-fix-loop); corrected the G3-approval-time framing; human decided a forward-fix PR, no history rewrite
+2026-10-05T19:26:01Z | regression | orchestrator | R1-R2 | returned | fixed examples/basic/app.ts:177 typing (8eaf017); prettier applied to src/test/examples (7905d0b); .playwright-mcp ignored (6d6a242); vitest typecheck exit 0, eslint 0, prettier 0, typecheck:v4 0, build 0
+2026-10-05T19:26:01Z | regression | orchestrator | R8 | returned | aidd-validate.py via py -3: state.yaml, change state.yaml, 8 story frontmatter VALID
+2026-10-05T19:26:01Z | regression | orchestrator | R4 | returned | determinism repeats x2 on 6d6a242: 614 passed / 5 skipped both, no type errors
+2026-10-05T19:26:01Z | regression | orchestrator | R3,R5,R6,R7 | returned | NOT remediated: post-G3 commits lack gate re-approval, E2E PASS bound to 98c51d3, interrogation counter, ADR-56 ledger row and budget raised stops; require human-gated re-QA of current HEAD before delivery

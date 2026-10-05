@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  actions: read # list mutation-full.yml runs in the release gate
   id-token: write # npm trusted publishing (OIDC) and provenance
 
 jobs:
